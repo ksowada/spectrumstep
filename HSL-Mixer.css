@@ -38,3 +38,11 @@
         transform: scale(1.0);
         transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
     }
+
+    /* 1. Standard-Styles zurücksetzen */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent; /* Verhindert doppelte Hintergründe */
+}

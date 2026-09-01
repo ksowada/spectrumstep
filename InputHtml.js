@@ -208,6 +208,9 @@ function InputHtml(args) {
     document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? round(param.value, param.round) : param.value;
     return param.value;
   }
+  this.getId = function (varName, varSuffix) {
+    return combineToId([this.el, varName, varSuffix])
+  }
   this.set = function (varName, value) {
     var param = this.params[varName];
     param.value = value;

@@ -18,7 +18,7 @@ var params_cmx = {
   hsl: { name: 'HSL-Gradient', type: 'checkbox',value:hslInit,callbackName:'calcform_cmx_dyna'},
   inv: { name: 'Inversion', type: 'checkbox',value:false,callbackName:'calcform_cmx_dyna'},
 };
-var colCnt = 3;
+var colCnt = 1;
 var rgbPreArr1 = ['#ff0000', '#00ff00', '#0000ff'];
 var rgbPreArr2 = ['#ff8080', '#80ff80', '#8080ff'];
 var hslPreArr1 = [[200,50,50],[350,50,50],[80,50,50]];
@@ -73,11 +73,21 @@ function calcform_cmx_doml(i) {
     calcform_cmx_dyna(i);
 }
 /** berechne HSL */
+function calcform_cmx_hsl_range(i, nr, h, s, l) {
+  document.getElementById(inp_cmx_arr[i].getId('h'+nr,'range')).style.background = `linear-gradient(90deg in hsl longer hue, hsl(0, ${s}%, ${l}%), hsl(0, ${s}%, ${l}%)`;
+  document.getElementById(inp_cmx_arr[i].getId('s'+nr,'range')).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, 0%, ${l}%), hsl(${h}, 100%, ${l}%)`;
+  document.getElementById(inp_cmx_arr[i].getId('l'+nr,'range')).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 0%), hsl(${h}, ${s}%, 100%)`;
+
+}
 function calcform_cmx_rgb1(i, init) {
   inp_cmx_arr[i].set('hsl',false);
   c[i] = inp_cmx_arr[i].get('c1');
   rgb1[i] = hexToRgb(c[i]);
   hsl1[i] = rgbToHsl(rgb1[i]);
+  const hsl_0 = Math.round(hsl1[i][0] * 360)
+  const hsl_1 = Math.round(hsl1[i][1] * 100)
+  const hsl_2 = Math.round(hsl1[i][2] * 100)
+  calcform_cmx_hsl_range(i, 1, hsl_0, hsl_1, hsl_2)
   inp_cmx_arr[i].set('h1', hsl1[i][0] * 360);
   inp_cmx_arr[i].set('s1', hsl1[i][1] * 100);
   inp_cmx_arr[i].set('l1', hsl1[i][2] * 100);
@@ -92,6 +102,10 @@ function calcform_cmx_rgb2(i, init) {
   c[i] = inp_cmx_arr[i].get('c2');
   rgb2[i] = hexToRgb(c[i]);
   hsl2[i] = rgbToHsl(rgb2[i]);
+  const hsl_0 = Math.round(hsl2[i][0] * 360)
+  const hsl_1 = Math.round(hsl2[i][1] * 100)
+  const hsl_2 = Math.round(hsl2[i][2] * 100)
+  calcform_cmx_hsl_range(i, 2, hsl_0, hsl_1, hsl_2)
   inp_cmx_arr[i].set('h2', hsl2[i][0] * 360);
   inp_cmx_arr[i].set('s2', hsl2[i][1] * 100);
   inp_cmx_arr[i].set('l2', hsl2[i][2] * 100);
@@ -106,6 +120,10 @@ function calcform_cmx_hsl1(i, init) {
   hsl1[i][0] = inp_cmx_arr[i].get('h1')/360;
   hsl1[i][1] = inp_cmx_arr[i].get('s1')/100;
   hsl1[i][2] = inp_cmx_arr[i].get('l1')/100;
+  const hsl_0 = Math.round(hsl1[i][0] * 360)
+  const hsl_1 = Math.round(hsl1[i][1] * 100)
+  const hsl_2 = Math.round(hsl1[i][2] * 100)
+  calcform_cmx_hsl_range(i, 1, hsl_0, hsl_1, hsl_2)
   var rgb_per = hslToRgb(hsl1[i][0],hsl1[i][1],hsl1[i][2]);
   rgb1h[i] = rgbToColor(rgb_per);
   inp_cmx_arr[i].set('c1', rgb1h[i]);
@@ -116,6 +134,10 @@ function calcform_cmx_hsl2(i, init) {
   hsl2[i][0] = inp_cmx_arr[i].get('h2')/360;
   hsl2[i][1] = inp_cmx_arr[i].get('s2')/100;
   hsl2[i][2] = inp_cmx_arr[i].get('l2')/100;
+  const hsl_0 = Math.round(hsl2[i][0] * 360)
+  const hsl_1 = Math.round(hsl2[i][1] * 100)
+  const hsl_2 = Math.round(hsl2[i][2] * 100)
+  calcform_cmx_hsl_range(i, 2, hsl_0, hsl_1, hsl_2)
   var rgb_per = hslToRgb(hsl2[i][0],hsl2[i][1],hsl2[i][2]);
   rgb2h[i] = rgbToColor(rgb_per);
   inp_cmx_arr[i].set('c2', rgb2h[i]);
