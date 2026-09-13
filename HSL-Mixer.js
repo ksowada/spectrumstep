@@ -2,7 +2,6 @@ var hslInit = false; // hsl initialition possible
 // TODO need swap colors sometimes as action next to use c1
 var params_cmx = {
   p1: { name: 'Color 1', type: 'place'},
-  // a1: { type: 'popup',value: 'Action', callbackName: 'calcform_cmx_col1_action'},
   c1: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb1'},
   h1: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round:0, callbackName: 'calcform_cmx_hsl1' },
   s1: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round:0, callbackName: 'calcform_cmx_hsl1' },
@@ -18,7 +17,7 @@ var params_cmx = {
   hsl: { name: 'HSL-Gradient', type: 'checkbox',value:hslInit,callbackName:'calcform_cmx_dyna'},
   inv: { name: 'Inversion', type: 'checkbox',value:false,callbackName:'calcform_cmx_dyna'},
 };
-var colCnt = 1;
+var colCnt = 2;
 var rgbPreArr1 = ['#ff0000', '#00ff00', '#0000ff'];
 var rgbPreArr2 = ['#ff8080', '#80ff80', '#8080ff'];
 var hslPreArr1 = [[200,50,50],[350,50,50],[80,50,50]];
@@ -74,10 +73,10 @@ function calcform_cmx_doml(i) {
 }
 /** berechne HSL */
 function calcform_cmx_hsl_range(i, nr, h, s, l) {
-  document.getElementById(inp_cmx_arr[i].getId('h'+nr,'range')).style.background = `linear-gradient(90deg in hsl longer hue, hsl(0, ${s}%, ${l}%), hsl(0, ${s}%, ${l}%)`;
-  document.getElementById(inp_cmx_arr[i].getId('s'+nr,'range')).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, 0%, ${l}%), hsl(${h}, 100%, ${l}%)`;
-  document.getElementById(inp_cmx_arr[i].getId('l'+nr,'range')).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 0%), hsl(${h}, ${s}%, 100%)`;
-
+  document.getElementById(combineToId([inp_cmx_arr[i].el, 'h'+nr,'range'])).style.background = `linear-gradient(90deg in hsl longer hue, hsl(0, ${s}%, ${l}%), hsl(0, ${s}%, ${l}%))`;
+  document.getElementById(combineToId([inp_cmx_arr[i].el, 's'+nr,'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, 0%, ${l}%), hsl(${h}, 100%, ${l}%))`;
+  // use 1% to 99% to help for replacing hsl to rgb black to white
+  document.getElementById(combineToId([inp_cmx_arr[i].el, 'l'+nr,'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 1%), hsl(${h}, ${s}%, 99%))`;
 }
 function calcform_cmx_rgb1(i, init) {
   inp_cmx_arr[i].set('hsl',false);
@@ -222,9 +221,6 @@ function calcform_cmx_onLoad() {
 function calcform_cmx_onSave() {
   var data = {rgb1h:rgb1h, rgb2h:rgb2h, rowCnt:rowCnt, inversEn:inversEn};
   storage.saveSetting({data:data});
-}
-function calcform_cmx_col1_action(args) {
-  log('popup:'+args);
 }
 function calcform_cmx_col2_action(i) {
   inp_cmx_arr[i].set('c2', rgb1h[i]);

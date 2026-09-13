@@ -106,10 +106,6 @@ function combineToId(args) {
   }
   return id;
 }
-var consoleLogOn = true; // through import of calcsLogOff.js it is overwritten
-function log(text) {
-  if (consoleLogOn) console.log(text);
-}
 // Code from https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Math/round
 // Closure
 (function() {
@@ -305,7 +301,6 @@ function interpolate(r,x1,x2,hue) {
     // if (xd<0.5) xh = -1 + xd;
     // var xh = (xd>0.5) ? -1 + xd :  xd;
     var hueBounded = hueBound(x1 + xh*r);
-    log('hueBounded:'+hueBounded);
     return hueBounded;
   }
 }

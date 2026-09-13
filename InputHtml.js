@@ -102,7 +102,6 @@ function InputHtml(args) {
     callbackName = callbackName.name;
     this.rangeInput = rangeInput; // just a bit to remember if it was range Input
     window[callbackName](callbackArgs);
-    log('inputCall:',callbackName,' range:',rangeInput);
     if (paramtype=='popup') {
       var html_popup = '<div id="'+combineToId([this.el, varName,'modal'])+'" class="modal show-modal"><div class="modal-content"><span class="close-button">&times;</span><h1>Hello, I am a popup!</h1></div></div>';
       document.getElementById(combineToId([this.el])).insertAdjacentHTML('afterend', html_popup);
