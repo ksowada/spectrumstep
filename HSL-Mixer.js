@@ -1,4 +1,4 @@
-var hslInit = false; // hsl initialition possible
+var hslInit = true; // hsl initialition possible
 // TODO need swap colors sometimes as action next to use c1
 var params_cmx = {
   p1: { name: 'Color 1', type: 'place'},
@@ -14,12 +14,13 @@ var params_cmx = {
   l2: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round:0, callbackName: 'calcform_cmx_hsl2' },
   p3: { name: 'Option', type: 'place'},
   chc: { name: 'Count', type: 'number', value: 4, min: 2, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
+  cha: { name: 'Overdrive', type: 'number', value: 0, min: 0, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
   hsl: { name: 'HSL-Gradient', type: 'checkbox',value:hslInit,callbackName:'calcform_cmx_dyna'},
   inv: { name: 'Inversion', type: 'checkbox',value:false,callbackName:'calcform_cmx_dyna'},
 };
-var colCnt = 2;
-var rgbPreArr1 = ['#ff0000', '#00ff00', '#0000ff'];
-var rgbPreArr2 = ['#ff8080', '#80ff80', '#8080ff'];
+var colCnt = 1;
+var rgbPreArr1 = ['#8fbfef', '#00ff00', '#0000ff'];
+var rgbPreArr2 = ['#bf8fef', '#80ff80', '#8080ff'];
 var hslPreArr1 = [[200,50,50],[350,50,50],[80,50,50]];
 var hslPreArr2 = [[200,50,90],[350,50,90],[80,50,90]];
 var params_cmx_arr = [];
@@ -32,6 +33,7 @@ var rgb2h = rgbPreArr2;
 var hsl1 = [[],[],[]];
 var hsl2 = [[],[],[]];
 var rowCnt = [];
+var cha = [];
 var inversEn = [];
 for (var i = 0; i < colCnt; i++) {
   params_cmx_arr[i] = params_cmx;
@@ -144,14 +146,15 @@ function calcform_cmx_hsl2(i, init) {
 }
 /** berechne Farbtabelle */
 function calcform_cmx_dyna(i) {
-  rowCnt[i] = inp_cmx_arr[i].get('chc');
+  rowCnt[i] = parseInt(inp_cmx_arr[i].get('chc'));
+  cha[i] = parseInt(inp_cmx_arr[i].get('cha'));
   inversEn[i] = inp_cmx_arr[i].get('inv');
   var hslMixEn = inp_cmx_arr[i].get('hsl');
-  var colArr;
-  var colArrInv;
+  var colArr = [];
+  var colArrInv = [];
   // vergleiche rgb1 und rgb2 um in beide Richtungen zu blenden
   if (hslMixEn) {
-    colArr = getHSLColors({len: rowCnt[i], hsl1: hsl1[i], hsl2: hsl2[i]});
+    colArr = getHSLColors({len: rowCnt[i], hsl1: hsl1[i], hsl2: hsl2[i], overdrive:cha[i]});
     if (inversEn[i]) {
       var hsl0 = [];
       for (var j=0; j<3; j++) {
@@ -167,8 +170,8 @@ function calcform_cmx_dyna(i) {
       colArrInv = getHSLColors({len: rowCnt[i], hsl1: hsl0, hsl2: hsl1[i]});
     }
     // this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
-    colArr[0] = inp_cmx_arr[i].get('c1');
-    colArr[rowCnt[i]-1] = inp_cmx_arr[i].get('c2');
+    colArr[cha[i]] = inp_cmx_arr[i].get('c1');
+    colArr[cha[i]+rowCnt[i]-1] = inp_cmx_arr[i].get('c2');
   } else {
     c[i] = inp_cmx_arr[i].get('c1');
     rgb1[i] = hexToRgb(c[i]);
@@ -189,12 +192,12 @@ function calcform_cmx_dyna(i) {
   var html = '<table class="plain"><tbody>';
   if (inversEn[i]) for (var rowIx = 0; rowIx < rowCnt[i]-1; rowIx++) {
     html += '<tr>';
-    html += '<td><input value="'+colArrInv[rowIx]+'" style="background-color:'+colArrInv[rowIx]+'"/></td>';
+    html += '<td><input class="gradient" value="'+colArrInv[rowIx]+'" style="background-color:'+colArrInv[rowIx]+'"/></td>';
     html += '</tr>';
   }  
-  for (var rowIx = 0; rowIx < rowCnt[i]; rowIx++) {
+  for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
     html += '<tr>';
-    html += '<td><input value="'+colArr[rowIx]+'" style="background-color:'+colArr[rowIx]+'"/></td>';
+    html += '<td><input class="gradient" value="'+colArr[rowIx]+'" style="background-color:'+colArr[rowIx]+'"/></td>';
     html += '</tr>';
   }
   html += '</tbody>';
@@ -207,6 +210,7 @@ function calcform_cmx_onLoad() {
   rgb1h = data.rgb1h;
   rgb2h = data.rgb2h;
   rowCnt = data.rowCnt;
+  cha = data.cha;
   inversEn = data.inversEn;
   for (i=0; i<colCnt; i++) {
     inp_cmx_arr[i].set('c1', rgb1h[i]);
@@ -214,12 +218,13 @@ function calcform_cmx_onLoad() {
     calcform_cmx_rgb1(i,true);
     calcform_cmx_rgb2(i,true);
     inp_cmx_arr[i].set('chc',rowCnt[i]);
+    inp_cmx_arr[i].set('cha',cha[i]);
     inp_cmx_arr[i].set('inv' ,inversEn[i]);
     calcform_cmx_dyna(i);
   }
 }
 function calcform_cmx_onSave() {
-  var data = {rgb1h:rgb1h, rgb2h:rgb2h, rowCnt:rowCnt, inversEn:inversEn};
+  var data = {rgb1h:rgb1h, rgb2h:rgb2h, rowCnt:rowCnt, chc:cha, inversEn:inversEn};
   storage.saveSetting({data:data});
 }
 function calcform_cmx_col2_action(i) {

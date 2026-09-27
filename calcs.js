@@ -307,15 +307,19 @@ function interpolate(r,x1,x2,hue) {
 /** calculate HSL colors from h1 to h2, and so on, period is repetition
  * give out hex rgb with leading # for css user */
 function getHSLColors(args) {
-  var period = (args.period!==undefined) ? args.period : args.len;
+  args.len = parseInt(args.len);
+  var overdrive = (args.overdrive!==undefined) ? parseInt(args.overdrive) : 0;
   var rgbColors = [];
-  for (var i=0;i<args.len;i++) {
-    var rel = (i%(period))/(period-1);
+  for (var i=-overdrive;i<args.len+overdrive;i++) {
+    var rel = i/(args.len-1);
     var h = interpolate(rel,args.hsl1[0],args.hsl2[0],true);
+    h = hueBound(h);
     var s = interpolate(rel,args.hsl1[1],args.hsl2[1]);
+    s = bound(s, 0, 1);
     var l = interpolate(rel,args.hsl1[2],args.hsl2[2]);
+    l = bound(l, 0, 1);
     var rgb = hslToRgb(h,s,l);
-    rgbColors[i] = '#'+rgbToColor(rgb);
+    rgbColors.push('#'+rgbToColor(rgb));
   }
   return rgbColors;
 }
@@ -323,17 +327,19 @@ function getHSLColors(args) {
  * from c1,c2 given as 6-digit-hexstring with leading # or
  * from rgb1,rgb2 as rgb Array 0..255*/
 function getRGBColors(args) {
+  args.len = parseInt(args.len);
+  var overdrive = (args.overdrive!==undefined) ? parseInt(args.overdrive) : 0;
   var rgbAr1 = (args.c1!==undefined) ? getRGBColorByStr(args.c1) : args.rgb1;
   var rgbAr2 = (args.c1!==undefined) ? getRGBColorByStr(args.c2) : args.rgb2;
   var period = (args.period!==undefined) ? args.period : args.len;
   var rgbColors = [];
-  for (var i=0;i<args.len;i++) {
-    var rel = (i%(period))/(period-1);
+  for (var i=-overdrive;i<args.len+overdrive;i++) {
+    var rel = i/(args.len-1);
     var r = interpolate(rel,rgbAr1[0],rgbAr2[0]);
     var g = interpolate(rel,rgbAr1[1],rgbAr2[1]);
     var b = interpolate(rel,rgbAr1[2],rgbAr2[2]);
     var rgb = getRGBColor(r,g,b);
-    rgbColors[i] = '#'+rgbToColor(rgb);
+    rgbColors.push('#'+rgbToColor(rgb));
   }
   return rgbColors;
 }

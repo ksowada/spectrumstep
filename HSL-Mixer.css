@@ -43,6 +43,11 @@
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
+  width: 300px;
   background: transparent; /* Verhindert doppelte Hintergründe */
+}
+.gradient {
+  color: black;
+  -webkit-text-stroke: 3px white;
+  paint-order: stroke fill;
 }
