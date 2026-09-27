@@ -189,20 +189,29 @@ function calcform_cmx_dyna(i) {
       colArrInv = getRGBColors({len: rowCnt[i], rgb1: rgb0, rgb2: rgb1[i]});
     }
   }
-  var html = '<table class="plain"><tbody>';
+  var html = ''
   if (inversEn[i]) for (var rowIx = 0; rowIx < rowCnt[i]-1; rowIx++) {
-    html += '<tr>';
-    html += '<td><input class="gradient" value="'+colArrInv[rowIx]+'" style="background-color:'+colArrInv[rowIx]+'"/></td>';
-    html += '</tr>';
+    html += '<div class="gradient" style="background-color:'+colArrInv[rowIx]+'">'+colArrInv[rowIx]+'</div>';
+
   }  
   for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
-    html += '<tr>';
-    html += '<td><input class="gradient" value="'+colArr[rowIx]+'" style="background-color:'+colArr[rowIx]+'"/></td>';
-    html += '</tr>';
+    html += '<div class="gradient" style="background-color:'+colArr[rowIx]+'">'+colArr[rowIx]+'</div>';
   }
-  html += '</tbody>';
-  html += '</table>';
+
   document.getElementById('tab-cmx'+i).innerHTML = html;
+
+  // build CSS linear gradient
+  let gradientText = ''
+  if (hslMixEn) {
+    gradientText += 'linear-gradient(180deg in hsl shorter hue,' 
+  } else {
+    gradientText += 'linear-gradient(180deg,' 
+  }
+  gradientText += colArr[0] + ','
+  gradientText += colArr[colArr.length-1] + ')'
+  const div_grd = document.getElementById('grd-cmx'+i)
+  div_grd.innerHTML = gradientText
+  div_grd.style.background = gradientText
 }
 function calcform_cmx_onLoad() {
   var data = storage.loadSetting();
