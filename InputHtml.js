@@ -20,7 +20,7 @@ function InputHtml(args) {
 
   /** init module and print out HTML  */
   this.init = function () {
-    var html = '<form><table class="inputs"><tbody>';
+    var html = '<table class="inputs"><tbody>';
     var callAtInit = (this.callAtInit === undefined) ? 'true' : this.callAtInit;
     for (var varName in this.params) {
       var param = this.params[varName];
@@ -29,7 +29,8 @@ function InputHtml(args) {
       param.step = (param.step === undefined) ? '1' : param.step;
       param.unit = (param.unit === undefined) ? '' : param.unit;
       param.value = (param.value === undefined) ? '' : param.value;// this.storageGet(varName,param); // change only if given from storage, uses array if unit is also array
-      html += '<tr id="' + combineToId([this.el, varName, 'row']) + '" class="'+param.type+'">';
+      param.class = (param.class === undefined) ? '' : param.class;
+      html += '<tr id="' + combineToId([this.el, varName, 'row']) + '" class="'+param.type+' '+param.class+'">';
 
       var html_name = '<td class="form-name">' + param.name + '</td>';
       var html_unit = '<td class="form-unit">' + param.unit + '</td>';
@@ -84,7 +85,7 @@ function InputHtml(args) {
       html += '</tr>';
     }
     html += '</tbody>';
-    html += '</table></form>';
+    html += '</table>';
     document.getElementById(this.el).innerHTML = html;
 
     // add a function to calling obj to remember if it was range Input

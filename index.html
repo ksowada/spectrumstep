@@ -2,109 +2,117 @@
 <html lang="de">
 
 <head>
-   <meta name="og:image" content="https://spare-benzin.de/assets/full/Regenbogen-in-der-Praerie.jpg" />
-   <meta name="twitter:card" content="summary_large_image" />
-   <meta name="og:url" content="https://spare-benzin.de/Extras/Hilfsmittel/HSL-Mixer/HSL-Mixer.html" />
-   <meta name="og:title" content="HSL-Mixer" />
-   <meta name="og:description" content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
+	<meta name="og:image" content="https://spare-benzin.de/assets/full/Regenbogen-in-der-Praerie.jpg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="og:url" content="https://spare-benzin.de/Extras/Hilfsmittel/HSL-Mixer/HSL-Mixer.html" />
+	<meta name="og:title" content="HSL-Mixer" />
+	<meta name="og:description" content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
 It generates a configurable color palette by interpolating between two colors in HSL space.
 Row count, RGB values, HSL values, and hue adjustments can be modified programmatically for accurate output control." />
-   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-   <meta name="description"
-      content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="description" content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
 It generates a configurable color palette by interpolating between two colors in HSL space.
 Row count, RGB values, HSL values, and hue adjustments can be modified programmatically for accurate output control." />
-   <meta name="keywords" content="HSL mischen, RGB Farbverlauf, Farbübergänge, HSL Farbpalette" />
-   <meta name="DC.format" content="XHTML" />
-   <meta name="DC.identifier" content="HSL-Mixer" />
-   <title>HSL-Mixer</title>
-   <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-   <link rel="stylesheet" type="text/css" href="dita.min.css" />
-   <link rel="stylesheet" type="text/css" href="HSL-Mixer.css" />
-   <script type="text/javascript" src="Storage.js"></script>
-   <script type="text/javascript" src="InputHtml.js"></script>
-   <script type="text/javascript" src="calcs.js"></script>
-   <script type="text/javascript" src="HSL-Mixer.js"></script>
+	<meta name="DC.format" content="XHTML" />
+	<meta name="DC.identifier" content="HSL-Mixer" />
+	<title>HSL-Mixer</title>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" type="text/css" href="water.css" />
+	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
+	<link rel="stylesheet" type="text/css" href="HSL-Mixer.css" />
+	<script type="text/javascript" src="Storage.js"></script>
+	<script type="text/javascript" src="InputHtml.js"></script>
+	<script type="text/javascript" src="calcs.js"></script>
+	<script type="text/javascript" src="HSL-Mixer.js"></script>
 </head>
 
 <body class="body" id="HSL-Mixer">
-   <div class="container">
-      <div class="middle" id="middle">
-         <h1>HSL Mixer</h1>
-         <div class="col-container">
-            <div class="col-cell">
-               <div id="loadSelect-cmx"><!-- --></div>
-            </div>
-            <div class="col-cell">
-               <div id="saveSelect-cmx"><!-- --></div>
-            </div>
-         </div>
-         <div class="col-container">
-            <div class="col-cell">
-               <div id="form-cmx0"><!-- --></div>
-               <div id="tab-cmx0"><!-- --></div>
-               <div id="grd-cmx0" class="linear-gradient"><!-- --></div>
-            </div>
-            <div class="col-cell">
-               <div id="form-cmx1"><!-- --></div>
-               <div id="tab-cmx1"><!-- --></div>
-               <div id="grd-cmx1" class="linear-gradient"><!-- --></div>
-            </div>
-            <div class="col-cell">
-               <div id="form-cmx2"><!-- --></div>
-               <div id="tab-cmx2"><!-- --></div>
-               <div id="grd-cmx2" class="linear-gradient"><!-- --></div>
-            </div>
-         </div>
-         <p>
-            Your colors can be mixed easily. Use RGB values in hex, or mix your colors using HSL.
-            This creates a color palette that is easy to configure. Change the number of rows,
-            RGB or HSL. The hue can be adjusted effortlessly.
-         </p>
-         <p>
-            It create also a CSS linear-gradient from the values
-         </p>
+	<div class="container">
+		<div class="middle" id="middle">
+			<h1>HSL Mixer</h1>
+			<fieldset>
+				<legend>Color scheme</legend>
+				<label class="wide">
+					<input type="radio" name="theme" value="light">
+					<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />Hell
+				</label>
+				<label class="wide">
+					<input type="radio" name="theme" value="dark">
+					<img src="icons/moon-solid-full.svg" alt="icon for sun" class="icon" />Dunkel
+				</label>
+			</fieldset>
+			<fieldset>
+				<legend>Store</legend>
+				<div class="flex">
+					<div class="flex">
+						<select id="load-input"></select>
+						<button id="load-btn" type="button">Load</button>
+					</div>
+					<div class="flex">
+						<input id="save-input" class="narrow"/>
+						<button id="save-btn" type="button">Save</button>
+					</div>
+				</div>
+			</fieldset>
+			<div class="col-container">
+				<div class="col-cell">
+				<fieldset>
+					<legend>Colors</legend>
+					<div id="form-cmx0"></div>
+				</fieldset>	
+					<div id="tab-cmx0"></div>
+					<div id="grd-cmx0" class="linear-gradient"></div>
+				</div>
+			</div>
+			<p>
+				Your colors can be mixed easily. Use RGB values in hex, or mix your colors using HSL.
+				This creates a color palette that is easy to configure. Change the number of rows,
+				RGB or HSL. The hue can be adjusted effortlessly.
+			</p>
+			<p>
+				It create also a CSS linear-gradient from the values
+			</p>
 
-         <p>
-            This calculator creates color transitions. In the HSL space, interpolation happens between two
-            colors and also in the inverse direction. You receive the RGB values in hex for use
-            in CSS or for graphics software such as the image editor
-            <a href="https://www.gimp.org/" target="_blank">GIMP</a>
-            or the drawing program
-            <a href="https://inkscape.org/de/" target="_blank">INKSCAPE</a>.
-         </p>
+			<p>
+				This calculator creates color transitions. In the HSL space, interpolation happens between two
+				colors and also in the inverse direction. You receive the RGB values in hex for use
+				in CSS or for graphics software such as the image editor
+				<a href="https://www.gimp.org/" target="_blank">GIMP</a>
+				or the drawing program
+				<a href="https://inkscape.org/de/" target="_blank">INKSCAPE</a>.
+			</p>
 
-         <p>HSL means the following:</p>
+			<p>HSL means the following:</p>
 
-         <div>
-            <ul>
-               <li>H stands for Hue. Hue is the color tone. It refers to a rainbow. In a rainbow,
-                  all colors of white light are spread out.</li>
-               <li>S stands for Saturation. Saturation is the intensity of the hue. Without intensity,
-                  the hue becomes gray.</li>
-               <li>L stands for Lightness. Lightness is the brightness. Full brightness is white,
-                  no brightness means black, as in absence of light.</li>
-            </ul>
-         </div>
+			<div>
+				<ul>
+					<li>H stands for Hue. Hue is the color tone. It refers to a rainbow. In a rainbow,
+						all colors of white light are spread out.</li>
+					<li>S stands for Saturation. Saturation is the intensity of the hue. Without intensity,
+						the hue becomes gray.</li>
+					<li>L stands for Lightness. Lightness is the brightness. Full brightness is white,
+						no brightness means black, as in absence of light.</li>
+				</ul>
+			</div>
 
-         <p>This is how you operate the tool:</p>
+			<p>This is how you operate the tool:</p>
 
-         <div>
-            <ul>
-               <li>C1 is the base color. It can be entered as an RGB hex value or selected with the
-                  color button, which opens a color picker.</li>
-               <li>C2 is the second color used for mixing. Interpolation happens between these two
-                  colors in HSL. This allows you to create beautiful intermediate shades.</li>
-               <li>You can also enter colors in HSL using sliders or text input.</li>
-               <li>You can save and load colors. It works without cookies. The information is stored
-                  in the browser. Simply do not delete your browser data, and your color selection
-                  will remain available.</li>
-            </ul>
-         </div>
-      </div>
-   </div>
+			<div>
+				<ul>
+					<li>C1 is the base color. It can be entered as an RGB hex value or selected with the
+						color button, which opens a color picker.</li>
+					<li>C2 is the second color used for mixing. Interpolation happens between these two
+						colors in HSL. This allows you to create beautiful intermediate shades.</li>
+					<li>You can also enter colors in HSL using sliders or text input.</li>
+					<li>You can save and load colors. It works without cookies. The information is stored
+						in the browser. Simply do not delete your browser data, and your color selection
+						will remain available.</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>
