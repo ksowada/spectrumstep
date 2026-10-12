@@ -36,23 +36,23 @@ Row count, RGB values, HSL values, and hue adjustments can be modified programma
 				<legend>Color scheme</legend>
 				<label class="wide">
 					<input type="radio" name="theme" value="light">
-					<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />Hell
+					<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />Light
 				</label>
 				<label class="wide">
 					<input type="radio" name="theme" value="dark">
-					<img src="icons/moon-solid-full.svg" alt="icon for sun" class="icon" />Dunkel
+					<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Dark
 				</label>
 			</fieldset>
 			<fieldset>
 				<legend>Store</legend>
 				<div class="flex">
 					<div class="flex">
-						<select id="load-input"></select>
-						<button id="load-btn" type="button">Load</button>
+						<select id="load-input" class="narrow"></select>
+						<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
 					</div>
 					<div class="flex">
 						<input id="save-input" class="narrow"/>
-						<button id="save-btn" type="button">Save</button>
+						<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
 					</div>
 				</div>
 			</fieldset>
@@ -66,51 +66,30 @@ Row count, RGB values, HSL values, and hue adjustments can be modified programma
 					<div id="grd-cmx0" class="linear-gradient"></div>
 				</div>
 			</div>
-			<p>
-				Your colors can be mixed easily. Use RGB values in hex, or mix your colors using HSL.
-				This creates a color palette that is easy to configure. Change the number of rows,
-				RGB or HSL. The hue can be adjusted effortlessly.
-			</p>
-			<p>
-				It create also a CSS linear-gradient from the values
+			<h2>description</h2>
+			<p>Your colors can be mixed easily. Use RGB values in hex, or mix your colors using HSL.This creates a color palette that is easy to configure. Change the number of rows,RGB or HSL. The hue can be adjusted effortlessly.</p>
+			<p>It create also a CSS linear-gradient from the values</p>
+			<p>This calculator creates color transitions. In the HSL space, interpolation happens between 2 colors and also in the inverse direction. You receive the RGB values in hex for usein CSS or for graphics software such as the image editor <a href="https://www.gimp.org/" target="_blank">GIMP</a> or the drawing program <a href="https://inkscape.org/de/" target="_blank">INKSCAPE</a>.
 			</p>
 
-			<p>
-				This calculator creates color transitions. In the HSL space, interpolation happens between two
-				colors and also in the inverse direction. You receive the RGB values in hex for use
-				in CSS or for graphics software such as the image editor
-				<a href="https://www.gimp.org/" target="_blank">GIMP</a>
-				or the drawing program
-				<a href="https://inkscape.org/de/" target="_blank">INKSCAPE</a>.
-			</p>
+			<h3>HSL means the following:</h3>
+			<ul>
+				<li>H stands for Hue. Hue is the color tone. It refers to a rainbow. In a rainbow, all colors of white light are spread out.</li>
+				<li>S stands for Saturation. Saturation is the intensity of the hue. Without intensity, the hue becomes gray.</li>
+				<li>L stands for Lightness. Lightness is the brightness. Full brightness is white, no brightness means black, as in absence of light.</li>
+			</ul>
 
-			<p>HSL means the following:</p>
-
-			<div>
-				<ul>
-					<li>H stands for Hue. Hue is the color tone. It refers to a rainbow. In a rainbow,
-						all colors of white light are spread out.</li>
-					<li>S stands for Saturation. Saturation is the intensity of the hue. Without intensity,
-						the hue becomes gray.</li>
-					<li>L stands for Lightness. Lightness is the brightness. Full brightness is white,
-						no brightness means black, as in absence of light.</li>
-				</ul>
-			</div>
-
-			<p>This is how you operate the tool:</p>
-
-			<div>
-				<ul>
-					<li>C1 is the base color. It can be entered as an RGB hex value or selected with the
-						color button, which opens a color picker.</li>
-					<li>C2 is the second color used for mixing. Interpolation happens between these two
-						colors in HSL. This allows you to create beautiful intermediate shades.</li>
-					<li>You can also enter colors in HSL using sliders or text input.</li>
-					<li>You can save and load colors. It works without cookies. The information is stored
-						in the browser. Simply do not delete your browser data, and your color selection
-						will remain available.</li>
-				</ul>
-			</div>
+			<h3>This is how you operate the tool:</h3>
+			<ul>
+				<li>C1 is the base color. It can be entered as an RGB hex value or selected with the color button, which opens a color picker. You can also use HSL entering.</li>
+				<li>You may invert colors C1 and C2 in HSL, that might supplys you a mean to invert a color for dark mode or vice versa.</li>
+				<li>C2 is the second color used for mixing. Interpolation happens between these 2 colors in HSL. This allows you to create beautiful intermediate shades.</li>
+				<li>You choose the number of <i>Steps</i> in the gradient for the digital in-between-colors.</li>
+				<li>You may use <i>Overdrive</i> to extend the range outer the 2 given colors.</li>
+				<li>The gradient may be calculated to be a <i>HSL or RGB-Gradient</i>.</li>
+				<li>You can also enter colors in HSL using sliders or text input.</li>
+				<li>You can save and load colors. It works without cookies. The information is stored in the browser. Simply do not delete your browser data, and your color selection will remain available.</li>
+			</ul>
 		</div>
 	</div>
 </body>

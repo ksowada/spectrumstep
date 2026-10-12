@@ -193,9 +193,13 @@ table.inputs {
 }
 
 .narrow {
-	width: 8ch;
+	width: 15ch;
 }
 
 body tr:nth-child(2n) {
 	background-color: transparent;
+}
+
+#form-cmx0-c1-range ,#form-cmx0-c2-range{
+	padding: 0; /* fill color picking area full with color */
 }

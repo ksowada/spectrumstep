@@ -5,13 +5,13 @@ var params_cmx = {
 	h1: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
 	s1: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
 	l1: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
-	a2: { type: 'button', value: 'Use C1', callbackName: 'calcform_cmx_col2_action' },
+	a1: { type: 'empty' },
 	c2: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb2' },
 	h2: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
 	s2: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
 	l2: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
-	p3: { name: 'Option', type: 'place' },
-	chc: { name: 'Count', type: 'number', value: 4, min: 2, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
+	a2: { type: 'empty' },
+	chc: { name: 'Steps', type: 'number', value: 4, min: 2, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
 	cha: { name: 'Overdrive', type: 'number', value: 0, min: 0, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
 	hsl: { name: 'HSL-Gradient', type: 'checkbox', value: hslInit, callbackName: 'calcform_cmx_dyna' },
 	inv: { name: 'Inversion', type: 'checkbox', value: false, callbackName: 'calcform_cmx_dyna' },
@@ -237,8 +237,36 @@ function calcform_cmx_onSave() {
 	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, inversEn: inversEn };
 	storage.saveSetting({ data: data });
 }
-function calcform_cmx_col2_action(i) {
+function calcform_cmx_col2_use_col1(i) {
 	inp_cmx_arr[i].set('c2', rgb1h[i]);
+	calcform_cmx_rgb2(i);
+}
+function calcform_cmx_col1_invert(i,hslMode) {
+	let invertedHex = undefined
+	if (hslMode) {
+		const invertedHsl = [hsl1[i][0], hsl1[i][1], 1-hsl1[i][2]]
+		const invertedRgb = hslToRgb(invertedHsl)
+		invertedHex = rgbToColor(invertedRgb)
+	} else {
+		const rgb = hexToRgb(rgb1h[i])
+		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
+		invertedHex = rgbToColor(invertedRgb)
+	}
+	inp_cmx_arr[i].set('c1', invertedHex);
+	calcform_cmx_rgb1(i);
+}
+function calcform_cmx_col2_invert(i,hslMode) {
+	let invertedHex = undefined
+	if (hslMode) {
+		const invertedHsl = [hsl2[i][0], hsl2[i][1], 1-hsl2[i][2]]
+		const invertedRgb = hslToRgb(invertedHsl)
+		invertedHex = rgbToColor(invertedRgb)
+	} else {
+		const rgb = hexToRgb(rgb2h[i])
+		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
+		invertedHex = rgbToColor(invertedRgb)
+	}
+	inp_cmx_arr[i].set('c2', invertedHex);
 	calcform_cmx_rgb2(i);
 }
 function themeCare() {
@@ -271,4 +299,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	for (i = 0; i < colCnt; i++) {
 		calcform_cmx_doml(i);
 	}
+	// Buttons below Color 1
+	let element = document.getElementById('form-cmx0-a1-row')
+	let children = element.children;
+	let onlyChild = children.length === 1 ? children[0] : null;
+	onlyChild.innerHTML = '<button onclick="calcform_cmx_col1_invert(0,false)">RGB-Invert</button><button onclick="calcform_cmx_col1_invert(0,true)">HSL-Invert</button><button onclick="calcform_cmx_col2_use_col1(0)">C2 use C1</button>';
+
+	// Buttons below Color 2
+	element = document.getElementById('form-cmx0-a2-row')
+	children = element.children;
+	onlyChild = children.length === 1 ? children[0] : null;
+	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(0,false)">RGB-Invert</button><button onclick="calcform_cmx_col2_invert(0,true)">HSL-Invert</button>';
+
 });

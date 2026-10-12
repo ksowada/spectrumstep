@@ -197,7 +197,13 @@ function rgbCorrect(value) {
  *
  * from https://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
  */
-function hslToRgb(h, s, l){
+function hslToRgb() {
+  let h, s, l
+  if (arguments.length===3) {
+    [h,s,l] = arguments
+  } else {
+    [h,s,l] = arguments[0]
+  }
   var r, g, b;
   if(s == 0){
       r = g = b = l; // achromatic
@@ -253,6 +259,11 @@ function rgbToHsl(args){
 
   return [h, s, l];
 }
+/**
+ * convert hex color to rgb array [0..255]
+ * @param {string} hex hex version of RGB Color, may be with leading # 
+ * @returns {number[]} array with 0..255 per color
+ */
 function hexToRgb(hex) {
   if (hex.charAt(0)=='#') hex = hex.substr(1);
   var bigint = parseInt(hex, 16);

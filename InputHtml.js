@@ -80,6 +80,8 @@ function InputHtml(args) {
           case 'place':
             html += html_name + html_range + '<td></td><td></td>' + html_unit; 
             break;
+          case 'empty':
+            html += '<td colspan="4"></td>'
         }
       }
       html += '</tr>';
