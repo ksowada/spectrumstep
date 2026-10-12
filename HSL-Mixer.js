@@ -14,7 +14,6 @@ var params_cmx = {
 	chc: { name: 'Steps', type: 'number', value: 4, min: 2, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
 	cha: { name: 'Overdrive', type: 'number', value: 0, min: 0, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
 	hsl: { name: 'HSL-Gradient', type: 'checkbox', value: hslInit, callbackName: 'calcform_cmx_dyna' },
-	inv: { name: 'Inversion', type: 'checkbox', value: false, callbackName: 'calcform_cmx_dyna' },
 };
 var colCnt = 1;
 var rgbPreArr1 = ['#8fbfef', '#00ff00', '#0000ff'];
@@ -32,7 +31,6 @@ var hsl1 = [[], [], []];
 var hsl2 = [[], [], []];
 var rowCnt = [];
 var cha = [];
-var inversEn = [];
 for (var i = 0; i < colCnt; i++) {
 	params_cmx_arr[i] = params_cmx;
 	params_cmx_arr[i].c1.value = rgbPreArr1[i];
@@ -146,30 +144,16 @@ function calcform_cmx_hsl2(i, init) {
 	if (init == undefined) calcform_cmx_dyna(i);
 }
 /** berechne Farbtabelle */
-function calcform_cmx_dyna(i) {
+function calcform_cmx_dyna(i, textColor='#000000') {
 	rowCnt[i] = parseInt(inp_cmx_arr[i].get('chc'));
 	cha[i] = parseInt(inp_cmx_arr[i].get('cha'));
-	inversEn[i] = inp_cmx_arr[i].get('inv');
 	var hslMixEn = inp_cmx_arr[i].get('hsl');
 	var colArr = [];
-	var colArrInv = [];
+
 	// vergleiche rgb1 und rgb2 um in beide Richtungen zu blenden
 	if (hslMixEn) {
 		colArr = getHSLColors({ len: rowCnt[i], hsl1: hsl1[i], hsl2: hsl2[i], overdrive: cha[i] });
-		if (inversEn[i]) {
-			var hsl0 = [];
-			for (var j = 0; j < 3; j++) {
-				var xd = hsl2[i][j] - hsl1[i][j];
-				var xh = xd;
-				if (xd > 0.5) xh = -1 + xd;
-				if (xd < -0.5) xh = 1 + xd;
-				hsl0[j] = hsl1[i][j] - xh;
-			}
-			hsl0[0] = hueBound(hsl0[0]);
-			hsl0[1] = bound(hsl0[1], 0, 1);
-			hsl0[2] = bound(hsl0[2], 0, 1);
-			colArrInv = getHSLColors({ len: rowCnt[i], hsl1: hsl0, hsl2: hsl1[i] });
-		}
+
 		// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
 		colArr[cha[i]] = inp_cmx_arr[i].get('c1');
 		colArr[cha[i] + rowCnt[i] - 1] = inp_cmx_arr[i].get('c2');
@@ -178,25 +162,11 @@ function calcform_cmx_dyna(i) {
 		rgb1[i] = hexToRgb(c[i]);
 		c[i] = inp_cmx_arr[i].get('c2');
 		rgb2[i] = hexToRgb(c[i]);
-		colArr = getRGBColors({ len: rowCnt[i], c1: rgb1h[i], c2: rgb2h[i] });
-		if (inversEn[i]) {
-			var rgbD = [];
-			var rgb0 = [];
-			for (var j = 0; j < 3; j++) {
-				rgbD[j] = rgb2[i][j] - rgb1[i][j];
-				rgb0[j] = rgb1[i][j] - rgbD[j];
-			}
-			var rgb0h = rgbToColor(rgb0);
-			colArrInv = getRGBColors({ len: rowCnt[i], rgb1: rgb0, rgb2: rgb1[i] });
-		}
+		colArr = getRGBColors({ len: rowCnt[i], c1: rgb1h[i], c2: rgb2h[i], overdrive: cha[i]  });
 	}
 	var html = ''
-	if (inversEn[i]) for (var rowIx = 0; rowIx < rowCnt[i] - 1; rowIx++) {
-		html += '<div class="gradient" style="background-color:' + colArrInv[rowIx] + '">' + colArrInv[rowIx] + '</div>';
-
-	}
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
-		html += '<div class="gradient" style="background-color:' + colArr[rowIx] + '">' + colArr[rowIx] + '</div>';
+		html += '<div class="gradient" style="background-color:' + colArr[rowIx] + ';color:'+textColor+'">' + colArr[rowIx] + '</div>';
 	}
 
 	document.getElementById('tab-cmx' + i).innerHTML = html;
@@ -213,6 +183,7 @@ function calcform_cmx_dyna(i) {
 	const div_grd = document.getElementById('grd-cmx' + i)
 	div_grd.innerHTML = gradientText
 	div_grd.style.background = gradientText
+	div_grd.style.color = textColor
 }
 function calcform_cmx_onLoad() {
 	var data = storage.loadSetting();
@@ -221,7 +192,6 @@ function calcform_cmx_onLoad() {
 	rgb2h = data.rgb2h;
 	rowCnt = data.rowCnt;
 	cha = data.cha;
-	inversEn = data.inversEn;
 	for (i = 0; i < colCnt; i++) {
 		inp_cmx_arr[i].set('c1', rgb1h[i]);
 		inp_cmx_arr[i].set('c2', rgb2h[i]);
@@ -229,12 +199,11 @@ function calcform_cmx_onLoad() {
 		calcform_cmx_rgb2(i, true);
 		inp_cmx_arr[i].set('chc', rowCnt[i]);
 		inp_cmx_arr[i].set('cha', cha[i]);
-		inp_cmx_arr[i].set('inv', inversEn[i]);
 		calcform_cmx_dyna(i);
 	}
 }
 function calcform_cmx_onSave() {
-	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, inversEn: inversEn };
+	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha};
 	storage.saveSetting({ data: data });
 }
 function calcform_cmx_col2_use_col1(i) {
@@ -311,4 +280,22 @@ document.addEventListener('DOMContentLoaded', function () {
 	onlyChild = children.length === 1 ? children[0] : null;
 	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(0,false)">RGB-Invert</button><button onclick="calcform_cmx_col2_invert(0,true)">HSL-Invert</button>';
 
+	// Text contrast
+	const fieldset = document.querySelector("#textContrast");
+
+	fieldset.addEventListener("change", (event) => {
+		// Ignoriert Änderungen am Farbfeld
+		if (event.target.type !== "radio") return;
+
+		const selected = fieldset.querySelector('input[type="radio"]:checked');
+		console.log(selected.value); // z. B. "light", "dark" oder "color"
+		let textColor
+		switch (selected.value) {
+			case 'light': textColor = '#ffffff'; break;
+			case 'dark': textColor = '#000000';break;
+			case 'color': textColor = document.getElementById('textColor').value;break;
+		}
+		console.log(textColor)
+		calcform_cmx_dyna(0, textColor)
+	});
 });

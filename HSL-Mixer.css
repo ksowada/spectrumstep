@@ -62,6 +62,14 @@
 	font-family: "Ubuntu", system-ui, sans-serif;
 }
 
+header {
+	display: flex;
+	justify-content: space-between;
+	font-size: 1.4rem;
+	font-weight: bold;
+	margin-bottom: 1rem;
+}
+
 table.inputs {
 	table-layout: fixed;
 	/* wie grid-template-columns */
@@ -162,18 +170,15 @@ table.inputs {
 
 .gradient {
 	color: black;
-	-webkit-text-stroke: 3px white;
-	paint-order: stroke fill;
 	padding: 1rem;
-	text-align: center;
+	text-align: center;  
 }
 
 .linear-gradient {
 	color: black;
-	-webkit-text-stroke: 3px white;
-	paint-order: stroke fill;
 	margin: 1rem 0rem;
 	padding: 3rem;
+	text-align: center;  
 }
 
 .icon {
@@ -190,6 +195,7 @@ table.inputs {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
+  align-items: center;
 }
 
 .narrow {
@@ -200,6 +206,10 @@ body tr:nth-child(2n) {
 	background-color: transparent;
 }
 
-#form-cmx0-c1-range ,#form-cmx0-c2-range{
+input[type="color"] {
 	padding: 0; /* fill color picking area full with color */
+}
+
+input[type="range"] { 
+  margin: 0px 0; /* overwrite water margin for less in-between-space */ 
 }

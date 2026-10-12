@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<html lang="de">
+<html lang="en">
 
 <head>
-	<meta name="og:image" content="https://spare-benzin.de/assets/full/Regenbogen-in-der-Praerie.jpg" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="og:url" content="https://spare-benzin.de/Extras/Hilfsmittel/HSL-Mixer/HSL-Mixer.html" />
-	<meta name="og:title" content="HSL-Mixer" />
-	<meta name="og:description" content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
-It generates a configurable color palette by interpolating between two colors in HSL space.
-Row count, RGB values, HSL values, and hue adjustments can be modified programmatically for accurate output control." />
+	<link rel="canonical" href="https://ardoid.eu/hsl-mixer/" />
+	<meta name="og:image" content="https://ardoid.eu/hsl-mixer/HSL-Mixer.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="og:url" content="https://ardoid.eu/hsl-mixer/" />
+	<meta name="og:title" content="HSL-Color-Mixer" />
+	<meta name="og:description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<meta name="description" content="This tool allows precise color mixing using either hex‑based RGB values or HSL parameters.
-It generates a configurable color palette by interpolating between two colors in HSL space.
-Row count, RGB values, HSL values, and hue adjustments can be modified programmatically for accurate output control." />
-	<meta name="DC.format" content="XHTML" />
-	<meta name="DC.identifier" content="HSL-Mixer" />
-	<title>HSL-Mixer</title>
+	<meta name="description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
+	<title>HSL Color Mixer – Color Palette & CSS Gradient Generator</title>
 	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 	<link rel="stylesheet" type="text/css" href="water.css" />
 	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
@@ -26,12 +20,38 @@ Row count, RGB values, HSL values, and hue adjustments can be modified programma
 	<script type="text/javascript" src="InputHtml.js"></script>
 	<script type="text/javascript" src="calcs.js"></script>
 	<script type="text/javascript" src="HSL-Mixer.js"></script>
+	<!-- Matomo --><script>
+		(function () {
+		function initTracking() {
+		var _paq = window._paq = window._paq || [];
+		_paq.push(['trackPageView']);
+		_paq.push(['enableLinkTracking']);
+		_paq.push(['alwaysUseSendBeacon']);
+		_paq.push(['setTrackerUrl', "\/\/ardoid.eu\/wp-content\/plugins\/matomo\/app\/matomo.php"]);
+		_paq.push(['setSiteId', '1']);
+		var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+		g.type='text/javascript';
+		 g.async=true;
+		 g.src="\/\/ardoid.eu\/wp-content\/uploads\/matomo\/matomo.js";
+		 s.parentNode.insertBefore(g,s);
+		}
+		if (document.prerendering) {
+			document.addEventListener('prerenderingchange', initTracking, {once: true});
+		} else {
+			initTracking();
+		}
+		})();
+		</script>
+		<!-- End Matomo Code -->
 </head>
 
 <body class="body" id="HSL-Mixer">
+	<header>
+		<a href="https://ardoid.eu/">ardoid.eu</a>
+		<div class="title">HSL Color Mixer</div>
+	</header>
 	<div class="container">
 		<div class="middle" id="middle">
-			<h1>HSL Mixer</h1>
 			<fieldset>
 				<legend>Color scheme</legend>
 				<label class="wide">
@@ -51,44 +71,52 @@ Row count, RGB values, HSL values, and hue adjustments can be modified programma
 						<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
 					</div>
 					<div class="flex">
-						<input id="save-input" class="narrow"/>
+						<input id="save-input" class="narrow" />
 						<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
 					</div>
 				</div>
 			</fieldset>
 			<div class="col-container">
 				<div class="col-cell">
-				<fieldset>
-					<legend>Colors</legend>
-					<div id="form-cmx0"></div>
-				</fieldset>	
+					<fieldset>
+						<legend>Colors</legend>
+						<div id="form-cmx0"></div>
+					</fieldset>
+					<fieldset class="flex" id="textContrast">
+						<legend>Text contrast</legend>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="light">
+							<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />White
+						</label>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="dark" checked>
+							<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Black
+						</label>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="color">
+							<img src="icons/palette-solid-full.svg" alt="icon for color" class="icon" />Color
+						</label>
+						<input type="color" value="#AAAAAA" id="textColor">
+					</fieldset>
 					<div id="tab-cmx0"></div>
 					<div id="grd-cmx0" class="linear-gradient"></div>
 				</div>
 			</div>
-			<h2>description</h2>
-			<p>Your colors can be mixed easily. Use RGB values in hex, or mix your colors using HSL.This creates a color palette that is easy to configure. Change the number of rows,RGB or HSL. The hue can be adjusted effortlessly.</p>
-			<p>It create also a CSS linear-gradient from the values</p>
-			<p>This calculator creates color transitions. In the HSL space, interpolation happens between 2 colors and also in the inverse direction. You receive the RGB values in hex for usein CSS or for graphics software such as the image editor <a href="https://www.gimp.org/" target="_blank">GIMP</a> or the drawing program <a href="https://inkscape.org/de/" target="_blank">INKSCAPE</a>.
-			</p>
-
-			<h3>HSL means the following:</h3>
+			<h1>HSL Color Mixer</h1>
+			<p>Mix two colors to create custom color palettes and smooth color transitions. Enter colors as HEX or HSL values, adjust the number of steps, and choose between HSL and RGB interpolation. Use hue inversion and Overdrive to explore additional color variations.</p>
+			<p>Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your colors directly in your browser without cookies.</p>
+			<h2>What is HSL?</h2>
+			<p>HSL stands for Hue, Saturation, and Lightness. Hue defines the color, Saturation its intensity, and Lightness its brightness, ranging from black to white.</p>
+			<h2>How to use the HSL Color Mixer</h2>
 			<ul>
-				<li>H stands for Hue. Hue is the color tone. It refers to a rainbow. In a rainbow, all colors of white light are spread out.</li>
-				<li>S stands for Saturation. Saturation is the intensity of the hue. Without intensity, the hue becomes gray.</li>
-				<li>L stands for Lightness. Lightness is the brightness. Full brightness is white, no brightness means black, as in absence of light.</li>
-			</ul>
-
-			<h3>This is how you operate the tool:</h3>
-			<ul>
-				<li>C1 is the base color. It can be entered as an RGB hex value or selected with the color button, which opens a color picker. You can also use HSL entering.</li>
-				<li>You may invert colors C1 and C2 in HSL, that might supplys you a mean to invert a color for dark mode or vice versa.</li>
-				<li>C2 is the second color used for mixing. Interpolation happens between these 2 colors in HSL. This allows you to create beautiful intermediate shades.</li>
-				<li>You choose the number of <i>Steps</i> in the gradient for the digital in-between-colors.</li>
-				<li>You may use <i>Overdrive</i> to extend the range outer the 2 given colors.</li>
-				<li>The gradient may be calculated to be a <i>HSL or RGB-Gradient</i>.</li>
-				<li>You can also enter colors in HSL using sliders or text input.</li>
-				<li>You can save and load colors. It works without cookies. The information is stored in the browser. Simply do not delete your browser data, and your color selection will remain available.</li>
+				<li><strong>C1 and C2:</strong> Enter HEX or HSL values, or select colors using the color picker.</li>
+				<li><strong>Steps:</strong> Set the number of intermediate colors in your palette.</li>
+				<li><strong>HSL or RGB:</strong> Choose the color space for interpolation.</li>
+				<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions.</li>
+				<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
+				<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
+				<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
+				<li><strong>Save and load:</strong> Store your color selections locally in your browser without cookies.</li>
 			</ul>
 		</div>
 	</div>
