@@ -31,6 +31,10 @@ var hsl1 = [[], [], []];
 var hsl2 = [[], [], []];
 var rowCnt = [];
 var cha = [];
+var hslMixEn = [];
+var _textColor = '#000000';
+var _backColor = undefined;
+
 for (var i = 0; i < colCnt; i++) {
 	params_cmx_arr[i] = params_cmx;
 	params_cmx_arr[i].c1.value = rgbPreArr1[i];
@@ -80,7 +84,6 @@ function calcform_cmx_hsl_range(i, nr, h, s, l) {
 	document.getElementById(combineToId([inp_cmx_arr[i].el, 'l' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 1%), hsl(${h}, ${s}%, 99%))`;
 }
 function calcform_cmx_rgb1(i, init) {
-	inp_cmx_arr[i].set('hsl', false);
 	c[i] = inp_cmx_arr[i].get('c1');
 	rgb1[i] = hexToRgb(c[i]);
 	hsl1[i] = rgbToHsl(rgb1[i]);
@@ -98,7 +101,6 @@ function calcform_cmx_rgb1(i, init) {
 }
 /** berechne RGB von HSL */
 function calcform_cmx_rgb2(i, init) {
-	inp_cmx_arr[i].set('hsl', false);
 	c[i] = inp_cmx_arr[i].get('c2');
 	rgb2[i] = hexToRgb(c[i]);
 	hsl2[i] = rgbToHsl(rgb2[i]);
@@ -116,7 +118,6 @@ function calcform_cmx_rgb2(i, init) {
 }
 /** berechne RGB von HSL */
 function calcform_cmx_hsl1(i, init) {
-	inp_cmx_arr[i].set('hsl', true);
 	hsl1[i][0] = inp_cmx_arr[i].get('h1') / 360;
 	hsl1[i][1] = inp_cmx_arr[i].get('s1') / 100;
 	hsl1[i][2] = inp_cmx_arr[i].get('l1') / 100;
@@ -130,7 +131,6 @@ function calcform_cmx_hsl1(i, init) {
 	if (init == undefined) calcform_cmx_dyna(i);
 }
 function calcform_cmx_hsl2(i, init) {
-	inp_cmx_arr[i].set('hsl', true);
 	hsl2[i][0] = inp_cmx_arr[i].get('h2') / 360;
 	hsl2[i][1] = inp_cmx_arr[i].get('s2') / 100;
 	hsl2[i][2] = inp_cmx_arr[i].get('l2') / 100;
@@ -144,14 +144,22 @@ function calcform_cmx_hsl2(i, init) {
 	if (init == undefined) calcform_cmx_dyna(i);
 }
 /** berechne Farbtabelle */
-function calcform_cmx_dyna(i, textColor='#000000') {
+function calcform_cmx_dyna(i, textColor, backColor) {
+	if (textColor) {
+		_textColor = textColor
+		_backColor = undefined
+	}
+	if (backColor) {
+		_textColor = undefined
+		_backColor = backColor
+	}
 	rowCnt[i] = parseInt(inp_cmx_arr[i].get('chc'));
 	cha[i] = parseInt(inp_cmx_arr[i].get('cha'));
-	var hslMixEn = inp_cmx_arr[i].get('hsl');
+	hslMixEn[i] = inp_cmx_arr[i].get('hsl');
 	var colArr = [];
 
 	// vergleiche rgb1 und rgb2 um in beide Richtungen zu blenden
-	if (hslMixEn) {
+	if (hslMixEn[i]) {
 		colArr = getHSLColors({ len: rowCnt[i], hsl1: hsl1[i], hsl2: hsl2[i], overdrive: cha[i] });
 
 		// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
@@ -166,10 +174,11 @@ function calcform_cmx_dyna(i, textColor='#000000') {
 	}
 	var html = ''
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
-		const textRgb = hexToRgb(textColor)
-		const backRgb = hexToRgb(colArr[rowIx])
+		const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
+		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
 		const contrastInfo = getContrastInfo(textRgb, backRgb)
-		html += '<div class="gradient" style="background-color:' + colArr[rowIx] + ';color:'+textColor+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
+		if (_backColor==undefined) html += '<div class="gradient" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
+		if (_textColor==undefined) html += '<div class="gradient" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
 	}
 
 	document.getElementById('tab-cmx' + i).innerHTML = html;
@@ -195,6 +204,31 @@ function calcform_cmx_onLoad() {
 	rgb2h = data.rgb2h;
 	rowCnt = data.rowCnt;
 	cha = data.cha;
+	hslMixEn = data.hslEn
+	if (data.textColor) {
+		_textColor = data.textColor
+		_backColor = undefined
+		if (_textColor==='#ffffff') {
+			document.querySelector('input[name="textContrast"][value="light"]').checked = true;
+		} else if (_textColor==='#000000') {
+			document.querySelector('input[name="textContrast"][value="dark"]').checked = true;
+		} else {
+			document.getElementById('text_color').value = _textColor
+			document.querySelector('input[name="textContrast"][value="color"]').checked = true;
+		}
+	}
+	if (data.backColor) {
+		_textColor = undefined
+		_backColor = data.backColor
+		if (_backColor==='#ffffff') {
+			document.querySelector('input[name="textContrast"][value="text_light"]').checked = true;
+		} else if (_backColor==='#000000') {
+			document.querySelector('input[name="textContrast"][value="text_dark"]').checked = true;
+		} else {
+			document.getElementById('back_color').value = _backColor
+			document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
+		}
+	}
 	for (i = 0; i < colCnt; i++) {
 		inp_cmx_arr[i].set('c1', rgb1h[i]);
 		inp_cmx_arr[i].set('c2', rgb2h[i]);
@@ -202,11 +236,12 @@ function calcform_cmx_onLoad() {
 		calcform_cmx_rgb2(i, true);
 		inp_cmx_arr[i].set('chc', rowCnt[i]);
 		inp_cmx_arr[i].set('cha', cha[i]);
+		inp_cmx_arr[i].set('hsl', hslMixEn[i]);
 		calcform_cmx_dyna(i);
 	}
 }
 function calcform_cmx_onSave() {
-	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha};
+	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, textColor:_textColor, backColor:_backColor, hslEn:hslMixEn};
 	storage.saveSetting({ data: data });
 }
 function calcform_cmx_col2_use_col1(i) {
@@ -333,20 +368,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Text contrast
 	const fieldset = document.querySelector("#textContrast");
-
 	fieldset.addEventListener("change", (event) => {
 		// Ignoriert Änderungen am Farbfeld
 		if (event.target.type !== "radio") return;
 
 		const selected = fieldset.querySelector('input[type="radio"]:checked');
 		console.log(selected.value); // z. B. "light", "dark" oder "color"
-		let textColor
+		let color
 		switch (selected.value) {
-			case 'light': textColor = '#ffffff'; break;
-			case 'dark': textColor = '#000000';break;
-			case 'color': textColor = document.getElementById('textColor').value;break;
+			case 'light': color = '#ffffff'; break;
+			case 'dark': color = '#000000';break;
+			case 'color': color = document.getElementById('text_color').value;break;
 		}
-		console.log(textColor)
-		calcform_cmx_dyna(0, textColor)
+		console.log(color)
+		calcform_cmx_dyna(0, color, undefined)
 	});
+	document.getElementById('text_color').addEventListener("change", (event) => {
+		let textColor = document.getElementById('text_color').value
+		document.querySelector('input[name="textContrast"][value="color"]').checked = true;
+		calcform_cmx_dyna(0, textColor, undefined)
+	})
+
+	// Back contrast
+	const fieldsetBack = document.querySelector("#backContrast");
+	fieldsetBack.addEventListener("change", (event) => {
+		// Ignoriert Änderungen am Farbfeld
+		if (event.target.type !== "radio") return;
+
+		const selected = fieldsetBack.querySelector('input[type="radio"]:checked');
+		console.log(selected.value); // z. B. "light", "dark" oder "color"
+		let color
+		switch (selected.value) {
+			case 'text_light': color = '#ffffff'; break;
+			case 'text_dark': color = '#000000';break;
+			case 'text_color': color = document.getElementById('back_color').value;break;
+		}
+		console.log(color)
+		calcform_cmx_dyna(0, undefined, color)
+	});
+	document.getElementById('back_color').addEventListener("change", (event) => {
+		let textColor = document.getElementById('back_color').value
+		document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
+		calcform_cmx_dyna(0, undefined, textColor)
+	})
 });

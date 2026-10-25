@@ -213,3 +213,7 @@ input[type="color"] {
 input[type="range"] { 
   margin: 0px 0; /* overwrite water margin for less in-between-space */ 
 }
+
+p ,li{
+	margin-bottom: 1rem;
+}

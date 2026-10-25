@@ -83,7 +83,7 @@
 						<div id="form-cmx0"></div>
 					</fieldset>
 					<fieldset class="flex" id="textContrast">
-						<legend>Text contrast</legend>
+						<legend>Text contrast with background color gradient</legend>
 						<label class="wide">
 							<input type="radio" name="textContrast" value="light">
 							<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />White
@@ -96,27 +96,44 @@
 							<input type="radio" name="textContrast" value="color">
 							<img src="icons/palette-solid-full.svg" alt="icon for color" class="icon" />Color
 						</label>
-						<input type="color" value="#AAAAAA" id="textColor">
+						<input type="color" value="#AAAAAA" id="text_color">
+					</fieldset>
+					<fieldset class="flex" id="backContrast">
+						<legend>Background contrast with text color gradient</legend>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="text_light">
+							<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />White
+						</label>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="text_dark">
+							<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Black
+						</label>
+						<label class="wide">
+							<input type="radio" name="textContrast" value="text_color">
+							<img src="icons/palette-solid-full.svg" alt="icon for color" class="icon" />Color
+						</label>
+						<input type="color" value="#AAAAAA" id="back_color">
 					</fieldset>
 					<div id="tab-cmx0"></div>
 					<div id="grd-cmx0" class="linear-gradient"></div>
 				</div>
 			</div>
 			<h1>HSL Color Mixer</h1>
-			<p>Mix two colors to create custom color palettes and smooth color transitions. Enter colors as HEX or HSL values, adjust the number of steps, and choose between HSL and RGB interpolation. Use hue inversion and Overdrive to explore additional color variations.</p>
-			<p>Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your colors directly in your browser without cookies.</p>
+			<p>Generate smooth color gradients between two colors with a configurable number of steps. Choose between two text contrast modes: generate a gradient of background colors with a custom text color, or keep the background fixed and generate a gradient of text colors. The tool displays the contrast ratio for each color, helping you explore readable text and background combinations.</p>
+			<p>Mix two colors to create custom color palettes and smooth color transitions. Enter HEX or HSL values, adjust the number of steps, and choose between HSL and RGB interpolation. Reverse the hue direction or use Overdrive to explore color variations beyond the original colors.</p>
+			<p>Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</p>
 			<h2>What is HSL?</h2>
-			<p>HSL stands for Hue, Saturation, and Lightness. Hue defines the color, Saturation its intensity, and Lightness its brightness, ranging from black to white.</p>
+			<p>HSL stands for Hue, Saturation, and Lightness. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white.</p>
 			<h2>How to use the HSL Color Mixer</h2>
 			<ul>
-				<li><strong>C1 and C2:</strong> Enter HEX or HSL values, or select colors using the color picker.</li>
-				<li><strong>Steps:</strong> Set the number of intermediate colors in your palette.</li>
-				<li><strong>HSL or RGB:</strong> Choose the color space for interpolation.</li>
-				<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions.</li>
-				<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
-				<li><strong>Text contrast:</strong> Explore text and background color combinations. The tool shows the Contrast Ratio for each gradient color in relation to chosen text color.</li>
-				<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
-				<li><strong>Save and load:</strong> Store your color selections locally in your browser without cookies.</li>
+			<li><strong>C1 and C2:</strong> Enter HEX or HSL values, or select colors using the color picker.</li>
+			<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient.</li>
+			<li><strong>HSL or RGB:</strong> Select the color space used for interpolation between the two colors.</li>
+			<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions.</li>
+			<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
+			<li><strong>Text contrast:</strong> Explore text and background color combinations. The tool displays the contrast ratio of each gradient color against your chosen text or background color.</li>
+			<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
+			<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
 			</ul>
 		</div>
 	</div>
