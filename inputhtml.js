@@ -44,9 +44,9 @@ function InputHtml(args) {
         switch (param.type) {
           case 'number':
             if (param.min !== undefined) {
-              html_range = '<td class="form-value"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="range" step="' + param.step + '" value="' + param.value + '" min="' + param.min + '" max="' + param.max + '" onchange="'+html_oninput+',true)"/></td>';
+              html_range = '<td class="form-value"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="range" step="' + param.step + '" value="' + param.value + '" min="' + param.min + '" max="' + param.max + '" oninput="'+html_oninput+',true)"/></td>';
             }
-            html += html_name + html_range + '<td class="form-value"><input id="' + combineToId([this.el, varName]) + '" class="form-control" type="number" step="' + param.step + '" value="' + param.value + '" onchange="'+html_oninput+',false)"/></td>' + html_unit; 
+            html += html_name + html_range + '<td class="form-value"><input id="' + combineToId([this.el, varName]) + '" class="form-control" type="number" step="' + param.step + '" value="' + param.value + '" oninput="'+html_oninput+',false)"/></td>' + html_unit;
             break;
           case 'text':
             html += html_name + html_range + '<td class="form-value"><input id="' + combineToId([this.el, varName]) + '" class="form-control" value="' + param.value + '" onchange="'+html_oninput+',false)"/></td>' + html_unit;

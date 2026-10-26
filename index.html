@@ -2,20 +2,21 @@
 <html lang="en">
 
 <head>
-	<link rel="canonical" href="https://ardoid.eu/hsl-mixer/" />
-	<meta name="og:image" content="https://ardoid.eu/hsl-mixer/HSL-Mixer.png" />
+	<link rel="canonical" href="https://ardoid.eu/spectrumstep/" />
+	<meta name="og:image" content="https://ardoid.eu/spectrumstep/HSL-Mixer.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="og:url" content="https://ardoid.eu/hsl-mixer/" />
-	<meta name="og:title" content="HSL-Color-Mixer" />
+	<meta name="og:url" content="https://ardoid.eu/spectrumstep/" />
+	<meta name="og:title" content="SpectrumStep – Multi-Space Gradient & Contrast Generator" />
 	<meta name="og:description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
-	<title>HSL Color Mixer – Color Palette & CSS Gradient Generator</title>
+	<title>SpectrumStep – Multi-Space Gradient & Contrast Generator</title>
 	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
 	<link rel="stylesheet" type="text/css" href="water.css" />
 	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
 	<link rel="stylesheet" type="text/css" href="HSL-Mixer.css" />
+	<script type="text/javascript" src="buttonswitch.js"></script>
 	<script type="text/javascript" src="storage.js"></script>
 	<script type="text/javascript" src="inputhtml.js"></script>
 	<script type="text/javascript" src="calcs.js"></script>
@@ -48,7 +49,7 @@
 <body class="body" id="HSL-Mixer">
 	<header>
 		<a href="https://ardoid.eu/">ardoid.eu</a>
-		<div class="title">HSL Color Mixer</div>
+		<div class="title">SpectrumStep - Color Mixer</div>
 	</header>
 	<div class="container">
 		<div class="middle" id="middle">
@@ -81,6 +82,21 @@
 					<fieldset>
 						<legend>Colors</legend>
 						<div id="form-cmx"></div>
+					</fieldset>
+					<fieldset class="flex" id="gradientMode">
+						<legend>color gradient in different color-spaces</legend>
+						<label class="wide">
+							<input type="radio" name="gradientMode" value="HSL" checked>
+							HSL
+						</label>
+						<label class="wide">
+							<input type="radio" name="gradientMode" value="RGB">
+							RGB
+						</label>
+						<label class="wide">
+							<input type="radio" name="gradientMode" value="HSV">
+							HSV
+						</label>
 					</fieldset>
 					<fieldset class="flex" id="textContrast">
 						<legend>Text contrast with background color gradient</legend>
@@ -118,23 +134,38 @@
 					<div id="grd-cmx" class="linear-gradient"></div>
 				</div>
 			</div>
-			<h1>HSL Color Mixer</h1>
-			<p>Generate smooth color gradients between two colors with a configurable number of steps. Choose between two text contrast modes: generate a gradient of background colors with a custom text color, or keep the background fixed and generate a gradient of text colors. The tool displays the contrast ratio for each color, helping you explore readable text and background combinations.</p>
-			<p>Mix two colors to create custom color palettes and smooth color transitions. Enter HEX or HSL values, adjust the number of steps, and choose between HSL and RGB interpolation. Reverse the hue direction or use Overdrive to explore color variations beyond the original colors.</p>
-			<p>Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</p>
-			<h2>What is HSL?</h2>
-			<p>HSL stands for Hue, Saturation, and Lightness. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white.</p>
-			<h2>How to use the HSL Color Mixer</h2>
-			<ul>
-			<li><strong>C1 and C2:</strong> Enter HEX or HSL values, or select colors using the color picker.</li>
-			<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient.</li>
-			<li><strong>HSL or RGB:</strong> Select the color space used for interpolation between the two colors.</li>
-			<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions.</li>
-			<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
-			<li><strong>Text contrast:</strong> Explore text and background color combinations. The tool displays the contrast ratio of each gradient color against your chosen text or background color.</li>
-			<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
-			<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
-			</ul>
+			<h2 class="tool-title">SpectrumStep – Multi-Space Gradient & Contrast Generator</h2>
+			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
+			<details class="tool-guide">
+				<summary>How to use SpectrumStep</summary>
+				<div class="guide-content">
+					<p><strong>1. Configure Colors:</strong> Toggle between HSL, HSV, and RGB spaces for each color picker. Adjust sliders or fine-tune components directly using numeric inputs.</p>
+					<p><strong>2. Invert & Copy:</strong> Invert color channels or sync settings instantly using the <em>RGB-Invert</em>, <em>HSL-Invert</em>, or <em>C2 use C1</em> utility buttons.</p>
+					<p><strong>3. Set Steps & Overdrive:</strong> Define the exact number of discrete gradient steps and fine-tune channel intensity using the Overdrive control.</p>
+					<p><strong>4. Color Spaces & Contrast:</strong> Switch the interpolation space (HSL, RGB, HSV) and test legibility with custom light, dark, or user-defined background and text combinations.</p>
+					<p><strong>5. Export CSS:</strong> Copy the ready-to-use linear-gradient CSS code snippet generated at the bottom.</p>
+				</div>
+			</details>
+			<details class="tool-description">
+				<summary>Description of tool-elements</summary>
+				<div class="guide-content">
+					<p>HSL stands for Hue, Saturation, and Lightness and is often also called HLS. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white. HSV stands for hue, saturation, and value, and is also often called HSB. See  <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">wikipedia: HSL and HSV</a></p>
+					<ul>
+						<li><strong>C1 and C2:</strong> Enter HEX or decimal RGB, HSL or HSV values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
+						<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient. Generate smooth color gradients between 2 colors with a configurable number of steps to create custom color palettes and smooth color transitions.</li>
+						<li><strong>RGB,HSL or HSV:</strong> Select the color space used for interpolation between the two colors.</li>
+						<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions. Might be good to swap colors between dark and light background.</li>
+						<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
+
+						<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
+						<li><strong>Back contrast:</strong> Alternatively you make a gradient of text-color and you may choose the static background-color for the whole gradient.</li>
+						<li><strong>Gradient output:</strong> Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</li>
+						<li><strong>Contrast ratio:</strong> The tool displays the contrast ratio for each color, helping you explore readable text and background combinations.</li>
+						<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
+						<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
+					</ul>
+				</div>
+			</details>
 		</div>
 	</div>
 </body>

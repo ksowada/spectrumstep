@@ -188,6 +188,7 @@ function rgbCorrect(value) {
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
  * Assumes h, s, and l are contained in the set [0, 1] and
+ * they might be supplied single value or as array
  * returns r, g, and b in the set [0, 255].
  *
  * @param   {number}  h       The hue
@@ -225,6 +226,37 @@ function hslToRgb() {
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 /**
+ * Converts an HSV color value to RGB.
+ * Assumes h, s, and v are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   {Array}  args   [h, s, v]
+ * @return  {Array}         The RGB representation [r, g, b]
+ */
+function hsvToRgb(args){
+  var h = args[0];
+  var s = args[1];
+  var v = args[2];
+
+  var r, g, b;
+
+  var i = Math.floor(h * 6);
+  var f = h * 6 - i;
+  var p = v * (1 - s);
+  var q = v * (1 - f * s);
+  var t = v * (1 - (1 - f) * s);
+
+  switch(i % 6){
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+/**
  * Converts an RGB color value to HSL. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
  * Assumes r, g, and b are contained in the set [0, 255] and
@@ -258,6 +290,39 @@ function rgbToHsl(args){
   }
 
   return [h, s, l];
+}
+/**
+ * Converts an RGB color value to HSV.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and v in the set [0, 1].
+ *
+ * @param   {Array}  args   [r, g, b]
+ * @return  {Array}         The HSV representation [h, s, v]
+ */
+function rgbToHsv(args){
+  var r = args[0];
+  var g = args[1];
+  var b = args[2];
+
+  r /= 255, g /= 255, b /= 255;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+
+  var d = max - min;
+  s = max == 0 ? 0 : d / max;
+
+  if(max == min){
+    h = 0; // achromatic
+  }else{
+    switch(max){
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  return [h, s, v];
 }
 /**
  * convert hex color to rgb array [0..255]
@@ -315,6 +380,16 @@ function interpolate(r,x1,x2,hue) {
     return hueBounded;
   }
 }
+function colorConvertFromRgb(mode, rgb) {
+  if (mode==='RGB') return rgb;
+  if (mode==='HSL') return rgbToHsl(rgb);
+  if (mode==='HSV') return rgbToHsv(rgb);
+}
+function colorConvertToRgb(mode, col) {
+  if (mode==='RGB') return col;
+  if (mode==='HSL') return hslToRgb(col);
+  if (mode==='HSV') return hsvToRgb(col);
+}
 /** calculate HSL colors from h1 to h2, and so on, period is repetition
  * give out hex rgb with leading # for css user */
 function getHSLColors(args) {
@@ -351,6 +426,65 @@ function getRGBColors(args) {
     var b = interpolate(rel,rgbAr1[2],rgbAr2[2]);
     var rgb = getRGBColor(r,g,b);
     rgbColors.push('#'+rgbToColor(rgb));
+  }
+  return rgbColors;
+}
+/** calculate colors interpolating from c1 to c2 in RGB, HSL or HSV space, overdrive extrapolates linearly
+ * args: { len, overdrive,
+ *         mode:   'RGB'|'HSL'|'HSV' (default 'RGB') = Raum, in dem interpoliert wird,
+ *         c1, c1Mode: 'RGB'|'HSL'|'HSV' (default = mode),
+ *         c2, c2Mode: 'RGB'|'HSL'|'HSV' (default = mode) }
+ * c1, c2 can be
+ *   - 6-digit-hexstring with leading # (c1Mode/c2Mode wird ignoriert)
+ *   - array in the units of its own mode: RGB 0..255, HSL/HSV [h,s,x] 0..1
+ * or (old style) rgb1, rgb2 as array 0..255
+ * give out hex rgb with leading # for css user */
+function getColors(args) {
+  var mode = args.mode || 'RGB';
+  args.len = parseInt(args.len);
+  var overdrive = (args.overdrive !== undefined) ? parseInt(args.overdrive) : 0;
+  var isHue = (mode !== 'RGB');
+
+  var conv = {
+    RGB: { toRgb: function (a, b, c) { return getRGBColor(a, b, c); },
+      fromRgb: function (rgb) { return rgb; } },
+    HSL: { toRgb: function (h, s, l) { return hslToRgb(h, s, l); },
+      fromRgb: rgbToHsl },
+    HSV: { toRgb: function (h, s, v) { return hsvToRgb([h, s, v]); },
+      fromRgb: rgbToHsv }
+  };
+
+  // Farbe aus ihrem eigenen Modus in den Interpolationsraum bringen
+  function resolve(c, cMode, rgbAlt) {
+    if (typeof c === 'string') {
+      return conv[mode].fromRgb(getRGBColorByStr(c));
+    }
+    if (c === undefined) {          // alter Stil: rgb1 / rgb2
+      c = rgbAlt;
+      cMode = 'RGB';
+    }
+    cMode = cMode || mode;
+    if (cMode === mode) return c;   // gleicher Raum: keine verlustbehaftete Umrechnung
+    var rgb = conv[cMode].toRgb(c[0], c[1], c[2]);
+    return conv[mode].fromRgb(rgb);
+  }
+  var p1 = resolve(args.c1, args.c1Mode, args.rgb1);
+  var p2 = resolve(args.c2, args.c2Mode, args.rgb2);
+
+  var rgbColors = [];
+  for (var i = -overdrive; i < args.len + overdrive; i++) {
+    var rel = args.len > 1 ? i / (args.len - 1) : 0;
+    var a, b, c;
+    if (isHue) {
+      a = hueBound(interpolate(rel, p1[0], p2[0], true));
+      b = bound(interpolate(rel, p1[1], p2[1]), 0, 1);
+      c = bound(interpolate(rel, p1[2], p2[2]), 0, 1);
+    } else {
+      a = interpolate(rel, p1[0], p2[0]);
+      b = interpolate(rel, p1[1], p2[1]);
+      c = interpolate(rel, p1[2], p2[2]);
+    }
+    rgbColors.push('#' + rgbToColor(conv[mode].toRgb(a, b, c)));
   }
   return rgbColors;
 }
