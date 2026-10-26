@@ -15,33 +15,29 @@ var params_cmx = {
 	cha: { name: 'Overdrive', type: 'number', value: 0, min: 0, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
 	hsl: { name: 'HSL-Gradient', type: 'checkbox', value: hslInit, callbackName: 'calcform_cmx_dyna' },
 };
-var colCnt = 1;
-var rgbPreArr1 = ['#8fbfef', '#00ff00', '#0000ff'];
-var rgbPreArr2 = ['#bf8fef', '#80ff80', '#8080ff'];
-var hslPreArr1 = [[200, 50, 50], [350, 50, 50], [80, 50, 50]];
-var hslPreArr2 = [[200, 50, 90], [350, 50, 90], [80, 50, 90]];
-var params_cmx_arr = [];
-var inp_cmx_arr = [];
-var c = [];
-var rgb1 = [[]];
-var rgb2 = [[]];
-var rgb1h = rgbPreArr1;
-var rgb2h = rgbPreArr2;
-var hsl1 = [[], [], []];
-var hsl2 = [[], [], []];
-var rowCnt = [];
-var cha = [];
-var hslMixEn = [];
+var hslPreArr1 = [200, 50, 50];
+var hslPreArr2 = [200, 50, 90];
+var params_cmx_arr = undefined;
+var inp_cmx_arr = undefined;
+var c = undefined;
+var rgb1 = [];
+var rgb2 = [];
+var rgb1h = '#8fbfef';
+var rgb2h = '#bf8fef';
+var hsl1 = [];
+var hsl2 = [];
+var rowCnt = undefined;
+var cha = undefined;
+var hslMixEn = undefined;
 var _textColor = '#000000';
 var _backColor = undefined;
 
-for (var i = 0; i < colCnt; i++) {
-	params_cmx_arr[i] = params_cmx;
-	params_cmx_arr[i].c1.value = rgbPreArr1[i];
-	params_cmx_arr[i].c2.value = rgbPreArr2[i];
-	inp_cmx_arr[i] = new InputHtml({ obj: 'inp_cmx_arr[' + i + ']', params: params_cmx_arr[i], el: 'form-cmx' + i, callbackName: 'calcform_cmx_doml', callbackArgs: i, callAtInit: false, storageEn: true });
-}
-var storage = new Storage({ unit: 'color-mixer', storageEn: true, 
+params_cmx_arr = params_cmx;
+params_cmx_arr.c1.value = rgb1h;
+params_cmx_arr.c2.value = rgb2h;
+inp_cmx_arr = new InputHtml({ obj: 'inp_cmx_arr', params: params_cmx_arr, el: 'form-cmx', callbackName: 'calcform_cmx_doml', callAtInit: false, storageEn: true });
+
+var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 	inputLoadId:'load-input', btnLoadId:'load-btn',
 	inputSaveId:'save-input', btnSaveId:'save-btn'
 });
@@ -50,101 +46,99 @@ var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 function calcform_cmx_init() {
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
-	for (var i = 0; i < colCnt; i++) {
-		inp_cmx_arr[i].init();
-		if (hslInit) {
-			inp_cmx_arr[i].set('h1', hslPreArr1[i][0]);
-			inp_cmx_arr[i].set('s1', hslPreArr1[i][1]);
-			inp_cmx_arr[i].set('l1', hslPreArr1[i][2]);
-			inp_cmx_arr[i].set('h2', hslPreArr2[i][0]);
-			inp_cmx_arr[i].set('s2', hslPreArr2[i][1]);
-			inp_cmx_arr[i].set('l2', hslPreArr2[i][2]);
-		} else {
-			inp_cmx_arr[i].set('c1', rgbPreArr1[i]);
-			inp_cmx_arr[i].set('c2', rgbPreArr2[i]);
-		}
-	}
-}
-/** berechne HSL */
-function calcform_cmx_doml(i) {
+	inp_cmx_arr.init();
 	if (hslInit) {
-		calcform_cmx_hsl1(i, true);
-		calcform_cmx_hsl2(i, true);
+		inp_cmx_arr.set('h1', hslPreArr1[0]);
+		inp_cmx_arr.set('s1', hslPreArr1[1]);
+		inp_cmx_arr.set('l1', hslPreArr1[2]);
+		inp_cmx_arr.set('h2', hslPreArr2[0]);
+		inp_cmx_arr.set('s2', hslPreArr2[1]);
+		inp_cmx_arr.set('l2', hslPreArr2[2]);
 	} else {
-		calcform_cmx_rgb1(i, true);
-		calcform_cmx_rgb2(i, true);
+		inp_cmx_arr.set('c1', rgb1h);
+		inp_cmx_arr.set('c2', rgb2h);
 	}
-	calcform_cmx_dyna(i);
 }
 /** berechne HSL */
-function calcform_cmx_hsl_range(i, nr, h, s, l) {
-	document.getElementById(combineToId([inp_cmx_arr[i].el, 'h' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl longer hue, hsl(0, ${s}%, ${l}%), hsl(0, ${s}%, ${l}%))`;
-	document.getElementById(combineToId([inp_cmx_arr[i].el, 's' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, 0%, ${l}%), hsl(${h}, 100%, ${l}%))`;
+function calcform_cmx_doml() {
+	if (hslInit) {
+		calcform_cmx_hsl1(true);
+		calcform_cmx_hsl2(true);
+	} else {
+		calcform_cmx_rgb1(true);
+		calcform_cmx_rgb2(true);
+	}
+	calcform_cmx_dyna();
+}
+/** berechne HSL */
+function calcform_cmx_hsl_range(nr, h, s, l) {
+	document.getElementById(combineToId([inp_cmx_arr.el, 'h' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl longer hue, hsl(0, ${s}%, ${l}%), hsl(0, ${s}%, ${l}%))`;
+	document.getElementById(combineToId([inp_cmx_arr.el, 's' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, 0%, ${l}%), hsl(${h}, 100%, ${l}%))`;
 	// use 1% to 99% to help for replacing hsl to rgb black to white
-	document.getElementById(combineToId([inp_cmx_arr[i].el, 'l' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 1%), hsl(${h}, ${s}%, 99%))`;
+	document.getElementById(combineToId([inp_cmx_arr.el, 'l' + nr, 'range'])).style.background = `linear-gradient(90deg in hsl shorter hue, hsl(${h}, ${s}%, 1%), hsl(${h}, ${s}%, 99%))`;
 }
-function calcform_cmx_rgb1(i, init) {
-	c[i] = inp_cmx_arr[i].get('c1');
-	rgb1[i] = hexToRgb(c[i]);
-	hsl1[i] = rgbToHsl(rgb1[i]);
-	const hsl_0 = Math.round(hsl1[i][0] * 360)
-	const hsl_1 = Math.round(hsl1[i][1] * 100)
-	const hsl_2 = Math.round(hsl1[i][2] * 100)
-	calcform_cmx_hsl_range(i, 1, hsl_0, hsl_1, hsl_2)
-	inp_cmx_arr[i].set('h1', hsl1[i][0] * 360);
-	inp_cmx_arr[i].set('s1', hsl1[i][1] * 100);
-	inp_cmx_arr[i].set('l1', hsl1[i][2] * 100);
-	var rgb_per = hslToRgb(hsl1[i][0], hsl1[i][1], hsl1[i][2]);
-	rgb1h[i] = rgbToColor(rgb_per);
-	inp_cmx_arr[i].set('c1', rgb1h[i]);
-	if (init == undefined) calcform_cmx_dyna(i);
-}
-/** berechne RGB von HSL */
-function calcform_cmx_rgb2(i, init) {
-	c[i] = inp_cmx_arr[i].get('c2');
-	rgb2[i] = hexToRgb(c[i]);
-	hsl2[i] = rgbToHsl(rgb2[i]);
-	const hsl_0 = Math.round(hsl2[i][0] * 360)
-	const hsl_1 = Math.round(hsl2[i][1] * 100)
-	const hsl_2 = Math.round(hsl2[i][2] * 100)
-	calcform_cmx_hsl_range(i, 2, hsl_0, hsl_1, hsl_2)
-	inp_cmx_arr[i].set('h2', hsl2[i][0] * 360);
-	inp_cmx_arr[i].set('s2', hsl2[i][1] * 100);
-	inp_cmx_arr[i].set('l2', hsl2[i][2] * 100);
-	var rgb_per = hslToRgb(hsl2[i][0], hsl2[i][1], hsl2[i][2]);
-	rgb2h[i] = rgbToColor(rgb_per);
-	inp_cmx_arr[i].set('c2', rgb2h[i]);
-	if (init == undefined) calcform_cmx_dyna(i);
+function calcform_cmx_rgb1(init) {
+	c = inp_cmx_arr.get('c1');
+	rgb1 = hexToRgb(c);
+	hsl1 = rgbToHsl(rgb1);
+	const hsl_0 = Math.round(hsl1[0] * 360)
+	const hsl_1 = Math.round(hsl1[1] * 100)
+	const hsl_2 = Math.round(hsl1[2] * 100)
+	calcform_cmx_hsl_range(1, hsl_0, hsl_1, hsl_2)
+	inp_cmx_arr.set('h1', hsl1[0] * 360);
+	inp_cmx_arr.set('s1', hsl1[1] * 100);
+	inp_cmx_arr.set('l1', hsl1[2] * 100);
+	var rgb_per = hslToRgb(hsl1[0], hsl1[1], hsl1[2]);
+	rgb1h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c1', rgb1h);
+	if (init == undefined) calcform_cmx_dyna();
 }
 /** berechne RGB von HSL */
-function calcform_cmx_hsl1(i, init) {
-	hsl1[i][0] = inp_cmx_arr[i].get('h1') / 360;
-	hsl1[i][1] = inp_cmx_arr[i].get('s1') / 100;
-	hsl1[i][2] = inp_cmx_arr[i].get('l1') / 100;
-	const hsl_0 = Math.round(hsl1[i][0] * 360)
-	const hsl_1 = Math.round(hsl1[i][1] * 100)
-	const hsl_2 = Math.round(hsl1[i][2] * 100)
-	calcform_cmx_hsl_range(i, 1, hsl_0, hsl_1, hsl_2)
-	var rgb_per = hslToRgb(hsl1[i][0], hsl1[i][1], hsl1[i][2]);
-	rgb1h[i] = rgbToColor(rgb_per);
-	inp_cmx_arr[i].set('c1', rgb1h[i]);
-	if (init == undefined) calcform_cmx_dyna(i);
+function calcform_cmx_rgb2(init) {
+	c = inp_cmx_arr.get('c2');
+	rgb2 = hexToRgb(c);
+	hsl2 = rgbToHsl(rgb2);
+	const hsl_0 = Math.round(hsl2[0] * 360)
+	const hsl_1 = Math.round(hsl2[1] * 100)
+	const hsl_2 = Math.round(hsl2[2] * 100)
+	calcform_cmx_hsl_range( 2, hsl_0, hsl_1, hsl_2)
+	inp_cmx_arr.set('h2', hsl2[0] * 360);
+	inp_cmx_arr.set('s2', hsl2[1] * 100);
+	inp_cmx_arr.set('l2', hsl2[2] * 100);
+	var rgb_per = hslToRgb(hsl2[0], hsl2[1], hsl2[2]);
+	rgb2h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c2', rgb2h);
+	if (init == undefined) calcform_cmx_dyna();
 }
-function calcform_cmx_hsl2(i, init) {
-	hsl2[i][0] = inp_cmx_arr[i].get('h2') / 360;
-	hsl2[i][1] = inp_cmx_arr[i].get('s2') / 100;
-	hsl2[i][2] = inp_cmx_arr[i].get('l2') / 100;
-	const hsl_0 = Math.round(hsl2[i][0] * 360)
-	const hsl_1 = Math.round(hsl2[i][1] * 100)
-	const hsl_2 = Math.round(hsl2[i][2] * 100)
-	calcform_cmx_hsl_range(i, 2, hsl_0, hsl_1, hsl_2)
-	var rgb_per = hslToRgb(hsl2[i][0], hsl2[i][1], hsl2[i][2]);
-	rgb2h[i] = rgbToColor(rgb_per);
-	inp_cmx_arr[i].set('c2', rgb2h[i]);
-	if (init == undefined) calcform_cmx_dyna(i);
+/** berechne RGB von HSL */
+function calcform_cmx_hsl1(init) {
+	hsl1[0] = inp_cmx_arr.get('h1') / 360;
+	hsl1[1] = inp_cmx_arr.get('s1') / 100;
+	hsl1[2] = inp_cmx_arr.get('l1') / 100;
+	const hsl_0 = Math.round(hsl1[0] * 360)
+	const hsl_1 = Math.round(hsl1[1] * 100)
+	const hsl_2 = Math.round(hsl1[2] * 100)
+	calcform_cmx_hsl_range(1, hsl_0, hsl_1, hsl_2)
+	var rgb_per = hslToRgb(hsl1[0], hsl1[1], hsl1[2]);
+	rgb1h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c1', rgb1h);
+	if (init == undefined) calcform_cmx_dyna();
+}
+function calcform_cmx_hsl2(init) {
+	hsl2[0] = inp_cmx_arr.get('h2') / 360;
+	hsl2[1] = inp_cmx_arr.get('s2') / 100;
+	hsl2[2] = inp_cmx_arr.get('l2') / 100;
+	const hsl_0 = Math.round(hsl2[0] * 360)
+	const hsl_1 = Math.round(hsl2[1] * 100)
+	const hsl_2 = Math.round(hsl2[2] * 100)
+	calcform_cmx_hsl_range(2, hsl_0, hsl_1, hsl_2)
+	var rgb_per = hslToRgb(hsl2[0], hsl2[1], hsl2[2]);
+	rgb2h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c2', rgb2h);
+	if (init == undefined) calcform_cmx_dyna();
 }
 /** berechne Farbtabelle */
-function calcform_cmx_dyna(i, textColor, backColor) {
+function calcform_cmx_dyna(textColor, backColor) {
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -153,24 +147,24 @@ function calcform_cmx_dyna(i, textColor, backColor) {
 		_textColor = undefined
 		_backColor = backColor
 	}
-	rowCnt[i] = parseInt(inp_cmx_arr[i].get('chc'));
-	cha[i] = parseInt(inp_cmx_arr[i].get('cha'));
-	hslMixEn[i] = inp_cmx_arr[i].get('hsl');
+	rowCnt = parseInt(inp_cmx_arr.get('chc'));
+	cha = parseInt(inp_cmx_arr.get('cha'));
+	hslMixEn = inp_cmx_arr.get('hsl');
 	var colArr = [];
 
 	// vergleiche rgb1 und rgb2 um in beide Richtungen zu blenden
-	if (hslMixEn[i]) {
-		colArr = getHSLColors({ len: rowCnt[i], hsl1: hsl1[i], hsl2: hsl2[i], overdrive: cha[i] });
+	if (hslMixEn) {
+		colArr = getHSLColors({ len: rowCnt, hsl1: hsl1, hsl2: hsl2, overdrive: cha });
 
 		// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
-		colArr[cha[i]] = inp_cmx_arr[i].get('c1');
-		colArr[cha[i] + rowCnt[i] - 1] = inp_cmx_arr[i].get('c2');
+		colArr[cha] = inp_cmx_arr.get('c1');
+		colArr[cha + rowCnt - 1] = inp_cmx_arr.get('c2');
 	} else {
-		c[i] = inp_cmx_arr[i].get('c1');
-		rgb1[i] = hexToRgb(c[i]);
-		c[i] = inp_cmx_arr[i].get('c2');
-		rgb2[i] = hexToRgb(c[i]);
-		colArr = getRGBColors({ len: rowCnt[i], c1: rgb1h[i], c2: rgb2h[i], overdrive: cha[i]  });
+		c = inp_cmx_arr.get('c1');
+		rgb1 = hexToRgb(c);
+		c = inp_cmx_arr.get('c2');
+		rgb2 = hexToRgb(c);
+		colArr = getRGBColors({ len: rowCnt, c1: rgb1h, c2: rgb2h, overdrive: cha  });
 	}
 	var html = ''
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
@@ -181,7 +175,7 @@ function calcform_cmx_dyna(i, textColor, backColor) {
 		if (_textColor==undefined) html += '<div class="gradient" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
 	}
 
-	document.getElementById('tab-cmx' + i).innerHTML = html;
+	document.getElementById('tab-cmx').innerHTML = html;
 
 	// build CSS linear gradient
 	let gradientText = ''
@@ -192,7 +186,7 @@ function calcform_cmx_dyna(i, textColor, backColor) {
 	}
 	gradientText += colArr[0] + ','
 	gradientText += colArr[colArr.length - 1] + ')'
-	const div_grd = document.getElementById('grd-cmx' + i)
+	const div_grd = document.getElementById('grd-cmx')
 	div_grd.innerHTML = gradientText
 	div_grd.style.background = gradientText
 	div_grd.style.color = textColor
@@ -229,52 +223,50 @@ function calcform_cmx_onLoad() {
 			document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
 		}
 	}
-	for (i = 0; i < colCnt; i++) {
-		inp_cmx_arr[i].set('c1', rgb1h[i]);
-		inp_cmx_arr[i].set('c2', rgb2h[i]);
-		calcform_cmx_rgb1(i, true);
-		calcform_cmx_rgb2(i, true);
-		inp_cmx_arr[i].set('chc', rowCnt[i]);
-		inp_cmx_arr[i].set('cha', cha[i]);
-		inp_cmx_arr[i].set('hsl', hslMixEn[i]);
-		calcform_cmx_dyna(i);
-	}
+	inp_cmx_arr.set('c1', rgb1h);
+	inp_cmx_arr.set('c2', rgb2h);
+	calcform_cmx_rgb1(true);
+	calcform_cmx_rgb2(true);
+	inp_cmx_arr.set('chc', rowCnt);
+	inp_cmx_arr.set('cha', cha);
+	inp_cmx_arr.set('hsl', hslMixEn);
+	calcform_cmx_dyna();
 }
 function calcform_cmx_onSave() {
 	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, textColor:_textColor, backColor:_backColor, hslEn:hslMixEn};
 	storage.saveSetting({ data: data });
 }
-function calcform_cmx_col2_use_col1(i) {
-	inp_cmx_arr[i].set('c2', rgb1h[i]);
-	calcform_cmx_rgb2(i);
+function calcform_cmx_col2_use_col1() {
+	inp_cmx_arr.set('c2', rgb1h);
+	calcform_cmx_rgb2();
 }
-function calcform_cmx_col1_invert(i,hslMode) {
+function calcform_cmx_col1_invert(hslMode) {
 	let invertedHex = undefined
 	if (hslMode) {
-		const invertedHsl = [hsl1[i][0], hsl1[i][1], 1-hsl1[i][2]]
+		const invertedHsl = [hsl1[0], hsl1[1], 1-hsl1[2]]
 		const invertedRgb = hslToRgb(invertedHsl)
 		invertedHex = rgbToColor(invertedRgb)
 	} else {
-		const rgb = hexToRgb(rgb1h[i])
+		const rgb = hexToRgb(rgb1h)
 		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
 		invertedHex = rgbToColor(invertedRgb)
 	}
-	inp_cmx_arr[i].set('c1', invertedHex);
-	calcform_cmx_rgb1(i);
+	inp_cmx_arr.set('c1', invertedHex);
+	calcform_cmx_rgb1();
 }
-function calcform_cmx_col2_invert(i,hslMode) {
+function calcform_cmx_col2_invert(hslMode) {
 	let invertedHex = undefined
 	if (hslMode) {
-		const invertedHsl = [hsl2[i][0], hsl2[i][1], 1-hsl2[i][2]]
+		const invertedHsl = [hsl2[0], hsl2[1], 1-hsl2[2]]
 		const invertedRgb = hslToRgb(invertedHsl)
 		invertedHex = rgbToColor(invertedRgb)
 	} else {
-		const rgb = hexToRgb(rgb2h[i])
+		const rgb = hexToRgb(rgb2h)
 		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
 		invertedHex = rgbToColor(invertedRgb)
 	}
-	inp_cmx_arr[i].set('c2', invertedHex);
-	calcform_cmx_rgb2(i);
+	inp_cmx_arr.set('c2', invertedHex);
+	calcform_cmx_rgb2();
 }
 function themeCare() {
 	const radios = document.querySelectorAll('input[name="theme"]');
@@ -351,20 +343,18 @@ function getContrastInfo(color1, color2) {
 document.addEventListener('DOMContentLoaded', function () {
 	themeCare();
 	calcform_cmx_init();
-	for (i = 0; i < colCnt; i++) {
-		calcform_cmx_doml(i);
-	}
+	calcform_cmx_doml();
 	// Buttons below Color 1
-	let element = document.getElementById('form-cmx0-a1-row')
+	let element = document.getElementById('form-cmx-a1-row')
 	let children = element.children;
 	let onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = `<button onclick="calcform_cmx_col1_invert(0,false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(0,true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col2_use_col1(0)"><img class="icon" src="icons/down-long-solid-full.svg"/>C2 use C1</button>`;
+	onlyChild.innerHTML = `<button onclick="calcform_cmx_col1_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col2_use_col1()"><img class="icon" src="icons/down-long-solid-full.svg"/>C2 use C1</button>`;
 
 	// Buttons below Color 2
-	element = document.getElementById('form-cmx0-a2-row')
+	element = document.getElementById('form-cmx-a2-row')
 	children = element.children;
 	onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(0,false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(0,true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
+	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
 
 	// Text contrast
 	const fieldset = document.querySelector("#textContrast");
@@ -381,12 +371,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			case 'color': color = document.getElementById('text_color').value;break;
 		}
 		console.log(color)
-		calcform_cmx_dyna(0, color, undefined)
+		calcform_cmx_dyna(color, undefined)
 	});
 	document.getElementById('text_color').addEventListener("change", (event) => {
-		let textColor = document.getElementById('text_color').value
+		let color = document.getElementById('text_color').value
 		document.querySelector('input[name="textContrast"][value="color"]').checked = true;
-		calcform_cmx_dyna(0, textColor, undefined)
+		calcform_cmx_dyna(color, undefined)
 	})
 
 	// Back contrast
@@ -404,11 +394,11 @@ document.addEventListener('DOMContentLoaded', function () {
 			case 'text_color': color = document.getElementById('back_color').value;break;
 		}
 		console.log(color)
-		calcform_cmx_dyna(0, undefined, color)
+		calcform_cmx_dyna(undefined, color)
 	});
 	document.getElementById('back_color').addEventListener("change", (event) => {
-		let textColor = document.getElementById('back_color').value
+		let color = document.getElementById('back_color').value
 		document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
-		calcform_cmx_dyna(0, undefined, textColor)
+		calcform_cmx_dyna(undefined, color)
 	})
 });

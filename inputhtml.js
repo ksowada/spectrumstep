@@ -15,7 +15,7 @@ function InputHtml(args) {
   for (var arg in args) {
     this[arg] = args[arg];
   }
-  this.callbackArgs = (this.callbackArgs === undefined) ? '{}' : this.callbackArgs;
+  this.callbackArgs = (this.callbackArgs === undefined) ? undefined : this.callbackArgs;
   this.storageEn = (this.storageEn === undefined) ? false : this.storageEn; // storage is default disabled
 
   /** init module and print out HTML  */
