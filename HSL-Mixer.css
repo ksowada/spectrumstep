@@ -97,6 +97,9 @@ table.inputs {
 		margin: 0px;
 		padding-right: 0.5rem; /* a little gap between cells */
 	}
+	td.empty {
+		text-align: left;
+	}
 }
 
 .form-control {
@@ -225,6 +228,7 @@ p ,li{
 	margin-bottom: 1rem;
 }
 
+/** hide label of buttonswitch per CSS */
 .status-btn .label {
 	display: none;
 }
@@ -232,3 +236,4 @@ p ,li{
 	max-width: none;
 	padding: 0;
 }
+

@@ -81,7 +81,7 @@ function InputHtml(args) {
             html += html_name + html_range + '<td></td><td></td>' + html_unit; 
             break;
           case 'empty':
-            html += '<td colspan="4"></td>'
+            html += '<td colspan="4" class="empty"></td>'
         }
       }
       html += '</tr>';

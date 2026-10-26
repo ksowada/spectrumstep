@@ -335,6 +335,18 @@ function calcform_cmx_onSave() {
 	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, textColor:_textColor, backColor:_backColor, gradientMode,colMode1,colMode2};
 	storage.saveSetting({ data: data });
 }
+function calcform_cmx_col1_shuffle() {
+	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
+	rgb1h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c1', rgb1h);
+	calcform_cmx_rgb1();
+}
+function calcform_cmx_col2_shuffle() {
+	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
+	rgb2h = rgbToColor(rgb_per);
+	inp_cmx_arr.set('c2', rgb2h);
+	calcform_cmx_rgb2();
+}
 function calcform_cmx_col2_use_col1() {
 	inp_cmx_arr.set('c2', rgb1h);
 	calcform_cmx_rgb2();
@@ -451,13 +463,13 @@ document.addEventListener('DOMContentLoaded', function () {
 	let element = document.getElementById('form-cmx-a1-row')
 	let children = element.children;
 	let onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = `<button onclick="calcform_cmx_col2_use_col1()"><img class="icon" src="icons/down-long-solid-full.svg"/>C2 use C1</button><button onclick="calcform_cmx_col1_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col1_use_col2()"><img class="icon" src="icons/up-long-solid-full.svg"/>C1 use C2</button>`;
+	onlyChild.innerHTML = `<button onclick="calcform_cmx_col1_shuffle()"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button><button onclick="calcform_cmx_col1_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col1_use_col2()"><img class="icon" src="icons/up-long-solid-full.svg"/>Copy</button><button onclick="calcform_cmx_col2_use_col1()"><img class="icon" src="icons/down-long-solid-full.svg"/>Copy</button>`;
 
 	// Buttons below Color 2
 	element = document.getElementById('form-cmx-a2-row')
 	children = element.children;
 	onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
+	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_shuffle()"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button><button onclick="calcform_cmx_col2_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
 
 	// gradient color mode
 	const fieldsetGradientMode = document.querySelector("#gradientMode");

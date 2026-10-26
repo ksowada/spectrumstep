@@ -36,6 +36,15 @@ function ratio(ratio, min, max) {
 function growth(val, pow) {
     return Math.pow(1.6180339887498948482045, pow) * val;
 }
+
+/**
+ * generates random number
+ * @param max exclusive maximum number
+ * @returns {number} integer range 0..max-1
+ */
+function randomInt(max) {
+  return Math.floor(Math.random() * max);
+}
 function getTextOfFloat(wert) {
   wert = String(wert);  // konvertiere nach String
   // wert = wert.replace(/[.]/,',');
@@ -337,7 +346,8 @@ function hexToRgb(hex) {
   var b = bigint & 255;
   return [r,g,b];
 }
-/** convert array of r,g,b into hexcolor  */
+/** convert array of r,g,b into hexcolor
+ * @param {number[]} args r,g,b given as integer from 0..255 */
 function rgbToColor(args) {
   var hexString = '';
   for (var i in args) {
