@@ -19,6 +19,7 @@ class ButtonSwitch {
 
         this.label = document.createElement('span');
         this.label.textContent = this.texte[this.index];
+        this.label.className = 'label';
 
         this.btn.append(this.icon, this.label);
         this.btn.addEventListener('click', () => this._next());
