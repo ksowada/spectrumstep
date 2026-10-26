@@ -186,6 +186,9 @@ table.inputs {
 	vertical-align: center;
 	padding: 0 0.3rem;
 }
+[data-theme="dark"] .icon {
+	filter: invert(1) brightness(0.9);
+}
 
 .wide {
 	padding-right: 0.8rem;

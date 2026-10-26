@@ -358,13 +358,13 @@ document.addEventListener('DOMContentLoaded', function () {
 	let element = document.getElementById('form-cmx0-a1-row')
 	let children = element.children;
 	let onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = '<button onclick="calcform_cmx_col1_invert(0,false)">RGB-Invert</button><button onclick="calcform_cmx_col1_invert(0,true)">HSL-Invert</button><button onclick="calcform_cmx_col2_use_col1(0)">C2 use C1</button>';
+	onlyChild.innerHTML = `<button onclick="calcform_cmx_col1_invert(0,false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(0,true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col2_use_col1(0)"><img class="icon" src="icons/down-long-solid-full.svg"/>C2 use C1</button>`;
 
 	// Buttons below Color 2
 	element = document.getElementById('form-cmx0-a2-row')
 	children = element.children;
 	onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(0,false)">RGB-Invert</button><button onclick="calcform_cmx_col2_invert(0,true)">HSL-Invert</button>';
+	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_invert(0,false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(0,true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
 
 	// Text contrast
 	const fieldset = document.querySelector("#textContrast");
