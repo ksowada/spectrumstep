@@ -70,6 +70,60 @@ function calcform_cmx_init() {
 			inp_cmx_arr[ix].set('c', rgbh[ix]);
 		}
 	}
+	// gradient color mode
+	const fieldsetGradientMode = document.querySelector("#gradientMode");
+	fieldsetGradientMode.addEventListener("change", (event) => {
+		// Ignoriert Änderungen am Farbfeld
+		if (event.target.type !== "radio") return;
+		const selected = fieldsetGradientMode.querySelector('input[type="radio"]:checked');
+		gradientMode = selected.value;
+		calcform_cmx_dyna();
+	})
+	// Text contrast
+	const fieldset = document.querySelector("#textContrast");
+	fieldset.addEventListener("change", (event) => {
+		// Ignoriert Änderungen am Farbfeld
+		if (event.target.type !== "radio") return;
+
+		const selected = fieldset.querySelector('input[type="radio"]:checked');
+		console.log(selected.value); // z. B. "light", "dark" oder "color"
+		let color
+		switch (selected.value) {
+			case 'light': color = '#ffffff'; break;
+			case 'dark': color = '#000000';break;
+			case 'color': color = document.getElementById('text_color').value;break;
+		}
+		console.log(color)
+		calcform_cmx_dyna(color, undefined)
+	});
+	document.getElementById('text_color').addEventListener("change", (event) => {
+		let color = document.getElementById('text_color').value
+		document.querySelector('input[name="textContrast"][value="color"]').checked = true;
+		calcform_cmx_dyna(color, undefined)
+	})
+
+	// Back contrast
+	const fieldsetBack = document.querySelector("#backContrast");
+	fieldsetBack.addEventListener("change", (event) => {
+		// Ignoriert Änderungen am Farbfeld
+		if (event.target.type !== "radio") return;
+
+		const selected = fieldsetBack.querySelector('input[type="radio"]:checked');
+		console.log(selected.value); // z. B. "light", "dark" oder "color"
+		let color
+		switch (selected.value) {
+			case 'text_light': color = '#ffffff'; break;
+			case 'text_dark': color = '#000000';break;
+			case 'text_color': color = document.getElementById('back_color').value;break;
+		}
+		console.log(color)
+		calcform_cmx_dyna(undefined, color)
+	});
+	document.getElementById('back_color').addEventListener("change", (event) => {
+		let color = document.getElementById('back_color').value
+		document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
+		calcform_cmx_dyna(undefined, color)
+	})
 }
 /** berechne HSL */
 function calcform_cmx_doml() {
@@ -315,59 +369,4 @@ document.addEventListener('DOMContentLoaded', function () {
 	calcform_cmx_init();
 	calcform_cmx_doml();
 	themeCare(); // need calcform_cmx_init before
-
-	// gradient color mode
-	const fieldsetGradientMode = document.querySelector("#gradientMode");
-	fieldsetGradientMode.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-		const selected = fieldsetGradientMode.querySelector('input[type="radio"]:checked');
-		gradientMode = selected.value;
-		calcform_cmx_dyna();
-	})
-	// Text contrast
-	const fieldset = document.querySelector("#textContrast");
-	fieldset.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-
-		const selected = fieldset.querySelector('input[type="radio"]:checked');
-		console.log(selected.value); // z. B. "light", "dark" oder "color"
-		let color
-		switch (selected.value) {
-			case 'light': color = '#ffffff'; break;
-			case 'dark': color = '#000000';break;
-			case 'color': color = document.getElementById('text_color').value;break;
-		}
-		console.log(color)
-		calcform_cmx_dyna(color, undefined)
-	});
-	document.getElementById('text_color').addEventListener("change", (event) => {
-		let color = document.getElementById('text_color').value
-		document.querySelector('input[name="textContrast"][value="color"]').checked = true;
-		calcform_cmx_dyna(color, undefined)
-	})
-
-	// Back contrast
-	const fieldsetBack = document.querySelector("#backContrast");
-	fieldsetBack.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-
-		const selected = fieldsetBack.querySelector('input[type="radio"]:checked');
-		console.log(selected.value); // z. B. "light", "dark" oder "color"
-		let color
-		switch (selected.value) {
-			case 'text_light': color = '#ffffff'; break;
-			case 'text_dark': color = '#000000';break;
-			case 'text_color': color = document.getElementById('back_color').value;break;
-		}
-		console.log(color)
-		calcform_cmx_dyna(undefined, color)
-	});
-	document.getElementById('back_color').addEventListener("change", (event) => {
-		let color = document.getElementById('back_color').value
-		document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
-		calcform_cmx_dyna(undefined, color)
-	})
 });
