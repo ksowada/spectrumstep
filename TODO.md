@@ -4,7 +4,16 @@
 - error: at load, cols get updated (only in RGB but not in HSL (test with S=0,L=0 => Hue is not remembered))
 - HSL-accuracy: 100 ticks for S, L is less, but it appears easy as percent is handy
 - HSL, HSV, RBG output at gradient: write values next to rgb-hexstring
-- C2 to C1 copy color up is missing; in front of inverts, so the inverts are aligned
+
+## code
+- var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
+
+## bug
+- calcform_cmx_dyna invoked multiple times
+- rgb=#000000 & #ffffff lead to loss of hue info at colModeSwitch, also at save&load
+
+## visu
+- input for numbers with fixed-width font
 
 ## simplify and generate room
 - light/dark theme in header

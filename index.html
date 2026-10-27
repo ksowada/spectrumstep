@@ -16,6 +16,7 @@
 	<link rel="stylesheet" type="text/css" href="water.css" />
 	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
 	<link rel="stylesheet" type="text/css" href="HSL-Mixer.css" />
+	<script type="text/javascript" src="rangesetting.js"></script>
 	<script type="text/javascript" src="buttonswitch.js"></script>
 	<script type="text/javascript" src="storage.js"></script>
 	<script type="text/javascript" src="inputhtml.js"></script>
@@ -81,8 +82,35 @@
 				<div class="col-cell">
 					<fieldset>
 						<legend>Colors</legend>
-						<div id="form-cmx"></div>
+						<div class="color-container">
+							<div class="color-selection">
+								<div id="form-cmx-0"></div>
+								<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+								<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+								<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+								<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
+							</div>
+							<div class="color-selection">
+								<div id="form-cmx-1"></div>
+								<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+								<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+								<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+								<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
+							</div>
+						</div>
 					</fieldset>
+					<div class="settings-container">
+						<div class="range-setting">
+							<label for="steps">Steps</label>
+							<input type="range" id="steps" name="steps" min="2" max="16" value="7">
+							<output for="steps" id="steps-value">7</output>
+						</div>
+						<div class="range-setting">
+							<label for="overdrive">Overdrive</label>
+							<input type="range" id="overdrive" name="overdrive" min="0" max="16" value="0">
+							<output for="overdrive" id="overdrive-value">0</output>
+						</div>
+					</div>
 					<fieldset class="flex" id="gradientMode">
 						<legend>color gradient in different color-spaces</legend>
 						<label class="wide">

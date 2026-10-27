@@ -1,31 +1,19 @@
 var hslInit = true; // hsl initialition possible
 // TODO need swap colors sometimes as action next to use c1
 var params_cmx = {
-	c1: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb1' },
-	h1: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
-	s1: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
-	l1: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl1', class:'colorrange'},
-	a1: { type: 'empty' },
-	c2: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb2' },
-	h2: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
-	s2: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
-	l2: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl2', class:'colorrange'},
-	a2: { type: 'empty' },
-	chc: { name: 'Steps', type: 'number', value: 4, min: 2, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
-	cha: { name: 'Overdrive', type: 'number', value: 0, min: 0, max: 16, step: 1, callbackName: 'calcform_cmx_dyna' },
+	c: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb' },
+	h: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+	s: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+	l: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 };
-var hslPreArr1 = [200, 60, 70];
-var hslPreArr2 = [140, 90, 70];
-var params_cmx_arr = undefined;
-var inp_cmx_arr = undefined;
-var rgb1 = [];
-var rgb2 = [];
-var rgb1h = '#8fbfef';
-var rgb2h = '#bf8fef';
-var hsl1 = [];
-var hsl2 = [];
-var rowCnt = undefined;
-var cha = undefined;
+const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
+var inp_cmx_arr = [];
+var rgb = [[], []]
+var rgbh = ['#8fbfef','#bf8fef'];
+var hslPreArr = [[200, 60, 70],[140, 90, 70]];
+var hsl = [[],[]];
+let steps = undefined;
+let overdrive = undefined;
 var _textColor = '#000000';
 var _backColor = undefined;
 const rangeMaxForMode = {
@@ -38,19 +26,11 @@ const factorForMode = {
 	HSL:[360,100,100],
 	HSV:[360,100,100],
 }
-const hslKeys1 = ['h1','s1','l1']
-const hslKeys2 = ['h2','s2','l2']
-var colMode1 = 'HSL'
-var colMode2 = 'HSL'
+const hslKeys = ['h','s','l']
+var colMode = ['HSL','HSL']
 const colModes = ['HSL', 'RGB', 'HSV']
 var gradientMode = 'HSL' // as in index.html
-var colMode1Switch = undefined;
-var colMode2Switch = undefined;
-
-params_cmx_arr = params_cmx;
-params_cmx_arr.c1.value = rgb1h;
-params_cmx_arr.c2.value = rgb2h;
-inp_cmx_arr = new InputHtml({ obj: 'inp_cmx_arr', params: params_cmx_arr, el: 'form-cmx', callbackName: 'calcform_cmx_doml', callAtInit: false, storageEn: true });
+var colModeSwitch = [undefined,undefined];
 
 var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 	inputLoadId:'load-input', btnLoadId:'load-btn',
@@ -61,54 +41,57 @@ var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 function calcform_cmx_init() {
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
-	inp_cmx_arr.init();
+
+	inp_cmx_ids.forEach((id,ix) => {
+		inp_cmx_arr[ix] = new InputHtml({ obj: `inp_cmx_arr[${ix}]`, params: params_cmx, el: id, callbackName: 'calcform_cmx_doml', callbackArgs:ix,callAtInit: false, storageEn: true });
+		inp_cmx_arr[ix].init();
+	})
+
+	steps = new RangeSetting('steps',calcform_cmx_dyna);
+	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna);
 
 	// replace text from c1 first cell through buttonswitch
-	let row = document.getElementById('form-cmx-c1-row');
-	let firstCell = row.cells[0];
-	firstCell.innerHTML = '';
-	colMode1Switch = new ButtonSwitch(firstCell, colModes, colorModeSelect1);
-	row = document.getElementById('form-cmx-c2-row');
-	firstCell = row.cells[0];
-	firstCell.innerHTML = '';
-	colMode2Switch = new ButtonSwitch(firstCell, colModes, colorModeSelect2);
-	if (hslInit) {
-		inp_cmx_arr.set('h1', hslPreArr1[0]);
-		inp_cmx_arr.set('s1', hslPreArr1[1]);
-		inp_cmx_arr.set('l1', hslPreArr1[2]);
-		inp_cmx_arr.set('h2', hslPreArr2[0]);
-		inp_cmx_arr.set('s2', hslPreArr2[1]);
-		inp_cmx_arr.set('l2', hslPreArr2[2]);
-	} else {
-		inp_cmx_arr.set('c1', rgb1h);
-		inp_cmx_arr.set('c2', rgb2h);
+	inp_cmx_ids.forEach((id,ix) => {
+		let row = document.getElementById(id+'-c-row');
+		let firstCell = row.cells[0];
+		firstCell.innerHTML = '';
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, ix, colorModeSelect);
+	})
+	for (let ix=0;ix<2;ix++) {
+		if (hslInit) {
+			inp_cmx_arr[ix].set('h', hslPreArr[ix][0]);
+			inp_cmx_arr[ix].set('s', hslPreArr[ix][1]);
+			inp_cmx_arr[ix].set('l', hslPreArr[ix][2]);
+		} else {
+			inp_cmx_arr[ix].set('c', rgbh[ix]);
+		}
 	}
 }
 /** berechne HSL */
 function calcform_cmx_doml() {
-	if (hslInit) {
-		calcform_cmx_hsl1(true);
-		calcform_cmx_hsl2(true);
-	} else {
-		calcform_cmx_rgb1(true);
-		calcform_cmx_rgb2(true);
+	for (let ix=0;ix<2;ix++) {
+		if (hslInit) {
+			calcform_cmx_hsl(ix,true);
+		} else {
+			calcform_cmx_rgb(ix,true);
+		}
 	}
 	calcform_cmx_dyna();
 }
 /** berechne HSL */
 /**
  * Unterlegt die drei Ranges (Komponente 1, 2, 3) farblich.
- * @param {number} nr     Nummer des Mischers
+ * @param {number} ix     Nummer des Mischers
  * @param {string} mode   'RGB' | 'HSL' | 'HSV'
  * @param {number} c1,c2,c3
  *   RGB: r,g,b  (0-255)
  *   HSL: h (0-360), s (0-100), l (0-100)
  *   HSV: h (0-360), s (0-100), v (0-100)
  */
-function calcform_cmx_range(nr, mode, c1, c2, c3) {
+function calcform_cmx_range(ix, mode, c1, c2, c3) {
 	// IDs der drei Ranges, ggf. an deine Benennung anpassen
 	const ids = ['h', 's', 'l'];
-	const el = i => document.getElementById(combineToId([inp_cmx_arr.el, ids[i] + nr, 'range']));
+	const el = i => document.getElementById(combineToId([inp_cmx_arr[ix].el, ids[i], 'range']));
 
 	const rgb = (r, g, b) => `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
 	const hsl = (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`;
@@ -147,102 +130,60 @@ function calcform_cmx_range(nr, mode, c1, c2, c3) {
 	el(1).style.background = g2;
 	el(2).style.background = g3;
 }
-function colorModeSelect1(mode) {
-	colMode1 = mode;
+function colorModeSelect(mode, index, buttonSwitch, ix) {
+	colMode[ix] = mode;
 	
 	// use RGB color as base
-	rgb1 = hexToRgb(inp_cmx_arr.get('c1'));
+	rgb[ix] = hexToRgb(inp_cmx_arr[ix].get('c'));
 
 	// manipulate range of H,S,L
-	const ids = ['form-cmx-h1-range','form-cmx-s1-range','form-cmx-l1-range']
-	ids.forEach((id,ix) => {
-		document.getElementById(id).max = rangeMaxForMode[colMode1][ix];
+	const ids = ['-h-range','-s-range','-l-range']
+	ids.forEach((id,i) => {
+		const newId = inp_cmx_ids[ix]+id;
+		document.getElementById(newId).max = rangeMaxForMode[colMode[ix]][i];
 	})
 	// manipulate row heads
-	const rowIds = ['form-cmx-h1-row','form-cmx-s1-row','form-cmx-l1-row']
-	rowIds.forEach((id,ix) => {
-		const row = document.getElementById(id);
+	const rowIds = ['-h-row','-s-row','-l-row']
+	rowIds.forEach((id,i) => {
+		const newId = inp_cmx_ids[ix]+id;
+		const row = document.getElementById(newId);
 		const firstCell = row.cells[0];
-		firstCell.innerHTML = colModes[colModes.indexOf(colMode1)].charAt(ix);
+		firstCell.innerHTML = colModes[colModes.indexOf(colMode[ix])].charAt(i);
 	})
-	calcform_cmx_rgb1();
+	calcform_cmx_rgb(ix);
 }
-function colorModeSelect2(mode) {
-	colMode2 = mode;
-
-	// use RGB color as base
-	rgb2 = hexToRgb(inp_cmx_arr.get('c2'));
-
-	// manipulate range of H,S,L
-	const ids = ['form-cmx-h2-range','form-cmx-s2-range','form-cmx-l2-range']
-	ids.forEach((id,ix) => {
-		document.getElementById(id).max = rangeMaxForMode[colMode2][ix];
-	})
-	// manipulate row heads
-	const rowIds = ['form-cmx-h2-row','form-cmx-s2-row','form-cmx-l2-row']
-	rowIds.forEach((id,ix) => {
-		const row = document.getElementById(id);
-		const firstCell = row.cells[0];
-		firstCell.innerHTML = colModes[colModes.indexOf(colMode2)].charAt(ix);
-	})
-	calcform_cmx_rgb2();
-}
-function calcform_cmx_rgb1(init) {
-	const c = inp_cmx_arr.get('c1');
-	rgb1 = hexToRgb(c);
-	hsl1 = colorConvertFromRgb(colMode1, rgb1)
+/** calculate HSL from RGB input */
+function calcform_cmx_rgb(ix,init) {
+	rgbh[ix] = inp_cmx_arr[ix].get('c');
+	rgb[ix] = hexToRgb(rgbh[ix]);
+	hsl[ix] = colorConvertFromRgb(colMode[ix], rgb[ix])
 	const hslLong = []
 	const hslLongRounded = []
-	factorForMode[colMode1].forEach((factor,ix) => {
-		hslLong[ix] = hsl1[ix] * factor;
-		hslLongRounded[ix] = Math.round(hslLong[ix]);
+	factorForMode[colMode[ix]].forEach((factor,i) => {
+		hslLong[i] = hsl[ix][i] * factor;
+		hslLongRounded[i] = Math.round(hslLong[i]);
 	})
-	calcform_cmx_range(1, colMode1,hslLongRounded[0], hslLongRounded[1], hslLongRounded[2])
-	hslKeys1.forEach((key,ix) => inp_cmx_arr.set(key, hslLong[ix]))
+	calcform_cmx_range(ix, colMode[ix],hslLongRounded[0], hslLongRounded[1], hslLongRounded[2])
+	hslKeys.forEach((key,i) => inp_cmx_arr[ix].set(key, hslLong[i]))
 	if (init == undefined) calcform_cmx_dyna();
 }
-/** berechne RGB von HSL */
-function calcform_cmx_rgb2(init) {
-	const c = inp_cmx_arr.get('c2');
-	rgb2 = hexToRgb(c);
-	hsl2 = colorConvertFromRgb(colMode2, rgb2)
+/** calculate RGB from HSL input */
+function calcform_cmx_hsl(ix,init) {
 	const hslLong = []
-	const hslLongRounded = []
-	factorForMode[colMode2].forEach((factor,ix) => {
-		hslLong[ix] = hsl2[ix] * factor;
-		hslLongRounded[ix] = Math.round(hslLong[ix]);
+	hslKeys.forEach((key,i) => {
+		hslLong[i] = inp_cmx_arr[ix].get(key)
+		hsl[ix][i] = hslLong[i] / factorForMode[colMode[ix]][i]
 	})
-	calcform_cmx_range(2, colMode2,hslLongRounded[0], hslLongRounded[1], hslLongRounded[2])
-	hslKeys2.forEach((key,ix) => inp_cmx_arr.set(key, hslLong[ix]))
-	if (init == undefined) calcform_cmx_dyna();
-}
-/** berechne RGB von HSL */
-function calcform_cmx_hsl1(init) {
-	const hslLong = []
-	hslKeys1.forEach((key,ix) => {
-		hslLong[ix] = inp_cmx_arr.get(key)
-		hsl1[ix] = hslLong[ix] / factorForMode[colMode1][ix]
-	})
-	calcform_cmx_range(1, colMode1, hslLong[0], hslLong[1], hslLong[2])
-	const rgb_per = colorConvertToRgb(colMode1, hsl1);
-	rgb1h = rgbToColor(rgb_per);
-	inp_cmx_arr.set('c1', rgb1h);
-	if (init == undefined) calcform_cmx_dyna();
-}
-function calcform_cmx_hsl2(init) {
-	const hslLong = []
-	hslKeys2.forEach((key,ix) => {
-		hslLong[ix] = inp_cmx_arr.get(key)
-		hsl2[ix] = hslLong[ix] / factorForMode[colMode2][ix]
-	})
-	calcform_cmx_range(2, colMode2, hslLong[0], hslLong[1], hslLong[2])
-	const rgb_per = colorConvertToRgb(colMode2, hsl2);
-	rgb2h = rgbToColor(rgb_per);
-	inp_cmx_arr.set('c2', rgb2h);
+	calcform_cmx_range(ix, colMode[ix], hslLong[0], hslLong[1], hslLong[2])
+	const rgb_per = colorConvertToRgb(colMode[ix], hsl[ix]);
+	rgbh[ix] = rgbToColor(rgb_per);
+	inp_cmx_arr[ix].set('c', rgbh[ix]);
 	if (init == undefined) calcform_cmx_dyna();
 }
 /** berechne Farbtabelle */
 function calcform_cmx_dyna(textColor, backColor) {
+	const rowCnt = steps.get()
+	const cha = overdrive.get()
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -251,14 +192,11 @@ function calcform_cmx_dyna(textColor, backColor) {
 		_textColor = undefined
 		_backColor = backColor
 	}
-	rowCnt = parseInt(inp_cmx_arr.get('chc'));
-	cha = parseInt(inp_cmx_arr.get('cha'));
-	// hslMixEn = inp_cmx_arr.get('hsl');
-	var colArr = getColors({ mode:gradientMode, len: rowCnt, c1: hsl1, c1Mode:colMode1, c2: hsl2,c2Mode:colMode2, overdrive: cha });
+	var colArr = getColors({ mode:gradientMode, len: rowCnt, c1: hsl[0], c1Mode:colMode[0], c2: hsl[1],c2Mode:colMode[1], overdrive: cha });
 
 	// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
-	colArr[cha] = inp_cmx_arr.get('c1');
-	colArr[cha + rowCnt - 1] = inp_cmx_arr.get('c2');
+	colArr[cha] = inp_cmx_arr[0].get('c');
+	colArr[cha + rowCnt - 1] = inp_cmx_arr[1].get('c');
 
 	var html = ''
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
@@ -288,11 +226,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 function calcform_cmx_onLoad() {
 	var data = storage.loadSetting();
 	if (data === null) return;
-	rgb1h = data.rgb1h;
-	rgb2h = data.rgb2h;
-	rowCnt = data.rowCnt;
-	cha = data.cha;
-	hslMixEn = data.hslEn
+	rgbh = data.rgbh;
 	if (data.textColor) {
 		_textColor = data.textColor
 		_backColor = undefined
@@ -317,71 +251,45 @@ function calcform_cmx_onLoad() {
 			document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
 		}
 	}
-	inp_cmx_arr.set('c1', rgb1h);
-	inp_cmx_arr.set('c2', rgb2h);
-	calcform_cmx_rgb1(true);
-	calcform_cmx_rgb2(true);
-	inp_cmx_arr.set('chc', rowCnt);
-	inp_cmx_arr.set('cha', cha);
+	colMode = data.colMode
+	for (let ix=0;ix<2;ix++) {
+		inp_cmx_arr[ix].set('c', rgbh[ix]);
+		calcform_cmx_rgb(ix,true);
+		colModeSwitch[ix].setValue(colMode[ix], true)
+	}
+	steps.set(data.steps)
+	overdrive.set(data.overdrive)
 	gradientMode = data.gradientMode
 	document.querySelector(`input[name="gradientMode"][value="${gradientMode}"]`).checked = true;
-	colMode1 = data.colMode1
-	colMode2Switch.setValue(colMode2, true)
-	colMode2 = data.colMode2
-	colMode1Switch.setValue(colMode1, true)
 	calcform_cmx_dyna();
 }
 function calcform_cmx_onSave() {
-	var data = { rgb1h: rgb1h, rgb2h: rgb2h, rowCnt: rowCnt, cha: cha, textColor:_textColor, backColor:_backColor, gradientMode,colMode1,colMode2};
+	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode,colMode};
 	storage.saveSetting({ data: data });
 }
-function calcform_cmx_col1_shuffle() {
+function calcform_cmx_col_shuffle(ix) {
 	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
-	rgb1h = rgbToColor(rgb_per);
-	inp_cmx_arr.set('c1', rgb1h);
-	calcform_cmx_rgb1();
+	rgbh[ix] = rgbToColor(rgb_per);
+	inp_cmx_arr[ix].set('c', rgbh[ix]);
+	calcform_cmx_rgb(ix);
 }
-function calcform_cmx_col2_shuffle() {
-	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
-	rgb2h = rgbToColor(rgb_per);
-	inp_cmx_arr.set('c2', rgb2h);
-	calcform_cmx_rgb2();
+function calcform_cmx_use_col(ix) {
+	inp_cmx_arr[1-ix].set('c', rgbh[ix]);
+	calcform_cmx_rgb(1-ix);
 }
-function calcform_cmx_col2_use_col1() {
-	inp_cmx_arr.set('c2', rgb1h);
-	calcform_cmx_rgb2();
-}
-function calcform_cmx_col1_use_col2() {
-	inp_cmx_arr.set('c1', rgb2h);
-	calcform_cmx_rgb1();
-}
-function calcform_cmx_col1_invert(hslMode) {
+function calcform_cmx_col_invert(ix,hslMode) {
 	let invertedHex = undefined
 	if (hslMode) {
-		const invertedHsl = [hsl1[0], hsl1[1], 1-hsl1[2]]
+		const invertedHsl = [hsl[ix][0], hsl[ix][1], 1-hsl[ix][2]]
 		const invertedRgb = hslToRgb(invertedHsl)
 		invertedHex = rgbToColor(invertedRgb)
 	} else {
-		const rgb = hexToRgb(rgb1h)
+		const rgb = hexToRgb(rgbh[ix])
 		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
 		invertedHex = rgbToColor(invertedRgb)
 	}
-	inp_cmx_arr.set('c1', invertedHex);
-	calcform_cmx_rgb1();
-}
-function calcform_cmx_col2_invert(hslMode) {
-	let invertedHex = undefined
-	if (hslMode) {
-		const invertedHsl = [hsl2[0], hsl2[1], 1-hsl2[2]]
-		const invertedRgb = hslToRgb(invertedHsl)
-		invertedHex = rgbToColor(invertedRgb)
-	} else {
-		const rgb = hexToRgb(rgb2h)
-		const invertedRgb = [255-rgb[0],255-rgb[1],255-rgb[2]] 
-		invertedHex = rgbToColor(invertedRgb)
-	}
-	inp_cmx_arr.set('c2', invertedHex);
-	calcform_cmx_rgb2();
+	inp_cmx_arr[ix].set('c', invertedHex);
+	calcform_cmx_rgb(ix);
 }
 function themeCare() {
 	const radios = document.querySelectorAll('input[name="theme"]');
@@ -459,17 +367,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	themeCare();
 	calcform_cmx_init();
 	calcform_cmx_doml();
-	// Buttons below Color 1
-	let element = document.getElementById('form-cmx-a1-row')
-	let children = element.children;
-	let onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = `<button onclick="calcform_cmx_col1_shuffle()"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button><button onclick="calcform_cmx_col1_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col1_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button><button onclick="calcform_cmx_col1_use_col2()"><img class="icon" src="icons/up-long-solid-full.svg"/>Copy</button><button onclick="calcform_cmx_col2_use_col1()"><img class="icon" src="icons/down-long-solid-full.svg"/>Copy</button>`;
-
-	// Buttons below Color 2
-	element = document.getElementById('form-cmx-a2-row')
-	children = element.children;
-	onlyChild = children.length === 1 ? children[0] : null;
-	onlyChild.innerHTML = '<button onclick="calcform_cmx_col2_shuffle()"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button><button onclick="calcform_cmx_col2_invert(false)"><img class="icon" src="icons/lightbulb-solid-full.svg"/>RGB-Invert</button><button onclick="calcform_cmx_col2_invert(true)"><img class="icon" src="icons/lightbulb-regular-full.svg"/>HSL-Invert</button>';
 
 	// gradient color mode
 	const fieldsetGradientMode = document.querySelector("#gradientMode");

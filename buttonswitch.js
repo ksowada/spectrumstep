@@ -1,8 +1,9 @@
 class ButtonSwitch {
-    constructor(cell, texte, onChange) {
+    constructor(cell, texte, onChangeArg, onChange) {
         this.cell = cell;
         this.texte = texte;
         this.onChange = onChange;
+        this.onChangeArg = onChangeArg;
         this.index = 0;
         this._build();
     }
@@ -33,7 +34,7 @@ class ButtonSwitch {
 
         // Callback in die plain-Welt
         if (typeof this.onChange === 'function') {
-            this.onChange(this.texte[this.index], this.index, this);
+            this.onChange(this.texte[this.index], this.index, this, this.onChangeArg);
         }
     }
 
@@ -52,7 +53,7 @@ class ButtonSwitch {
         this.index = idx;
         this.label.textContent = this.texte[this.index];
         if (!silent && typeof this.onChange === 'function') {
-            this.onChange(this.texte[this.index], this.index, this);
+            this.onChange(this.texte[this.index], this.index, this, this.onChangeArg);
         }
         return true;
     }
