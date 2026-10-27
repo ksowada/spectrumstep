@@ -2,9 +2,9 @@ var hslInit = true; // hsl initialition possible
 // TODO need swap colors sometimes as action next to use c1
 var params_cmx = {
 	c: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb' },
-	h: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
-	s: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
-	l: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+	h: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+	s: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+	l: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, round: 0, callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 };
 const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
 var inp_cmx_arr = [];
@@ -59,7 +59,7 @@ function calcform_cmx_init() {
 		let row = document.getElementById(id+'-c-row');
 		let firstCell = row.cells[0];
 		firstCell.innerHTML = '';
-		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, colorModeSelect);
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace);
 	})
 	for (let ix=0;ix<2;ix++) {
 		if (hslInit) {
@@ -133,6 +133,7 @@ function calcform_cmx_doml() {
 		} else {
 			calcform_cmx_rgb(ix,true);
 		}
+		calcform_cmx_colorspace(colMode[ix],undefined,undefined,ix,true);
 	}
 	calcform_cmx_dyna();
 }
@@ -188,7 +189,7 @@ function calcform_cmx_range(ix, mode, c1, c2, c3) {
 	el(1).style.background = g2;
 	el(2).style.background = g3;
 }
-function colorModeSelect(mode, index, buttonSwitch, ix) {
+function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 	colMode[ix] = mode;
 	
 	// use RGB color as base
@@ -199,6 +200,7 @@ function colorModeSelect(mode, index, buttonSwitch, ix) {
 	ids.forEach((id,i) => {
 		const newId = inp_cmx_ids[ix]+id;
 		document.getElementById(newId).max = rangeMaxForMode[colMode[ix]][i];
+		params_cmx[hslKeys[i]].max = rangeMaxForMode[colMode[ix]][i];
 	})
 	// manipulate row heads
 	const rowIds = ['-h-row','-s-row','-l-row']
@@ -208,7 +210,7 @@ function colorModeSelect(mode, index, buttonSwitch, ix) {
 		const firstCell = row.cells[0];
 		firstCell.innerHTML = colModes[colModes.indexOf(colMode[ix])].charAt(i);
 	})
-	calcform_cmx_rgb(ix);
+	if (!init) calcform_cmx_rgb(ix);
 }
 /** calculate HSL from RGB input */
 function calcform_cmx_rgb(ix,init) {
