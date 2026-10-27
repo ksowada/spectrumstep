@@ -51,33 +51,26 @@
 	<header>
 		<a href="https://ardoid.eu/">ardoid.eu</a>
 		<div class="title">SpectrumStep - Color Mixer</div>
+		<div id="theme-select"></div>
 	</header>
 	<div class="container">
 		<div class="middle" id="middle">
-			<fieldset>
-				<legend>Color scheme</legend>
-				<label class="wide">
-					<input type="radio" name="theme" value="light">
-					<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />Light
-				</label>
-				<label class="wide">
-					<input type="radio" name="theme" value="dark">
-					<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Dark
-				</label>
-			</fieldset>
-			<fieldset>
-				<legend>Store</legend>
-				<div class="flex">
+			<details>
+				<summary>User Store to load and save palettes</summary>
+				<fieldset>
+					<legend>Store</legend>
 					<div class="flex">
-						<select id="load-input" class="narrow"></select>
-						<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
+						<div class="flex">
+							<select id="load-input" class="narrow"></select>
+							<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
+						</div>
+						<div class="flex">
+							<input id="save-input" class="narrow" />
+							<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
+						</div>
 					</div>
-					<div class="flex">
-						<input id="save-input" class="narrow" />
-						<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
-					</div>
-				</div>
-			</fieldset>
+				</fieldset>
+			</details>
 			<div class="col-container">
 				<div class="col-cell">
 					<fieldset>

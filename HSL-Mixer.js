@@ -31,14 +31,18 @@ var colMode = ['HSL','HSL']
 const colModes = ['HSL', 'RGB', 'HSV']
 var gradientMode = 'HSL' // as in index.html
 var colModeSwitch = [undefined,undefined];
-
 var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 	inputLoadId:'load-input', btnLoadId:'load-btn',
 	inputSaveId:'save-input', btnSaveId:'save-btn'
 });
-
+const themeModes = ['light','dark']
+var themeSwitch = undefined;
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
+	themeSwitch = new ButtonSwitch(
+		document.getElementById('theme-select'),
+		themeModes, ['icons/sun-solid-full.svg','icons/moon-solid-full.svg'],undefined, themeCare);
+
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
 
@@ -55,7 +59,7 @@ function calcform_cmx_init() {
 		let row = document.getElementById(id+'-c-row');
 		let firstCell = row.cells[0];
 		firstCell.innerHTML = '';
-		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, ix, colorModeSelect);
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, colorModeSelect);
 	})
 	for (let ix=0;ix<2;ix++) {
 		if (hslInit) {
@@ -261,10 +265,11 @@ function calcform_cmx_onLoad() {
 	overdrive.set(data.overdrive)
 	gradientMode = data.gradientMode
 	document.querySelector(`input[name="gradientMode"][value="${gradientMode}"]`).checked = true;
+	themeCare(data.theme);
 	calcform_cmx_dyna();
 }
 function calcform_cmx_onSave() {
-	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode,colMode};
+	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode,colMode, theme:themeSwitch.value};
 	storage.saveSetting({ data: data });
 }
 function calcform_cmx_col_shuffle(ix) {
@@ -291,29 +296,19 @@ function calcform_cmx_col_invert(ix,hslMode) {
 	inp_cmx_arr[ix].set('c', invertedHex);
 	calcform_cmx_rgb(ix);
 }
-function themeCare() {
-	const radios = document.querySelectorAll('input[name="theme"]');
+function themeCare(text, ix) {
+	// determine mode from ix, if undefined parameterTheme gets undefined
+	const parameterTheme = text ? text : themeModes[ix]
 	const savedTheme = localStorage.getItem("theme");
 	const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
 		? "dark"
 		: "light";
-
 	function applyTheme(theme) {
 		document.documentElement.dataset.theme = theme;
 		localStorage.setItem("theme", theme);
-
-		for (const radio of radios) {
-			radio.checked = radio.value === theme;
-		}
+		themeSwitch.setValue(theme, true)
 	}
-
-	applyTheme(savedTheme || systemTheme);
-
-	for (const radio of radios) {
-		radio.addEventListener("change", () => {
-			if (radio.checked) applyTheme(radio.value);
-		});
-	}
+	applyTheme(parameterTheme || savedTheme || systemTheme);
 }
 
 function relativeLuminance([r, g, b]) {
@@ -364,9 +359,9 @@ function getContrastInfo(color1, color2) {
 // console.log(result.largeTextAAA);   // true/false
 
 document.addEventListener('DOMContentLoaded', function () {
-	themeCare();
 	calcform_cmx_init();
 	calcform_cmx_doml();
+	themeCare(); // need calcform_cmx_init before
 
 	// gradient color mode
 	const fieldsetGradientMode = document.querySelector("#gradientMode");

@@ -16,11 +16,8 @@
 - input for numbers with fixed-width font
 
 ## simplify and generate room
-- light/dark theme in header
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
-- HSL/HSV/RGB-gradient eliminate radio buttons and use single-selction-buttons
-- Steps & Overdrive without text input next to each other, for mobile with flex-wrap 
-- split C1 and C2 to 2 equal InputVars, flex-wrap horizontally
+- HSL/HSV/RGB-gradient eliminate radio buttons and use single-selection-buttons
 
 ## ChatGPT
 - HEX-Werte direkt anklickbar machen - Schnelleres Arbeiten
