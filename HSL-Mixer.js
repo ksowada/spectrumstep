@@ -311,53 +311,6 @@ function themeCare(text, ix) {
 	applyTheme(parameterTheme || savedTheme || systemTheme);
 }
 
-function relativeLuminance([r, g, b]) {
-  const linearize = (value) => {
-    const channel = value / 255;
-
-    return channel <= 0.04045
-      ? channel / 12.92
-      : ((channel + 0.055) / 1.055) ** 2.4;
-  };
-
-  const R = linearize(r);
-  const G = linearize(g);
-  const B = linearize(b);
-
-  return 0.2126 * R + 0.7152 * G + 0.0722 * B;
-}
-
-function getContrastInfo(color1, color2) {
-  const L1 = relativeLuminance(color1);
-  const L2 = relativeLuminance(color2);
-
-  const lighter = Math.max(L1, L2);
-  const darker = Math.min(L1, L2);
-
-  const ratio = (lighter + 0.05) / (darker + 0.05);
-
-  return {
-    ratio,
-    ratioText: `${ratio.toFixed(2)}:1`,
-    normalTextAA: ratio >= 4.5,
-    normalTextAAA: ratio >= 7,
-    largeTextAA: ratio >= 3,
-    largeTextAAA: ratio >= 4.5,
-  };
-}
-
-// // Beispiel: weißer Text auf blauem Hintergrund
-// const foreground = [255, 255, 255];
-// const background = [40, 80, 120];
-
-// const result = getContrastInfo(foreground, background);
-
-// console.log(result.ratioText);      // z. B. "5.12:1"
-// console.log(result.normalTextAA);   // true/false
-// console.log(result.largeTextAA);    // true/false
-// console.log(result.normalTextAAA);  // true/false
-// console.log(result.largeTextAAA);   // true/false
-
 document.addEventListener('DOMContentLoaded', function () {
 	calcform_cmx_init();
 	calcform_cmx_doml();
