@@ -61,20 +61,24 @@
 					<legend>Color 1</legend>
 					<div>
 						<div id="form-cmx-0"></div>
-						<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-						<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-						<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-						<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
+						<div class="button-container">
+							<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
+						</div>
 					</div>
 				</fieldset>
 				<fieldset class="color-selection">
 					<legend>Color 2</legend>
 					<div>
 						<div id="form-cmx-1"></div>
-						<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-						<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-						<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-						<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
+						<div class="button-container">
+							<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
+						</div>
 					</div>
 				</fieldset>
 			</div>
@@ -154,15 +158,16 @@
 				<div class="guide-content">
 					<p>HSL stands for Hue, Saturation, and Lightness and is often also called HLS. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white. HSV stands for hue, saturation, and value, and is also often called HSB. See  <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">wikipedia: HSL and HSV</a></p>
 					<ul>
-						<li><strong>C1 and C2:</strong> Enter HEX or decimal RGB, HSL or HSV values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
+						<li><strong>C1 and C2:</strong> Enter HEX or decimal RGB, HSL or HSV single values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
 						<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient. Generate smooth color gradients between 2 colors with a configurable number of steps to create custom color palettes and smooth color transitions.</li>
 						<li><strong>RGB,HSL or HSV:</strong> Select the color space used for interpolation between the two colors.</li>
-						<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions. Might be good to swap colors between dark and light background.</li>
+						<li><strong>HSL inversion:</strong> Reverse lightness. Might be good to swap colors between dark and light background.</li>
+						<li><strong>RGB inversion:</strong> Invert Color.</li>
 						<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
 						<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
 						<li><strong>Back contrast:</strong> Alternatively you make a gradient of text-color and you may choose the static background-color for the whole gradient.</li>
 						<li><strong>Gradient output:</strong> Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</li>
-						<li><strong>Gradient direction:</strong> Choose direction of linear gradient</li>
+						<li><strong>Gradient direction:</strong> Choose direction of linear gradient in all 4 direction</li>
 						<li><strong>Contrast ratio:</strong> The tool displays the contrast ratio for each color, helping you explore readable text and background combinations.</li>
 						<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
 						<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>

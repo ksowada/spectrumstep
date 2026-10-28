@@ -53,8 +53,8 @@ function InputHtml(args) {
             break;
           case 'color':
             param.value = rgbCorrect(param.value);
-            html_range = '<td class="form-value"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '" onchange="'+html_oninput+',true)"/></td>';
-            html += html_name + html_range + '<td class="form-value"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" onchange="'+html_oninput+',false)"/></td>' + html_unit;
+            html_range = '<td class="form-value color"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '" onchange="'+html_oninput+',true)"/></td>';
+            html += html_name + html_range + '<td class="form-value color"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" onchange="'+html_oninput+',false)"/></td>' + html_unit;
             break;
           case 'button':
           case 'popup':

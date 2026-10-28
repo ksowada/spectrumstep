@@ -8,6 +8,7 @@
 - light/dark theme in header
 - random color button
 - expands 3-digit hex colors
+- gradientDirection in all 4 direction
 
 ## UI
 - icon: make icons light in dark theme
