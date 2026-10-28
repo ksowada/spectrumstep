@@ -300,8 +300,24 @@ table.inputs {
 .color-step span {
 	margin: 0;
 	padding: 0;
-	line-height: 1.2;
+	line-height: 1.25;
 	font-family: var(--font-monospace);
+}
+.wcag-badge {
+	display: inline-block;
+	font-size: 0.72rem;
+	font-weight: bold;
+	padding: 1px 4px;
+	border-radius: 3px;
+	border: 1px solid currentColor;
+	margin-top: 3px;
+	line-height: 1.1;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
+}
+.wcag-badge.fail {
+	opacity: 0.65;
+	border-style: dashed;
 }
 .color-palette .color-step {
 	padding: 0;

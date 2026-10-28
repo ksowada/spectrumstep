@@ -10,6 +10,7 @@
 - expands 3-digit hex colors
 - gradientDirection in all 4 direction
 - enhanced accuracy for HSV and HSL mode, no loss of RGB value
+- each color in gradient holds contrast info including WCAG AA / AAA badges (Pass/Fail)
 
 ## UI
 - icon: make icons light in dark theme

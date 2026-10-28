@@ -587,9 +587,30 @@ function getContrastInfo(color1, color2) {
 
   const ratio = (lighter + 0.05) / (darker + 0.05);
 
+  let badge = '✕ Fail';
+  let badgeClass = 'fail';
+  let badgeTitle = 'Fails WCAG (< 3:1)';
+
+  if (ratio >= 7) {
+    badge = '✓ AAA';
+    badgeClass = 'pass aaa';
+    badgeTitle = 'Passes WCAG AAA (Enhanced contrast >= 7:1)';
+  } else if (ratio >= 4.5) {
+    badge = '✓ AA';
+    badgeClass = 'pass aa';
+    badgeTitle = 'Passes WCAG AA (Normal text >= 4.5:1)';
+  } else if (ratio >= 3) {
+    badge = '✓ AA+';
+    badgeClass = 'pass large';
+    badgeTitle = 'Passes WCAG AA for Large text only (>= 3:1)';
+  }
+
   return {
     ratio,
     ratioText: `${ratio.toFixed(2)}:1`,
+    badge,
+    badgeClass,
+    badgeTitle,
     normalTextAA: ratio >= 4.5,
     normalTextAAA: ratio >= 7,
     largeTextAA: ratio >= 3,

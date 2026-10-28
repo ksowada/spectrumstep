@@ -265,8 +265,9 @@ function calcform_cmx_dyna(textColor, backColor) {
 		const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
 		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
 		const contrastInfo = getContrastInfo(textRgb, backRgb)
-		if (_backColor==undefined) html += '<div class="color-step" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'</span></div>';
-		if (_textColor==undefined) html += '<div class="color-step" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'</span></div>';
+		const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" title="' + contrastInfo.badgeTitle + '">' + contrastInfo.badge + '</span>';
+		if (_backColor==undefined) html += '<div class="color-step" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
+		if (_textColor==undefined) html += '<div class="color-step" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
 	}
 	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
