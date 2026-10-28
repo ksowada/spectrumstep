@@ -1,4 +1,4 @@
-var hslInit = true; // hsl initialition possible
+var hslInit = false; // hsl initialition possible
 // TODO need swap colors sometimes as action next to use c1
 var params_cmx = {
 	c: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb' },
@@ -9,7 +9,7 @@ var params_cmx = {
 const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
 var inp_cmx_arr = [];
 var rgb = [[], []]
-var rgbh = ['#8fbfef','#bf8fef'];
+var rgbh = ['#3388ee','#ee22aa'];
 var hslPreArr = [[200, 60, 70],[140, 90, 70]];
 var hsl = [[],[]];
 let steps = undefined;
@@ -39,6 +39,7 @@ const themeModes = ['light','dark']
 var themeSwitch = undefined;
 var textColorSelect = undefined;
 var backColorSelect = undefined;
+var gradientDirectionSwitch = undefined;
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
@@ -64,6 +65,9 @@ function calcform_cmx_init() {
 	gradientSwitch = new ButtonSwitch(
 		document.getElementById('gradient-select'),
 		colModes, 'icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna());
+	gradientDirectionSwitch = new ButtonSwitch(
+		document.getElementById('gradientDirection'),
+		['horizontal','vertical'], ['icons/arrows-left-right-solid-full.svg','icons/arrows-up-down-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
 	textColorSelect = new ButtonSelect(
 		document.getElementById('textContrast'),
 		(id, el, instance) => {
@@ -221,6 +225,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const rowCnt = steps.get()
 	const cha = overdrive.get()
 	const gradientMode = gradientSwitch.value;
+	const gradientDirection = gradientDirectionSwitch.value;
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -235,23 +240,24 @@ function calcform_cmx_dyna(textColor, backColor) {
 	colArr[cha] = inp_cmx_arr[0].get('c');
 	colArr[cha + rowCnt - 1] = inp_cmx_arr[1].get('c');
 
-	var html = ''
+	var html = `<div class="color-palette-${gradientDirection}">`
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
 		const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
 		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
 		const contrastInfo = getContrastInfo(textRgb, backRgb)
-		if (_backColor==undefined) html += '<div class="gradient" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
-		if (_textColor==undefined) html += '<div class="gradient" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'">' + colArr[rowIx] + ' | Contrast ratio:'+contrastInfo.ratioText+'</div>';
+		if (_backColor==undefined) html += '<div class="color-step" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'</span></div>';
+		if (_textColor==undefined) html += '<div class="color-step" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'</span></div>';
 	}
-
+	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
 
 	// build CSS linear gradient
+	const rotation = { horizontal: '90deg', vertical: '180deg' }[gradientDirection];
 	let gradientText = ''
 	if (gradientMode!=='RGB') {
-		gradientText += 'linear-gradient(180deg in hsl shorter hue,'
+		gradientText += `linear-gradient(${rotation} in hsl shorter hue,`
 	} else {
-		gradientText += 'linear-gradient(180deg,'
+		gradientText += `linear-gradient(${rotation},`
 	}
 	gradientText += colArr[0] + ','
 	gradientText += colArr[colArr.length - 1] + ')'
@@ -268,24 +274,22 @@ function calcform_cmx_onLoad() {
 		_textColor = data.textColor
 		_backColor = undefined
 		if (_textColor==='#ffffff') {
-			document.querySelector('input[name="textContrast"][value="light"]').checked = true;
+			textColorSelect.setValue('textContrast-white')
 		} else if (_textColor==='#000000') {
-			document.querySelector('input[name="textContrast"][value="dark"]').checked = true;
+			textColorSelect.setValue('textContrast-black')
 		} else {
-			document.getElementById('text_color').value = _textColor
-			document.querySelector('input[name="textContrast"][value="color"]').checked = true;
+			textColorSelect.setValue('textContrast-label')
 		}
 	}
 	if (data.backColor) {
 		_textColor = undefined
 		_backColor = data.backColor
 		if (_backColor==='#ffffff') {
-			document.querySelector('input[name="textContrast"][value="text_light"]').checked = true;
+			backColorSelect.setValue('backContrast-white')
 		} else if (_backColor==='#000000') {
-			document.querySelector('input[name="textContrast"][value="text_dark"]').checked = true;
+			backColorSelect.setValue('backContrast-white')
 		} else {
-			document.getElementById('back_color').value = _backColor
-			document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
+			backColorSelect.setValue('backContrast-color')
 		}
 	}
 	colMode = data.colMode
@@ -297,11 +301,12 @@ function calcform_cmx_onLoad() {
 	steps.set(data.steps)
 	overdrive.set(data.overdrive)
 	gradientSwitch.setValue(data.gradient)
+	gradientDirectionSwitch.setValue(data.gradientDirection)
 	themeCare(data.theme);
 	calcform_cmx_dyna();
 }
 function calcform_cmx_onSave() {
-	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode:gradientSwitch.value,colMode, theme:themeSwitch.value};
+	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode:gradientSwitch.value,colMode, theme:themeSwitch.value,gradientDirection:gradientDirectionSwitch.value};
 	storage.saveSetting({ data: data });
 }
 function calcform_cmx_col_shuffle(ix) {

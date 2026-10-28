@@ -2,7 +2,6 @@
 :root {
 	color-scheme: light dark;
 }
-
 /* Manuell Hell */
 :root[data-theme="light"] {
 	color-scheme: light;
@@ -28,7 +27,6 @@
 	--highlight: #ff0;
 	--select-arrow: url("data:image/svg+xml;charset=utf-8,%3C?xml version='1.0' encoding='utf-8'?%3E %3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='62.5' width='116.9' fill='%23161f27'%3E %3Cpath d='M115.3,1.6 C113.7,0 111.1,0 109.5,1.6 L58.5,52.7 L7.4,1.6 C5.8,0 3.2,0 1.6,1.6 C0,3.2 0,5.8 1.6,7.4 L55.5,61.3 C56.3,62.1 57.3,62.5 58.4,62.5 C59.4,62.5 60.5,62.1 61.3,61.3 L115.2,7.4 C116.9,5.8 116.9,3.2 115.3,1.6Z'/%3E %3C/svg%3E");
 }
-
 /* Manuell Dunkel */
 :root[data-theme="dark"] {
 	color-scheme: dark;
@@ -54,18 +52,15 @@
 	--highlight: #efdb43;
 	--select-arrow: url("data:image/svg+xml;charset=utf-8,%3C?xml version='1.0' encoding='utf-8'?%3E %3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='62.5' width='116.9' fill='%23efefef'%3E %3Cpath d='M115.3,1.6 C113.7,0 111.1,0 109.5,1.6 L58.5,52.7 L7.4,1.6 C5.8,0 3.2,0 1.6,1.6 C0,3.2 0,5.8 1.6,7.4 L55.5,61.3 C56.3,62.1 57.3,62.5 58.4,62.5 C59.4,62.5 60.5,62.1 61.3,61.3 L115.2,7.4 C116.9,5.8 116.9,3.2 115.3,1.6Z'/%3E %3C/svg%3E");
 }
-
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 	font-family: "Ubuntu", system-ui, sans-serif;
 }
-
 body {
 	max-width: 1280px;
 }
-
 header {
 	display: flex;
 	justify-content: space-between;
@@ -73,19 +68,15 @@ header {
 	margin-bottom: 1rem;
 	align-items: center;
 }
-
 body tr:nth-child(2n) {
 	background-color: transparent; /* overwrite water.css */
 }
-
 input[type="color"] {
 	padding: 0; /* fill color picking area full with color */
 }
-
 input[type="range"] {
 	margin: 0px 0; /* overwrite water margin for less in-between-space */
 }
-
 p ,li{
 	margin-bottom: 1rem;
 }
@@ -93,18 +84,31 @@ button {
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
 }
+/* Überschreibe die Standardeinstellungen von Water.css */
+fieldset {
+	color: #aaa;
+	border-color: #555;
+	padding: 5px 5px;
+	margin-bottom: 8px;
+	padding-bottom: 0px;
+	padding-top: 5px;
+}
+legend {
+	width: auto;           /* Verhindert, dass es die volle Breite einnimmt */
+	margin-left: auto;     /* Zentriert nach links */
+	margin-right: auto;    /* Zentriert nach rechts */
+	text-align: center;    /* Stellt sicher, dass der Text bei mehrzeiligen Legenden zentriert bleibt */
+}
 .color-container {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1rem;
 }
-
 .color-selection {
 	flex: 1 1 calc(50% - 0.5rem);
 	min-width: 0;
 	box-sizing: border-box;
 }
-
 @media (max-width: 600px) {
 	.color-selection {
 		flex-basis: 100%;
@@ -137,11 +141,9 @@ table.inputs {
 		text-align: left;
 	}
 }
-
 .form-control {
 	width: 100%;
 }
-
 .modal {
 	position: fixed;
 	left: 0;
@@ -154,7 +156,6 @@ table.inputs {
 	transform: scale(1.1);
 	transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
 }
-
 .modal-content {
 	position: absolute;
 	top: 50%;
@@ -165,7 +166,6 @@ table.inputs {
 	width: 24rem;
 	border-radius: 0.5rem;
 }
-
 .close-button {
 	float: right;
 	width: 1.5rem;
@@ -175,18 +175,15 @@ table.inputs {
 	border-radius: 0.25rem;
 	background-color: lightgray;
 }
-
 .close-button:hover {
 	background-color: darkgray;
 }
-
 .show-modal {
 	opacity: 1;
 	visibility: visible;
 	transform: scale(1.0);
 	transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
 }
-
 /* water.css overwrite Track stylen */
 .colorrange input[type="range"]::-webkit-slider-runnable-track {
 	height: 8px;
@@ -194,14 +191,12 @@ table.inputs {
 	border-radius: 4px;
 	border: none;
 }
-
 .colorrange input[type="range"]::-moz-range-track {
 	height: 8px;
 	background: transparent;
 	border-radius: 4px;
 	border: none;
 }
-
 /* 1. Standard-Styles zurücksetzen */
 .colorrange input[type="range"] {
 	-webkit-appearance: none;
@@ -210,20 +205,44 @@ table.inputs {
 	background: transparent;
 	/* Verhindert doppelte Hintergründe */
 }
-
-.gradient {
-	color: black;
-	padding: 1rem;
-	text-align: center;  
+.color-palette-horizontal {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+	gap: 4px;
 }
-
+.color-palette-vertical {
+	display: grid;
+	grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+	gap: 4px;
+}
+.color-step {
+	min-width: 0;
+	min-height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+.color-step span {
+	margin: 0;
+	padding: 0;
+	line-height: 1.2;
+}
+.color-palette .color-step {
+	padding: 0;
+	margin: 0;
+	min-width: 0;
+	box-sizing: border-box;
+}
 .linear-gradient {
 	color: black;
 	margin: 1rem 0rem;
 	padding: 3rem;
-	text-align: center;  
+	text-align: center;
 }
-
 .icon {
 	height: 1.3rem;
 	vertical-align: center;
@@ -232,22 +251,34 @@ table.inputs {
 [data-theme="dark"] .icon {
 	filter: invert(1) brightness(0.9);
 }
-
 .wide {
 	padding-right: 0.8rem;
 }
-
 .flex {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
-  align-items: center;
+  	align-items: center;
 }
-
+.flex-scatter-childs {
+	display: flex;
+	gap: 10px; /* Abstand zwischen den Elementen */
+	width: 100%; /* Nimmt die maximale Breite des Elternelements ein */
+	box-sizing: border-box;
+}
+.flex-scatter-childs > * {
+	flex: 1;
+	min-width: 0; /* Verhindert, dass das Input-Feld die Box sprengt */
+	box-sizing: border-box;
+}
 .narrow {
 	width: 15ch;
 }
-
+.status-btn {
+	margin: 0;
+	margin-bottom: 0px;
+	margin-bottom: 5px;
+}
 .status-btn .icon {
 	max-width: none;
 }
@@ -257,7 +288,17 @@ table.inputs {
 	flex-wrap: wrap;
 	gap: 0.75rem 1.5rem;
 }
-
+/* 1. und 4. Fieldset: Minimal breit (nur so breit wie der Inhalt) */
+.settings-container fieldset:nth-child(1),
+.settings-container fieldset:nth-child(4) {
+	flex: 0 0 auto;
+	min-width: 0; /* Verhindert das Ausbrechen bei sehr langem Inhalt */
+}
+/* 2. und 3. Fieldset: Teilen sich den restlichen verfügbaren Platz */
+.settings-container fieldset:nth-child(2),
+.settings-container fieldset:nth-child(3) {
+	flex: 1 1 0%;
+}
 .range-setting {
 	display: flex;
 	align-items: center;
@@ -265,20 +306,17 @@ table.inputs {
 	flex: 1 1 250px;
 	min-width: 0;
 }
-
 .range-setting label {
 	flex: 0 0 6rem;
 	margin: 0;
 	white-space: nowrap;
 }
-
 .range-setting input[type="range"] {
 	flex: 1 1 auto;
 	width: 0;
 	min-width: 0;
 	margin: 0;
 }
-
 .range-setting output {
 	flex: 0 0 2rem;
 	text-align: right;
@@ -293,6 +331,10 @@ table.inputs {
 	background-color: gray;
 	color: black;
 }
+#textContrast-label {
+	background-color: gray;
+	color: violet;
+}
 #backContrast-white {
 	background-color: white;
 	color: gray;
@@ -300,6 +342,10 @@ table.inputs {
 #backContrast-black {
 	background-color: black;
 	color: gray;
+}
+#backContrast-label {
+	background-color: gray;
+	color: black;
 }
 /** special styles for color button in gradient text */
 .btn-select {
@@ -319,7 +365,6 @@ table.inputs {
 	border-style: solid;
 	border-width: 4px;
 }
-
 /* Color-Input unsichtbar, füllt das Label */
 .btn-select input[type="color"] {
 	position: absolute;

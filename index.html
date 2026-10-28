@@ -72,68 +72,72 @@
 					</div>
 				</fieldset>
 			</details>
-			<div class="col-container">
-				<div class="col-cell">
-					<fieldset>
-						<legend>Colors</legend>
-						<div class="color-container">
-							<div class="color-selection">
-								<div id="form-cmx-0"></div>
-								<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-								<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-								<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-								<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
-							</div>
-							<div class="color-selection">
-								<div id="form-cmx-1"></div>
-								<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-								<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-								<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-								<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
-							</div>
-						</div>
-					</fieldset>
-					<div class="settings-container">
-						<div class="range-setting">
-							<label for="steps">Steps</label>
-							<input type="range" id="steps" name="steps" min="2" max="16" value="7">
-							<output for="steps" id="steps-value">7</output>
-						</div>
-						<div class="range-setting">
-							<label for="overdrive">Overdrive</label>
-							<input type="range" id="overdrive" name="overdrive" min="0" max="16" value="0">
-							<output for="overdrive" id="overdrive-value">0</output>
-						</div>
+			<div class="color-container">
+				<fieldset class="color-selection">
+					<legend>Color 1</legend>
+					<div>
+						<div id="form-cmx-0"></div>
+						<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+						<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+						<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+						<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
 					</div>
-					<div class="settings-container">
-						<fieldset class="flex" id="gradientMode">
-							<legend>gradient</legend>
-							<div id="gradient-select"></div>
-						</fieldset>
-						<fieldset class="flex" id="textContrast">
-							<legend>Text color</legend>
-							<button id="textContrast-black" class="btn-select" data-color="#000000">Black</button>
-							<button id="textContrast-white" class="btn-select" data-color="#ffffff">White</button>
-							<label class="btn-select">
-								<span  id="textContrast-color-preview">Color</span>
-								<input type="color" value="#888888" id="textContrast-color">
-							</label>
-						</fieldset>
-						<fieldset class="flex" id="backContrast">
-							<legend>Background color</legend>
-							<button id="backContrast-black" class="btn-select" data-color="#000000">Black</button>
-							<button id="backContrast-white" class="btn-select" data-color="#ffffff">White</button>
-							<label class="btn-select">
-								<span  id="backContrast-color-preview">Color</span>
-								<input type="color" value="#888888" id="backContrast-color">
-							</label>
-						</fieldset>
+				</fieldset>
+				<fieldset class="color-selection">
+					<legend>Color 2</legend>
+					<div>
+						<div id="form-cmx-1"></div>
+						<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
+						<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+						<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+						<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
 					</div>
-					<div id="tab-cmx"></div>
-					<div id="grd-cmx" class="linear-gradient"></div>
-				</div>
+				</fieldset>
 			</div>
-			<h2 class="tool-title">SpectrumStep – Multi-Space Gradient & Contrast Generator</h2>
+			<fieldset class="settings-container">
+				<legend>Steps</legend>
+				<div class="range-setting">
+					<label for="steps">Steps</label>
+					<input type="range" id="steps" name="steps" min="2" max="16" value="7">
+					<output for="steps" id="steps-value">7</output>
+				</div>
+				<div class="range-setting">
+					<label for="overdrive">Overdrive</label>
+					<input type="range" id="overdrive" name="overdrive" min="0" max="16" value="0">
+					<output for="overdrive" id="overdrive-value">0</output>
+				</div>
+			</fieldset>
+			<div class="settings-container">
+				<fieldset class="flex" id="gradientMode">
+					<legend>Gradient</legend>
+					<div id="gradient-select"></div>
+				</fieldset>
+				<fieldset class="flex-scatter-childs" id="textContrast">
+					<legend>Text color</legend>
+					<button id="textContrast-black" class="btn-select" data-color="#000000">Black</button>
+					<button id="textContrast-white" class="btn-select" data-color="#ffffff">White</button>
+					<label id="textContrast-label" class="btn-select">
+						<span  id="textContrast-color-preview">Color</span>
+						<input type="color" value="#888888" id="textContrast-color">
+					</label>
+				</fieldset>
+				<fieldset class="flex-scatter-childs" id="backContrast">
+					<legend>Background color</legend>
+					<button id="backContrast-black" class="btn-select" data-color="#000000">Black</button>
+					<button id="backContrast-white" class="btn-select" data-color="#ffffff">White</button>
+					<label id="backContrast-label" class="btn-select">
+						<span  id="backContrast-color-preview">Color</span>
+						<input type="color" value="#888888" id="backContrast-color">
+					</label>
+				</fieldset>
+				<fieldset class="flex">
+					<legend>Dir</legend>
+					<div id="gradientDirection"></div>
+				</fieldset>
+			</div>
+			<div id="tab-cmx"></div>
+			<div id="grd-cmx" class="linear-gradient"></div>
+			<p class="tool-title">SpectrumStep – Multi-Space Gradient & Contrast Generator</p>
 			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
 			<details class="tool-guide">
 				<summary>How to use SpectrumStep</summary>
@@ -155,10 +159,10 @@
 						<li><strong>RGB,HSL or HSV:</strong> Select the color space used for interpolation between the two colors.</li>
 						<li><strong>Hue inversion:</strong> Reverse the hue direction to create alternative color transitions. Might be good to swap colors between dark and light background.</li>
 						<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
-
 						<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
 						<li><strong>Back contrast:</strong> Alternatively you make a gradient of text-color and you may choose the static background-color for the whole gradient.</li>
 						<li><strong>Gradient output:</strong> Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</li>
+						<li><strong>Gradient direction:</strong> Choose direction of linear gradient</li>
 						<li><strong>Contrast ratio:</strong> The tool displays the contrast ratio for each color, helping you explore readable text and background combinations.</li>
 						<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
 						<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
