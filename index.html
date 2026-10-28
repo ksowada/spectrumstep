@@ -54,24 +54,8 @@
 		<div class="title">SpectrumStep - Color Mixer</div>
 		<div id="theme-select"></div>
 	</header>
-	<div class="container">
+	<main>
 		<div class="middle" id="middle">
-			<details>
-				<summary>User Store to load and save palettes</summary>
-				<fieldset>
-					<legend>Store</legend>
-					<div class="flex">
-						<div class="flex">
-							<select id="load-input" class="narrow"></select>
-							<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
-						</div>
-						<div class="flex">
-							<input id="save-input" class="narrow" />
-							<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
-						</div>
-					</div>
-				</fieldset>
-			</details>
 			<div class="color-container">
 				<fieldset class="color-selection">
 					<legend>Color 1</legend>
@@ -137,6 +121,22 @@
 			</div>
 			<div id="tab-cmx"></div>
 			<div id="grd-cmx" class="linear-gradient"></div>
+			<details>
+				<summary>User Store to load and save palettes</summary>
+				<fieldset>
+					<legend>Store</legend>
+					<div class="flex">
+						<div class="flex">
+							<select id="load-input" class="narrow"></select>
+							<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
+						</div>
+						<div class="flex">
+							<input id="save-input" class="narrow" />
+							<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
+						</div>
+					</div>
+				</fieldset>
+			</details>
 			<p class="tool-title">SpectrumStep – Multi-Space Gradient & Contrast Generator</p>
 			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
 			<details class="tool-guide">
@@ -170,7 +170,7 @@
 				</div>
 			</details>
 		</div>
-	</div>
+	</main>
 </body>
 
 </html>

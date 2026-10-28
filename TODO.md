@@ -2,6 +2,7 @@
 
 ## tasks
 - error: at load, cols get updated (only in RGB but not in HSL (test with S=0,L=0 => Hue is not remembered))
+- error: if C2 is black, the gradient makes hue rotation because #000 is interpreted as Hue=0, it shall take Hue from C1
 - HSL-accuracy: 100 ticks for S, L is less, but it appears easy as percent is handy
 - HSL, HSV, RBG output at gradient: write values next to rgb-hexstring
 - swap C1 & C2 button
@@ -30,4 +31,5 @@
 - merge sources with spare-benzin.de/src
 
 ## marketing
-- github public repository
+- github public repository 
+  - make comments all English

@@ -7,6 +7,7 @@
 - theme option in store
 - light/dark theme in header
 - random color button
+- expands 3-digit hex colors
 
 ## UI
 - icon: make icons light in dark theme

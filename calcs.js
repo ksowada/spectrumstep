@@ -188,10 +188,19 @@ function hueBound(hue) {
   if (hue>1) hue = hue-1;
   return hue;
 }
-function rgbCorrect(value) {  
-  value = (value.charAt(0)=='#') ? value : '#'+value; // set # if not given
-  value = (value.charAt(1)=='#') ? value.substr(1) : value; // delete # if given ##
-  return value;
+function rgbCorrect(value) {
+  // 1. Remove leading '#' if present
+  value = (value.charAt(0) === '#') ? value.slice(1) : value;
+  // 2. Handle accidental double '#' (e.g. "##333")
+  value = (value.charAt(0) === '#') ? value.slice(1) : value;
+  // 3. Expand short form (3 chars) to long form (6 chars)
+  if (value.length === 3) {
+    value = value[0] + value[0]
+        + value[1] + value[1]
+        + value[2] + value[2];
+  }
+  // 4. Re-add the single leading '#'
+  return '#' + value;
 }
 /**
  * Converts an HSL color value to RGB. Conversion formula

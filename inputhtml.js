@@ -188,6 +188,8 @@ function InputHtml(args) {
         if (this.rangeInput) return this.getRange(varName);
         value = document.getElementById(combineToId([this.el, varName])).value;
         value = rgbCorrect(value);
+        document.getElementById(combineToId([this.el, varName])).value = value;
+        this.setRange(varName, value);
         param.value = value;
         return param.value;
       case 'checkbox':
@@ -209,6 +211,9 @@ function InputHtml(args) {
     // if (param.type=='color') param.value = param.value.substr(1); else param.value = getFloatOfText(param.value);
     document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? round(param.value, param.round) : param.value;
     return param.value;
+  }
+  this.setRange = function (varName, value) {
+    document.getElementById(combineToId([this.el, varName, 'range'])).value = value; // change slider
   }
   this.getId = function (varName, varSuffix) {
     return combineToId([this.el, varName, varSuffix])
