@@ -1,6 +1,7 @@
 /* Standard: Systemeinstellung verwenden */
 :root {
 	color-scheme: light dark;
+	--font-monospace: "Ubuntu Sans Mono", monospace !important;
 }
 /* Manuell Hell */
 :root[data-theme="light"] {
@@ -141,8 +142,12 @@ table.inputs {
 		text-align: left;
 	}
 }
-.form-control {
+input.form-control {
 	width: 100%;
+	font-family: "Ubuntu Sans Mono", monospace !important;
+	/* Disables font features that might cause the '#' to glitch */
+	font-variant-ligatures: none;
+	font-feature-settings: "liga" 0, "clig" 0;
 }
 .modal {
 	position: fixed;
@@ -217,7 +222,7 @@ table.inputs {
 }
 .color-step {
 	min-width: 0;
-	min-height: 64px;
+	min-height: 144px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -230,6 +235,7 @@ table.inputs {
 	margin: 0;
 	padding: 0;
 	line-height: 1.2;
+	font-family: var(--font-monospace);
 }
 .color-palette .color-step {
 	padding: 0;
@@ -239,9 +245,11 @@ table.inputs {
 }
 .linear-gradient {
 	color: black;
+	min-height: 144px;
 	margin: 1rem 0rem;
-	padding: 3rem;
+	padding: 0.5rem;
 	text-align: center;
+	font-family: var(--font-monospace);
 }
 .icon {
 	height: 1.3rem;

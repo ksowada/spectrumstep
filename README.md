@@ -15,3 +15,4 @@
 - Steps & Overdrive without text input next to each other, for mobile with flex-wrap 
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
 - HSL/HSV/RGB-gradient eliminate radio buttons and use single-selection-buttons
+- input for numbers with monospace font

@@ -14,7 +14,6 @@
 - rgb=#000000 & #ffffff lead to loss of hue info at colModeSwitch, also at save&load
 
 ## visu
-- input for numbers with fixed-width font
 - mark edge colors as in overdrive it is unvisible, f.e. a frame around base gradient
 
 ## ChatGPT
