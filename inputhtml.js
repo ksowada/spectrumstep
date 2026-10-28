@@ -15,6 +15,9 @@ function InputHtml(args) {
   for (var arg in args) {
     this[arg] = args[arg];
   }
+  if (args.params) {
+    this.params = JSON.parse(JSON.stringify(args.params));
+  }
   this.callbackArgs = (this.callbackArgs === undefined) ? undefined : this.callbackArgs;
   this.storageEn = (this.storageEn === undefined) ? false : this.storageEn; // storage is default disabled
 
@@ -27,6 +30,7 @@ function InputHtml(args) {
       param.name = (param.name === undefined) ? '' : param.name;
       param.type = (param.type === undefined) ? 'number' : param.type;
       param.step = (param.step === undefined) ? '1' : param.step;
+      param.rangeStep = (param.rangeStep === undefined) ? param.step : param.rangeStep;
       param.unit = (param.unit === undefined) ? '' : param.unit;
       param.value = (param.value === undefined) ? '' : param.value;// this.storageGet(varName,param); // change only if given from storage, uses array if unit is also array
       param.class = (param.class === undefined) ? '' : param.class;
@@ -44,7 +48,7 @@ function InputHtml(args) {
         switch (param.type) {
           case 'number':
             if (param.min !== undefined) {
-              html_range = '<td class="form-value"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="range" step="' + param.step + '" value="' + param.value + '" min="' + param.min + '" max="' + param.max + '" oninput="'+html_oninput+',true)"/></td>';
+              html_range = '<td class="form-value"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="range" step="' + param.rangeStep + '" value="' + param.value + '" min="' + param.min + '" max="' + param.max + '" oninput="'+html_oninput+',true)"/></td>';
             }
             html += html_name + html_range + '<td class="form-value"><input id="' + combineToId([this.el, varName]) + '" class="form-control" type="number" step="' + param.step + '" value="' + param.value + '" oninput="'+html_oninput+',false)"/></td>' + html_unit;
             break;
@@ -126,7 +130,7 @@ function InputHtml(args) {
   this.getText = function (varName) {
     var param = this.params[varName];
     param.value = document.getElementById(combineToId([this.el, varName])).value;
-    return value;
+    return param.value;
   }
   this.getIns = function (ins) {
     var i = {};
@@ -186,11 +190,11 @@ function InputHtml(args) {
         return param.value;
       case 'color':
         if (this.rangeInput) return this.getRange(varName);
-        value = document.getElementById(combineToId([this.el, varName])).value;
-        value = rgbCorrect(value);
-        document.getElementById(combineToId([this.el, varName])).value = value;
-        this.setRange(varName, value);
-        param.value = value;
+        var val = document.getElementById(combineToId([this.el, varName])).value;
+        val = rgbCorrect(val);
+        document.getElementById(combineToId([this.el, varName])).value = val;
+        this.setRange(varName, val);
+        param.value = val;
         return param.value;
       case 'checkbox':
         param.value = document.getElementById(combineToId([this.el, varName])).checked;
@@ -200,7 +204,7 @@ function InputHtml(args) {
         param.value = document.getElementById(combineToId([this.el, varName])).value;
         param.value = getFloatOfText(param.value);
         param.value = (param.min !== undefined) ? bound(param.value, param.min, param.max) : param.value;
-        document.getElementById(combineToId([this.el, varName])).value = param.value;
+        document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
         document.getElementById(combineToId([this.el, varName, 'range'])).value = param.value;
         return param.value;
     }
@@ -208,8 +212,8 @@ function InputHtml(args) {
   this.getRange = function (varName) {
     var param = this.params[varName];
     param.value = document.getElementById(combineToId([this.el, varName, 'range'])).value; // change slider
-    // if (param.type=='color') param.value = param.value.substr(1); else param.value = getFloatOfText(param.value);
-    document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? round(param.value, param.round) : param.value;
+    param.value = parseFloat(param.value);
+    document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
     return param.value;
   }
   this.setRange = function (varName, value) {

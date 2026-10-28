@@ -2,10 +2,12 @@
 /** Macht aus einem String unabh&auml;ngig, ob mit Komma oder Punkt
  geschrieben einen float zurück */
 function getFloatOfText(preis) {
-  if (preis.length == 0) preis="0";
+  if (preis === undefined || preis === null) return 0;
+  preis = String(preis);
+  if (preis.length == 0) preis = "0";
   preis = preis.replace(/[,]/,'.');
   preis = parseFloat(preis);
-  return preis;
+  return isNaN(preis) ? 0 : preis;
 }
 function round(wert, decimals) {
   decimalsStd = (decimals !== undefined) ? decimals : -2;
@@ -50,13 +52,15 @@ function getTextOfFloat(wert) {
   // wert = wert.replace(/[.]/,',');
   return wert;
 }
-// add missing zeros after digits, standard is integer
-function getTextOfRound(wert,decimals) {
+// format number with decimals; trims redundant trailing zeros if clean integer
+function getTextOfRound(wert, decimals) {
   decimals = (decimals !== undefined) ? decimals : 0;
-  wert = Number.parseFloat(wert).toFixed(-decimals);
-  wert = String(wert);  // konvertiere nach String
-  wert = wert.replace(/[.]/,',');
-  return wert;
+  if (isNaN(wert)) return '';
+  var fixed = Number.parseFloat(wert).toFixed(-decimals);
+  if (decimals !== 0 && fixed.indexOf('.') !== -1) {
+    fixed = fixed.replace(/\.?0+$/, '');
+  }
+  return fixed;
 }
 function getEuroOfFloat(wert) {
   wert = String(round(wert).toFixed(2));  // konvertiere nach String
@@ -184,8 +188,8 @@ function shortName(name) {
 }
 /** hue is rotating so beware difference from bound */
 function hueBound(hue) {
-  if (hue<0) hue = hue+1;
-  if (hue>1) hue = hue-1;
+  hue = hue % 1;
+  if (hue < 0) hue += 1;
   return hue;
 }
 function rgbCorrect(value) {
@@ -285,7 +289,7 @@ function hsvToRgb(args){
  * @param   {number}  b       The blue color value
  * @return  {Array}           The HSL representation
  */
-function rgbToHsl(args){
+function rgbToHsl(args, fallbackHue){
   var r = args[0];
   var g = args[1];
   var b = args[2];
@@ -295,7 +299,8 @@ function rgbToHsl(args){
   var h, s, l = (max + min) / 2;
 
   if(max == min){
-      h = s = 0; // achromatic
+      h = (fallbackHue !== undefined && !isNaN(fallbackHue)) ? fallbackHue : 0; // achromatic
+      s = 0;
   }else{
       var d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
@@ -315,9 +320,10 @@ function rgbToHsl(args){
  * returns h, s, and v in the set [0, 1].
  *
  * @param   {Array}  args   [r, g, b]
+ * @param   {number} [fallbackHue] Optional hue to preserve when achromatic
  * @return  {Array}         The HSV representation [h, s, v]
  */
-function rgbToHsv(args){
+function rgbToHsv(args, fallbackHue){
   var r = args[0];
   var g = args[1];
   var b = args[2];
@@ -330,7 +336,7 @@ function rgbToHsv(args){
   s = max == 0 ? 0 : d / max;
 
   if(max == min){
-    h = 0; // achromatic
+    h = (fallbackHue !== undefined && !isNaN(fallbackHue)) ? fallbackHue : 0; // achromatic
   }else{
     switch(max){
       case r: h = (g - b) / d + (g < b ? 6 : 0); break;
@@ -399,10 +405,10 @@ function interpolate(r,x1,x2,hue) {
     return hueBounded;
   }
 }
-function colorConvertFromRgb(mode, rgb) {
+function colorConvertFromRgb(mode, rgb, fallbackHue) {
   if (mode==='RGB') return rgb;
-  if (mode==='HSL') return rgbToHsl(rgb);
-  if (mode==='HSV') return rgbToHsv(rgb);
+  if (mode==='HSL') return rgbToHsl(rgb, fallbackHue);
+  if (mode==='HSV') return rgbToHsv(rgb, fallbackHue);
 }
 function colorConvertToRgb(mode, col) {
   if (mode==='RGB') return col;
@@ -489,6 +495,25 @@ function getColors(args) {
   }
   var p1 = resolve(args.c1, args.c1Mode, args.rgb1);
   var p2 = resolve(args.c2, args.c2Mode, args.rgb2);
+
+  if (isHue && Array.isArray(p1) && Array.isArray(p2)) {
+    p1 = p1.slice();
+    p2 = p2.slice();
+
+    var isAchromatic1 = (mode === 'HSL')
+      ? (p1[2] <= 0.0001 || p1[2] >= 0.9999 || p1[1] <= 0.0001)
+      : (p1[2] <= 0.0001 || p1[1] <= 0.0001);
+
+    var isAchromatic2 = (mode === 'HSL')
+      ? (p2[2] <= 0.0001 || p2[2] >= 0.9999 || p2[1] <= 0.0001)
+      : (p2[2] <= 0.0001 || p2[1] <= 0.0001);
+
+    if (isAchromatic2 && !isAchromatic1) {
+      p2[0] = p1[0];
+    } else if (isAchromatic1 && !isAchromatic2) {
+      p1[0] = p2[0];
+    }
+  }
 
   var rgbColors = [];
   for (var i = -overdrive; i < args.len + overdrive; i++) {

@@ -9,6 +9,7 @@
 - random color button
 - expands 3-digit hex colors
 - gradientDirection in all 4 direction
+- enhanced accuracy for HSV and HSL mode, no loss of RGB value
 
 ## UI
 - icon: make icons light in dark theme
