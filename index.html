@@ -16,6 +16,7 @@
 	<link rel="stylesheet" type="text/css" href="water.css" />
 	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
 	<link rel="stylesheet" type="text/css" href="HSL-Mixer.css" />
+	<script type="text/javascript" src="buttonselect.js"></script>
 	<script type="text/javascript" src="rangesetting.js"></script>
 	<script type="text/javascript" src="buttonswitch.js"></script>
 	<script type="text/javascript" src="storage.js"></script>
@@ -104,53 +105,30 @@
 							<output for="overdrive" id="overdrive-value">0</output>
 						</div>
 					</div>
-					<fieldset class="flex" id="gradientMode">
-						<legend>color gradient in different color-spaces</legend>
-						<label class="wide">
-							<input type="radio" name="gradientMode" value="HSL" checked>
-							HSL
-						</label>
-						<label class="wide">
-							<input type="radio" name="gradientMode" value="RGB">
-							RGB
-						</label>
-						<label class="wide">
-							<input type="radio" name="gradientMode" value="HSV">
-							HSV
-						</label>
-					</fieldset>
-					<fieldset class="flex" id="textContrast">
-						<legend>Text contrast with background color gradient</legend>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="light">
-							<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />White
-						</label>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="dark" checked>
-							<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Black
-						</label>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="color">
-							<img src="icons/palette-solid-full.svg" alt="icon for color" class="icon" />Color
-						</label>
-						<input type="color" value="#AAAAAA" id="text_color">
-					</fieldset>
-					<fieldset class="flex" id="backContrast">
-						<legend>Background contrast with text color gradient</legend>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="text_light">
-							<img src="icons/sun-solid-full.svg" alt="icon for sun" class="icon" />White
-						</label>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="text_dark">
-							<img src="icons/moon-solid-full.svg" alt="icon for moon" class="icon" />Black
-						</label>
-						<label class="wide">
-							<input type="radio" name="textContrast" value="text_color">
-							<img src="icons/palette-solid-full.svg" alt="icon for color" class="icon" />Color
-						</label>
-						<input type="color" value="#AAAAAA" id="back_color">
-					</fieldset>
+					<div class="settings-container">
+						<fieldset class="flex" id="gradientMode">
+							<legend>gradient</legend>
+							<div id="gradient-select"></div>
+						</fieldset>
+						<fieldset class="flex" id="textContrast">
+							<legend>Text color</legend>
+							<button id="textContrast-black" class="btn-select" data-color="#000000">Black</button>
+							<button id="textContrast-white" class="btn-select" data-color="#ffffff">White</button>
+							<label class="btn-select">
+								<span  id="textContrast-color-preview">Color</span>
+								<input type="color" value="#888888" id="textContrast-color">
+							</label>
+						</fieldset>
+						<fieldset class="flex" id="backContrast">
+							<legend>Background color</legend>
+							<button id="backContrast-black" class="btn-select" data-color="#000000">Black</button>
+							<button id="backContrast-white" class="btn-select" data-color="#ffffff">White</button>
+							<label class="btn-select">
+								<span  id="backContrast-color-preview">Color</span>
+								<input type="color" value="#888888" id="backContrast-color">
+							</label>
+						</fieldset>
+					</div>
 					<div id="tab-cmx"></div>
 					<div id="grd-cmx" class="linear-gradient"></div>
 				</div>

@@ -14,7 +14,7 @@ var hslPreArr = [[200, 60, 70],[140, 90, 70]];
 var hsl = [[],[]];
 let steps = undefined;
 let overdrive = undefined;
-var _textColor = '#000000';
+var _textColor = undefined;
 var _backColor = undefined;
 const rangeMaxForMode = {
 	RGB:[255,255,255],
@@ -29,7 +29,7 @@ const factorForMode = {
 const hslKeys = ['h','s','l']
 var colMode = ['HSL','HSL']
 const colModes = ['HSL', 'RGB', 'HSV']
-var gradientMode = 'HSL' // as in index.html
+var gradientSwitch = undefined;
 var colModeSwitch = [undefined,undefined];
 var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 	inputLoadId:'load-input', btnLoadId:'load-btn',
@@ -37,6 +37,8 @@ var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 });
 const themeModes = ['light','dark']
 var themeSwitch = undefined;
+var textColorSelect = undefined;
+var backColorSelect = undefined;
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
@@ -50,17 +52,45 @@ function calcform_cmx_init() {
 		inp_cmx_arr[ix] = new InputHtml({ obj: `inp_cmx_arr[${ix}]`, params: params_cmx, el: id, callbackName: 'calcform_cmx_doml', callbackArgs:ix,callAtInit: false, storageEn: true });
 		inp_cmx_arr[ix].init();
 	})
-
-	steps = new RangeSetting('steps',calcform_cmx_dyna);
-	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna);
-
 	// replace text from c1 first cell through buttonswitch
 	inp_cmx_ids.forEach((id,ix) => {
 		let row = document.getElementById(id+'-c-row');
 		let firstCell = row.cells[0];
 		firstCell.innerHTML = '';
-		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace);
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace, {showText:false});
 	})
+	steps = new RangeSetting('steps',calcform_cmx_dyna);
+	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna);
+	gradientSwitch = new ButtonSwitch(
+		document.getElementById('gradient-select'),
+		colModes, 'icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna());
+	textColorSelect = new ButtonSelect(
+		document.getElementById('textContrast'),
+		(id, el, instance) => {
+			const input = el.querySelector('input[type="color"]');
+			const color = el.dataset.color ?? input?.value;
+			if (input) {
+				const preview = el.querySelector('span');
+				preview.style.color = color;
+			}
+			backColorSelect.setValue(undefined, false)
+			calcform_cmx_dyna(color, undefined); // dein Callback-Ziel
+		}
+	);
+	backColorSelect = new ButtonSelect(
+		document.getElementById('backContrast'),
+		(id, el, instance) => {
+			const input = el.querySelector('input[type="color"]');
+			const color = el.dataset.color ?? input?.value;
+			if (input) {
+				const preview = el.querySelector('span');
+				el.style.backgroundColor = color;
+			}
+			textColorSelect.setValue(undefined, false)
+			calcform_cmx_dyna(undefined,color); // dein Callback-Ziel
+		}
+	);
+	textColorSelect.setValue('textContrast-black')
 	for (let ix=0;ix<2;ix++) {
 		if (hslInit) {
 			inp_cmx_arr[ix].set('h', hslPreArr[ix][0]);
@@ -70,60 +100,6 @@ function calcform_cmx_init() {
 			inp_cmx_arr[ix].set('c', rgbh[ix]);
 		}
 	}
-	// gradient color mode
-	const fieldsetGradientMode = document.querySelector("#gradientMode");
-	fieldsetGradientMode.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-		const selected = fieldsetGradientMode.querySelector('input[type="radio"]:checked');
-		gradientMode = selected.value;
-		calcform_cmx_dyna();
-	})
-	// Text contrast
-	const fieldset = document.querySelector("#textContrast");
-	fieldset.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-
-		const selected = fieldset.querySelector('input[type="radio"]:checked');
-		console.log(selected.value); // z. B. "light", "dark" oder "color"
-		let color
-		switch (selected.value) {
-			case 'light': color = '#ffffff'; break;
-			case 'dark': color = '#000000';break;
-			case 'color': color = document.getElementById('text_color').value;break;
-		}
-		console.log(color)
-		calcform_cmx_dyna(color, undefined)
-	});
-	document.getElementById('text_color').addEventListener("change", (event) => {
-		let color = document.getElementById('text_color').value
-		document.querySelector('input[name="textContrast"][value="color"]').checked = true;
-		calcform_cmx_dyna(color, undefined)
-	})
-
-	// Back contrast
-	const fieldsetBack = document.querySelector("#backContrast");
-	fieldsetBack.addEventListener("change", (event) => {
-		// Ignoriert Änderungen am Farbfeld
-		if (event.target.type !== "radio") return;
-
-		const selected = fieldsetBack.querySelector('input[type="radio"]:checked');
-		console.log(selected.value); // z. B. "light", "dark" oder "color"
-		let color
-		switch (selected.value) {
-			case 'text_light': color = '#ffffff'; break;
-			case 'text_dark': color = '#000000';break;
-			case 'text_color': color = document.getElementById('back_color').value;break;
-		}
-		console.log(color)
-		calcform_cmx_dyna(undefined, color)
-	});
-	document.getElementById('back_color').addEventListener("change", (event) => {
-		let color = document.getElementById('back_color').value
-		document.querySelector('input[name="textContrast"][value="text_color"]').checked = true;
-		calcform_cmx_dyna(undefined, color)
-	})
 }
 /** berechne HSL */
 function calcform_cmx_doml() {
@@ -244,6 +220,7 @@ function calcform_cmx_hsl(ix,init) {
 function calcform_cmx_dyna(textColor, backColor) {
 	const rowCnt = steps.get()
 	const cha = overdrive.get()
+	const gradientMode = gradientSwitch.value;
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -319,13 +296,12 @@ function calcform_cmx_onLoad() {
 	}
 	steps.set(data.steps)
 	overdrive.set(data.overdrive)
-	gradientMode = data.gradientMode
-	document.querySelector(`input[name="gradientMode"][value="${gradientMode}"]`).checked = true;
+	gradientSwitch.setValue(data.gradient)
 	themeCare(data.theme);
 	calcform_cmx_dyna();
 }
 function calcform_cmx_onSave() {
-	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode,colMode, theme:themeSwitch.value};
+	var data = { rgbh, steps: steps.get(), overdrive: overdrive.get(), textColor:_textColor, backColor:_backColor, gradientMode:gradientSwitch.value,colMode, theme:themeSwitch.value};
 	storage.saveSetting({ data: data });
 }
 function calcform_cmx_col_shuffle(ix) {

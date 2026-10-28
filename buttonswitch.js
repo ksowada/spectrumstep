@@ -1,5 +1,13 @@
 class ButtonSwitch {
-    constructor(cell, texte, icons = undefined, onChangeArg, onChange) {
+    /**
+     * @param {HTMLTableCellElement} cell
+     * @param {string[]} texte
+     * @param {string|string[]|undefined} icons
+     * @param {*} onChangeArg
+     * @param {(text:string,index:number,btn:ButtonSwitch,arg:*)=>void} onChange
+     * @param {{ showText?: boolean }} [options]
+     */
+    constructor(cell, texte, icons = undefined, onChangeArg, onChange, options = {}) {
         if (texte.length === 0) {
             throw new Error('ButtonSwitch: texte darf nicht leer sein');
         }
@@ -7,9 +15,8 @@ class ButtonSwitch {
         this.cell = cell;
         this.texte = texte;
         this.hasIcon = icons !== undefined;
-        this.icons = this.hasIcon
-            ? this._normalizeIcons(icons, texte.length)
-            : null;
+        this.icons = this.hasIcon ? this._normalizeIcons(icons, texte.length) : null;
+        this.showText = options.showText !== false;    // Default: true
         this.onChange = onChange;
         this.onChangeArg = onChangeArg;
         this.index = 0;
@@ -36,21 +43,24 @@ class ButtonSwitch {
         this.btn.type = 'button';
         this.btn.className = 'status-btn';
 
+        this.icon = null;
         if (this.hasIcon) {
             this.icon = document.createElement('img');
             this.icon.alt = '';
             this.icon.className = 'icon';
-        } else {
-            this.icon = null;
+            this.btn.append(this.icon);
         }
 
-        this.label = document.createElement('span');
-        this.label.className = 'label';
-
-        if (this.icon) {
-            this.btn.append(this.icon, this.label);
-        } else {
+        this.label = null;
+        if (this.showText) {
+            this.label = document.createElement('span');
+            this.label.className = 'label';
             this.btn.append(this.label);
+        }
+
+        // Safety: leerer Button wäre klickbar aber unsichtbar – verhindern
+        if (!this.hasIcon && !this.showText) {
+            throw new Error('ButtonSwitch: mindestens Icon oder Text muss sichtbar sein (showText:false + kein Icon)');
         }
 
         this.btn.addEventListener('click', () => this._next());
@@ -60,7 +70,9 @@ class ButtonSwitch {
     }
 
     _render() {
-        this.label.textContent = this.texte[this.index];
+        if (this.showText) {
+            this.label.textContent = this.texte[this.index];
+        }
         if (this.hasIcon) {
             this.icon.src = this.icons[this.index];
         }
