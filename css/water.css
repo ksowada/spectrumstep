@@ -1,8 +1,12 @@
 /**
+ * Water.css
  * Automatic version:
  * Uses light theme by default but switches to dark theme
  * if a system-wide theme preference is set on the user's device.
  * from https://watercss.kognise.dev/
+ *
+ * Copyright (c) 2019 Kognise
+ * Licensed under the MIT License (https://github.com/kognise/water.css/blob/master/LICENSE.md)
  */
 
 :root {

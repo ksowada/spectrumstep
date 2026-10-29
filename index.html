@@ -3,7 +3,7 @@
 
 <head>
 	<link rel="canonical" href="https://ardoid.eu/spectrumstep/" />
-	<meta name="og:image" content="https://ardoid.eu/spectrumstep/SpectrumStep.png" />
+	<meta name="og:image" content="https://ardoid.eu/spectrumstep/assets/spectrumstep.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="og:url" content="https://ardoid.eu/spectrumstep/" />
@@ -12,17 +12,17 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
 	<title>SpectrumStep – Multi-Space Gradient & Contrast Generator</title>
-	<link rel="icon" href="favicon.svg" type="image/svg+xml" />
-	<link rel="stylesheet" type="text/css" href="water.css" />
-	<link rel="stylesheet" type="text/css" href="fonts/fonts.css" />
-	<link rel="stylesheet" type="text/css" href="SpectrumStep.css" />
-	<script type="text/javascript" src="buttonselect.js"></script>
-	<script type="text/javascript" src="rangesetting.js"></script>
-	<script type="text/javascript" src="buttonswitch.js"></script>
-	<script type="text/javascript" src="storage.js"></script>
-	<script type="text/javascript" src="inputhtml.js"></script>
-	<script type="text/javascript" src="calcs.js"></script>
-	<script type="text/javascript" src="SpectrumStep.js"></script>
+	<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+	<link rel="stylesheet" type="text/css" href="css/water.css" />
+	<link rel="stylesheet" type="text/css" href="assets/fonts/fonts.css" />
+	<link rel="stylesheet" type="text/css" href="css/spectrumstep.css" />
+	<script type="text/javascript" src="js/buttonselect.js"></script>
+	<script type="text/javascript" src="js/rangesetting.js"></script>
+	<script type="text/javascript" src="js/buttonswitch.js"></script>
+	<script type="text/javascript" src="js/storage.js"></script>
+	<script type="text/javascript" src="js/inputhtml.js"></script>
+	<script type="text/javascript" src="js/calcs.js"></script>
+	<script type="text/javascript" src="js/spectrumstep.js"></script>
 	<!-- Matomo --><script>
 		(function () {
 		function initTracking() {
@@ -62,10 +62,10 @@
 					<div>
 						<div id="form-cmx-0"></div>
 						<div class="button-container">
-							<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-							<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-							<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-							<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="icons/right-long-solid-full.svg"/>Copy</button>
+							<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="assets/icons/right-long-solid-full.svg"/>Copy</button>
 						</div>
 					</div>
 				</fieldset>
@@ -74,10 +74,10 @@
 					<div>
 						<div id="form-cmx-1"></div>
 						<div class="button-container">
-							<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="icons/shuffle-solid-full.svg"/>Random</button>
-							<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-							<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-							<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="icons/left-long-solid-full.svg"/>Copy</button>
+							<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="assets/icons/left-long-solid-full.svg"/>Copy</button>
 						</div>
 					</div>
 				</fieldset>
@@ -132,11 +132,11 @@
 					<div class="flex">
 						<div class="flex">
 							<select id="load-input" class="narrow"></select>
-							<button id="load-btn" type="button"><img src="icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
+							<button id="load-btn" type="button"><img src="assets/icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
 						</div>
 						<div class="flex">
 							<input id="save-input" class="narrow" />
-							<button id="save-btn" type="button"><img src="icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
+							<button id="save-btn" type="button"><img src="assets/icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
 						</div>
 					</div>
 				</fieldset>

@@ -53,7 +53,7 @@ var gradientDirectionSwitch = undefined;
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
 		document.getElementById('theme-select'),
-		themeModes, ['icons/sun-solid-full.svg','icons/moon-solid-full.svg'],undefined, themeCare);
+		themeModes, ['assets/icons/sun-solid-full.svg','assets/icons/moon-solid-full.svg'],undefined, themeCare);
 
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
@@ -67,16 +67,16 @@ function calcform_cmx_init() {
 		let row = document.getElementById(id+'-c-row');
 		let firstCell = row.cells[0];
 		firstCell.innerHTML = '';
-		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace, {showText:false});
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'assets/icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace, {showText:false});
 	})
 	steps = new RangeSetting('steps',calcform_cmx_dyna);
 	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna);
 	gradientSwitch = new ButtonSwitch(
 		document.getElementById('gradient-select'),
-		colModes, 'icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna());
+		colModes, 'assets/icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna());
 	gradientDirectionSwitch = new ButtonSwitch(
 		document.getElementById('gradientDirection'),
-		['right','down','left','up'], ['icons/right-long-solid-full.svg','icons/down-long-solid-full.svg','icons/left-long-solid-full.svg','icons/up-long-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
+		['right','down','left','up'], ['assets/icons/right-long-solid-full.svg','assets/icons/down-long-solid-full.svg','assets/icons/left-long-solid-full.svg','assets/icons/up-long-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
 	textColorSelect = new ButtonSelect(
 		document.getElementById('textContrast'),
 		(id, el, instance) => {
