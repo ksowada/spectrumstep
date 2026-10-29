@@ -116,6 +116,17 @@ var backColorSelect = undefined;
 var gradientDirectionSwitch = undefined;
 var gradientWaySwitch = undefined;
 var contrastVisibilitySwitch = undefined;
+var cmxStateReady = false;
+const urlWayMap = {
+	shorter: 'shorter',
+	short: 'shorter',
+	longer: 'longer',
+	long: 'longer'
+};
+const urlWayToParam = {
+	shorter: 'short',
+	longer: 'long'
+};
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
@@ -224,7 +235,9 @@ function calcform_cmx_init() {
 			'backContrast-label': 'Background Contrast Mode: Pick a custom static background color behind gradient-colored text'
 		}
 	);
-	textColorSelect.setValue('textContrast-black')
+	_textColor = '#000000';
+	_backColor = undefined;
+	textColorSelect.setValue('textContrast-black', false)
 	for (let ix=0;ix<2;ix++) {
 		if (hslInit) {
 			inp_cmx_arr[ix].set('h', hslPreArr[ix][0]);
@@ -426,6 +439,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	document.querySelectorAll('#backContrast .btn-select span').forEach(span => {
 		span.style.backgroundImage = gradientText;
 	});
+	calcform_cmx_syncState();
 }
 
 let toastTimeout = null;
@@ -480,38 +494,72 @@ function fallbackCopy(text, successMsg) {
 	}
 	document.body.removeChild(ta);
 }
-function calcform_cmx_onLoad() {
-	var data = storage.loadSetting();
-	if (data === null) return;
-	rgbh = data.rgbh;
+function calcform_cmx_getState() {
+	return {
+		rgbh: rgbh.map(c => rgbCorrect(c)),
+		hsl: hsl.map(arr => (Array.isArray(arr) ? arr.slice() : arr)),
+		steps: steps.get(),
+		overdrive: overdrive.get(),
+		textColor: _textColor,
+		backColor: _backColor,
+		gradientMode: gradientSwitch.value,
+		colMode: colMode.slice(),
+		theme: themeSwitch.value,
+		gradientDirection: gradientDirectionSwitch.value,
+		gradientWay: gradientWaySwitch.value,
+		contrastVisibility: contrastVisibilitySwitch.value
+	};
+}
+function calcform_cmx_applyState(data) {
+	if (!data) return;
+	if (Array.isArray(data.rgbh) && data.rgbh.length === 2) {
+		rgbh = data.rgbh.map(c => rgbCorrect(c));
+	}
 	if (data.textColor) {
-		_textColor = data.textColor
-		_backColor = undefined
-		if (_textColor==='#ffffff') {
-			textColorSelect.setValue('textContrast-white')
-		} else if (_textColor==='#000000') {
-			textColorSelect.setValue('textContrast-black')
+		_textColor = rgbCorrect(data.textColor).toLowerCase();
+		_backColor = undefined;
+		backColorSelect.setValue(undefined, false);
+		if (_textColor === '#ffffff') {
+			textColorSelect.setValue('textContrast-white', false);
+		} else if (_textColor === '#000000') {
+			textColorSelect.setValue('textContrast-black', false);
 		} else {
-			textColorSelect.setValue('textContrast-label')
+			const tcInput = document.getElementById('textContrast-color');
+			const tcLabel = document.getElementById('textContrast-label');
+			const tcPreview = document.getElementById('textContrast-color-preview');
+			if (tcInput) tcInput.value = _textColor;
+			if (tcLabel) textColorSelect._applyColorAccent(tcLabel, _textColor);
+			if (tcPreview) tcPreview.style.color = _textColor;
+			textColorSelect.setValue('textContrast-label', false);
 		}
 	}
 	if (data.backColor) {
-		_textColor = undefined
-		_backColor = data.backColor
-		if (_backColor==='#ffffff') {
-			backColorSelect.setValue('backContrast-white')
-		} else if (_backColor==='#000000') {
-			backColorSelect.setValue('backContrast-black')
+		_textColor = undefined;
+		_backColor = rgbCorrect(data.backColor).toLowerCase();
+		textColorSelect.setValue(undefined, false);
+		if (_backColor === '#ffffff') {
+			backColorSelect.setValue('backContrast-white', false);
+		} else if (_backColor === '#000000') {
+			backColorSelect.setValue('backContrast-black', false);
 		} else {
-			backColorSelect.setValue('backContrast-color')
+			const bcInput = document.getElementById('backContrast-color');
+			const bcLabel = document.getElementById('backContrast-label');
+			if (bcInput) bcInput.value = _backColor;
+			if (bcLabel) {
+				backColorSelect._applyColorAccent(bcLabel, _backColor);
+				bcLabel.style.backgroundColor = _backColor;
+			}
+			backColorSelect.setValue('backContrast-label', false);
 		}
 	}
-	colMode = data.colMode;
-	for (let ix=0;ix<2;ix++) {
+	if (Array.isArray(data.colMode) && data.colMode.length === 2) {
+		colMode = data.colMode.slice();
+	}
+	for (let ix = 0; ix < 2; ix++) {
 		inp_cmx_arr[ix].set('c', rgbh[ix]);
 		colModeSwitch[ix].setValue(colMode[ix], true);
 		calcform_cmx_colorspace(colMode[ix], undefined, undefined, ix, true);
-		if (data.hsl && data.hsl[ix]) {
+		if (data.hsl && Array.isArray(data.hsl[ix]) && data.hsl[ix].length === 3) {
 			hsl[ix] = data.hsl[ix].slice();
 			const hslLong = [];
 			factorForMode[colMode[ix]].forEach((factor, i) => {
@@ -524,31 +572,155 @@ function calcform_cmx_onLoad() {
 			calcform_cmx_rgb(ix, true);
 		}
 	}
-	steps.set(data.steps)
-	overdrive.set(data.overdrive)
-	gradientSwitch.setValue(data.gradientMode)
-	gradientDirectionSwitch.setValue(data.gradientDirection)
-	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay)
-	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility)
-	themeCare(data.theme);
+	if (data.steps !== undefined) steps.set(Number(data.steps));
+	if (data.overdrive !== undefined) overdrive.set(Number(data.overdrive));
+	if (data.gradientMode) gradientSwitch.setValue(data.gradientMode, true);
+	if (data.gradientDirection) gradientDirectionSwitch.setValue(data.gradientDirection, true);
+	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay, true);
+	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility, true);
+	if (data.theme) themeCare(data.theme);
 	calcform_cmx_dyna();
 }
+function calcform_cmx_updateUrl(data) {
+	const params = new URLSearchParams();
+	[0, 1].forEach(ix => {
+		const num = ix + 1;
+		const mode = data.colMode[ix] || 'HSL';
+		const hex = rgbCorrect(data.rgbh[ix]).slice(1).toLowerCase();
+		params.set('c' + num, hex);
+		params.set('m' + num, mode.toLowerCase());
+		if (data.hsl && Array.isArray(data.hsl[ix])) {
+			const factors = factorForMode[mode];
+			const rounds = roundForMode[mode];
+			const chStr = data.hsl[ix]
+				.map((v, i) => getTextOfRound(v * factors[i], rounds[i]))
+				.join('-');
+			params.set('ch' + num, chStr);
+		}
+	});
+	params.set('st', String(data.steps));
+	params.set('od', String(data.overdrive));
+	params.set('gm', (data.gradientMode || 'HSL').toLowerCase());
+	params.set('gd', data.gradientDirection || 'right');
+	params.set('gw', urlWayToParam[data.gradientWay] || 'short');
+	params.set('cv', data.contrastVisibility || 'show');
+	if (data.backColor) {
+		params.set('bc', rgbCorrect(data.backColor).slice(1).toLowerCase());
+	} else if (data.textColor) {
+		params.set('tc', rgbCorrect(data.textColor).slice(1).toLowerCase());
+	}
+	if (data.theme) {
+		params.set('th', data.theme);
+	}
+	const newUrl = window.location.pathname + '?' + params.toString() + window.location.hash;
+	window.history.replaceState(null, '', newUrl);
+}
+function calcform_cmx_getUrlState() {
+	if (!window.location.search || window.location.search.length <= 1) return null;
+	const params = new URLSearchParams(window.location.search);
+	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th'];
+	if (!knownKeys.some(k => params.has(k))) return null;
+
+	const state = calcform_cmx_getState();
+	const isHex = v => /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+
+	[0, 1].forEach(ix => {
+		const num = ix + 1;
+		const mParam = params.get('m' + num);
+		if (mParam && colModes.includes(mParam.toUpperCase())) {
+			state.colMode[ix] = mParam.toUpperCase();
+		}
+		const mode = state.colMode[ix];
+		const cParam = params.get('c' + num);
+		const chParam = params.get('ch' + num);
+		const validHex = (cParam && isHex(cParam)) ? rgbCorrect(cParam).toLowerCase() : null;
+
+		let parsedCh = null;
+		if (chParam) {
+			const parts = chParam.split(/[-_,]/).map(Number);
+			if (parts.length === 3 && parts.every(n => !isNaN(n))) {
+				const maxes = rangeMaxForMode[mode];
+				const factors = factorForMode[mode];
+				parsedCh = parts.map((val, i) => bound(val, 0, maxes[i]) / factors[i]);
+			}
+		}
+
+		if (validHex && parsedCh) {
+			const hexFromCh = rgbCorrect(rgbToColor(colorConvertToRgb(mode, parsedCh))).toLowerCase();
+			state.rgbh[ix] = validHex;
+			if (hexFromCh === validHex) {
+				state.hsl[ix] = parsedCh;
+			} else {
+				state.hsl[ix] = colorConvertFromRgb(mode, hexToRgb(validHex), parsedCh[0]);
+			}
+		} else if (validHex) {
+			state.rgbh[ix] = validHex;
+			state.hsl[ix] = colorConvertFromRgb(mode, hexToRgb(validHex));
+		} else if (parsedCh) {
+			state.hsl[ix] = parsedCh;
+			state.rgbh[ix] = rgbCorrect(rgbToColor(colorConvertToRgb(mode, parsedCh))).toLowerCase();
+		} else if (mParam) {
+			state.hsl[ix] = colorConvertFromRgb(mode, hexToRgb(state.rgbh[ix]));
+		}
+	});
+
+	if (params.has('st')) {
+		const st = parseInt(params.get('st'), 10);
+		if (!isNaN(st)) state.steps = bound(st, 2, 16);
+	}
+	if (params.has('od')) {
+		const od = parseInt(params.get('od'), 10);
+		if (!isNaN(od)) state.overdrive = bound(od, 0, 16);
+	}
+	if (params.has('gm')) {
+		const gm = params.get('gm').toUpperCase();
+		if (colModes.includes(gm)) state.gradientMode = gm;
+	}
+	if (params.has('gd')) {
+		const gd = params.get('gd').toLowerCase();
+		if (['right', 'down', 'left', 'up'].includes(gd)) state.gradientDirection = gd;
+	}
+	if (params.has('gw')) {
+		const gw = urlWayMap[params.get('gw').toLowerCase()];
+		if (gw) state.gradientWay = gw;
+	}
+	if (params.has('cv')) {
+		const cv = params.get('cv').toLowerCase();
+		if (['show', 'hide'].includes(cv)) state.contrastVisibility = cv;
+	}
+	if (params.has('tc')) {
+		const tc = params.get('tc');
+		if (isHex(tc)) {
+			state.textColor = rgbCorrect(tc).toLowerCase();
+			state.backColor = undefined;
+		}
+	} else if (params.has('bc')) {
+		const bc = params.get('bc');
+		if (isHex(bc)) {
+			state.backColor = rgbCorrect(bc).toLowerCase();
+			state.textColor = undefined;
+		}
+	}
+	if (params.has('th')) {
+		const th = params.get('th').toLowerCase();
+		if (themeModes.includes(th)) state.theme = th;
+	}
+
+	return state;
+}
+function calcform_cmx_syncState() {
+	if (!cmxStateReady) return;
+	const state = calcform_cmx_getState();
+	storage.saveState(state);
+	calcform_cmx_updateUrl(state);
+}
+function calcform_cmx_onLoad() {
+	var data = storage.loadSetting();
+	if (data === null) return;
+	calcform_cmx_applyState(data);
+}
 function calcform_cmx_onSave() {
-	var data = { 
-		rgbh, 
-		hsl: hsl.map(arr => (Array.isArray(arr) ? arr.slice() : arr)),
-		steps: steps.get(), 
-		overdrive: overdrive.get(), 
-		textColor:_textColor, 
-		backColor:_backColor, 
-		gradientMode:gradientSwitch.value,
-		colMode, 
-		theme:themeSwitch.value,
-		gradientDirection:gradientDirectionSwitch.value,
-		gradientWay:gradientWaySwitch.value,
-		contrastVisibility:contrastVisibilitySwitch.value
-	};
-	storage.saveSetting({ data: data });
+	storage.saveSetting({ data: calcform_cmx_getState() });
 }
 function calcform_cmx_col_shuffle(ix) {
 	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
@@ -587,6 +759,7 @@ function themeCare(text, ix) {
 		themeSwitch.setValue(theme, true)
 	}
 	applyTheme(parameterTheme || savedTheme || systemTheme);
+	calcform_cmx_syncState();
 }
 
 var activeTooltipTarget = null;
@@ -675,5 +848,20 @@ document.addEventListener('DOMContentLoaded', function () {
 	calcform_cmx_init();
 	calcform_cmx_doml();
 	themeCare(); // need calcform_cmx_init before
+	const urlState = calcform_cmx_getUrlState();
+	const savedState = storage.loadState();
+	if (urlState) {
+		calcform_cmx_applyState(urlState);
+	} else if (savedState) {
+		calcform_cmx_applyState(savedState);
+	}
+	cmxStateReady = true;
+	calcform_cmx_syncState();
 	initTooltips();
+	window.addEventListener('popstate', function () {
+		const popState = calcform_cmx_getUrlState();
+		if (popState) {
+			calcform_cmx_applyState(popState);
+		}
+	});
 });

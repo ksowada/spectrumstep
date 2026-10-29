@@ -5,8 +5,7 @@
 - swap C1 & C2 button
 - RGB text input shall have onkey event
 - CSS linear gradient has mouse over that manipulate colors, and needs copy function
-- URL search params with color and gradientsetting to make share of colors easy
-- use tooltips to clarify exactly what utility does
+- given 1 color component, the 2 remaining may visualized by a plain, so you may fix hue and choose the saturation and lightness by choosing a point in area 
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
@@ -19,6 +18,8 @@
 - header is cutted at broad width display, it shall be full-width
 - docu as extra tab, not below gradient, there should be nothing
   - in docu use icons for explain
+- selection for textContrast etc. shall be monochromatic and more visible
+- all buttons and esp. the color inputs have small borders, they should be plain 
 
 ## ChatGPT
 - HEX-Werte direkt anklickbar machen - Schnelleres Arbeiten
@@ -29,10 +30,14 @@
 - Aktive Auswahl deutlich markieren	- Bessere Orientierung
 - Kurze Animation beim Wechsel der Farben	- Lebendigere Bedienung
 
-## repeatly work tasks
-- merge sources with spare-benzin.de/src
-
 ## marketing
 - github public repository 
   - make comments all English
 - subdomain spectrumstep.ardoid.eu: Google supports distinct site names for domains and subdomains, but not for individual subdirectories. Therefore, a dedicated subdomain could eventually give SpectrumStep a more independent identity in Google Search.
+- JSON-LD
+
+## docu-page
+- make externally reference
+- add articles 
+- same header with app and theme switch
+- back link

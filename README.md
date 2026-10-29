@@ -15,6 +15,9 @@
   - contrast info can be disabled
 - copy function with visual feedback at gradient swatches
 - hue allows 2 gradients, longer and shorter way
+- use tooltips to clarify exactly what utility does
+- URL search params with color and gradientsetting to make share of colors easy
+- use storage to retain information, when switching to docu and back
 
 ## UI
 - icon: make icons light in dark theme

@@ -59,4 +59,16 @@ function Storage(args) {
 		if (unitLoaded[name]===undefined) return null;
 		return unitLoaded[name];
 	}
+	this.saveState = function (data) {
+		if (!this.storageEn) return;
+		localStorage.setItem(this.unit + '-state', JSON.stringify(data));
+	}
+	this.loadState = function () {
+		if (!this.storageEn) return null;
+		try {
+			return JSON.parse(localStorage.getItem(this.unit + '-state'));
+		} catch (e) {
+			return null;
+		}
+	}
 }
