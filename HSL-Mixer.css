@@ -296,6 +296,25 @@ table.inputs {
 	padding: 0;
 	margin: 0;
 	box-sizing: border-box;
+	cursor: pointer;
+	user-select: none;
+	position: relative;
+	transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.color-step:hover {
+	transform: scale(1.02);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	z-index: 2;
+}
+.color-step.step-copied {
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+	animation: stepPulse 0.35s ease;
+}
+@keyframes stepPulse {
+	0% { transform: scale(0.97); }
+	50% { transform: scale(1.03); }
+	100% { transform: scale(1); }
 }
 .color-step span {
 	margin: 0;
@@ -332,10 +351,45 @@ table.inputs {
 	padding: 0.5rem;
 	text-align: center;
 	font-family: var(--font-monospace);
-	/* Text vertikal zentrieren */
 	display: flex;
 	justify-content: center; /* Zentriert horizontal */
 	align-items: center;     /* Zentriert vertikal */
+	cursor: pointer;
+	user-select: none;
+	transition: opacity 0.15s ease;
+}
+.linear-gradient:hover {
+	opacity: 0.92;
+}
+.cmx-toast {
+	position: fixed;
+	bottom: 2rem;
+	left: 50%;
+	transform: translateX(-50%) translateY(20px);
+	background: rgba(15, 23, 32, 0.92);
+	color: #fff;
+	padding: 8px 18px;
+	border-radius: 20px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	font-family: var(--font-monospace);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+	z-index: 9999;
+	pointer-events: none;
+}
+[data-theme="light"] .cmx-toast {
+	background: rgba(30, 35, 42, 0.92);
+	color: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.cmx-toast.show {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(-50%) translateY(0);
 }
 .icon {
 	height: 1.3rem;

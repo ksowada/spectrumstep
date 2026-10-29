@@ -266,8 +266,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
 		const contrastInfo = getContrastInfo(textRgb, backRgb)
 		const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" title="' + contrastInfo.badgeTitle + '">' + contrastInfo.badge + '</span>';
-		if (_backColor==undefined) html += '<div class="color-step" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
-		if (_textColor==undefined) html += '<div class="color-step" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
+		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" title="Click to copy ' + colArr[rowIx] + '" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
+		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" title="Click to copy ' + colArr[rowIx] + '" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
 	}
 	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
@@ -286,6 +286,61 @@ function calcform_cmx_dyna(textColor, backColor) {
 	div_grd.innerHTML = gradientText
 	div_grd.style.background = gradientText
 	div_grd.style.color = _textColor
+	div_grd.title = "Click to copy CSS gradient";
+	div_grd.onclick = () => copyText(gradientText, '✓ Copied CSS gradient!');
+}
+
+let toastTimeout = null;
+function showToast(message) {
+	let toast = document.getElementById('cmx-toast');
+	if (!toast) {
+		toast = document.createElement('div');
+		toast.id = 'cmx-toast';
+		toast.className = 'cmx-toast';
+		document.body.appendChild(toast);
+	}
+	toast.textContent = message;
+	toast.classList.add('show');
+	if (toastTimeout) clearTimeout(toastTimeout);
+	toastTimeout = setTimeout(() => {
+		toast.classList.remove('show');
+	}, 1800);
+}
+
+function copyText(text, successMsg) {
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(() => {
+			showToast(successMsg || ('✓ Copied ' + text));
+		}).catch(() => fallbackCopy(text, successMsg));
+	} else {
+		fallbackCopy(text, successMsg);
+	}
+}
+
+function copyColorStep(hex, el) {
+	if (el) {
+		el.classList.remove('step-copied');
+		void el.offsetWidth;
+		el.classList.add('step-copied');
+		setTimeout(() => el.classList.remove('step-copied'), 400);
+	}
+	copyText(hex, '✓ Copied ' + hex);
+}
+
+function fallbackCopy(text, successMsg) {
+	const ta = document.createElement('textarea');
+	ta.value = text;
+	ta.style.position = 'fixed';
+	ta.style.opacity = '0';
+	document.body.appendChild(ta);
+	ta.select();
+	try {
+		document.execCommand('copy');
+		showToast(successMsg || ('✓ Copied ' + text));
+	} catch (e) {
+		showToast(text);
+	}
+	document.body.removeChild(ta);
 }
 function calcform_cmx_onLoad() {
 	var data = storage.loadSetting();
