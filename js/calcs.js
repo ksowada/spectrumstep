@@ -391,16 +391,20 @@ function rgbToColor(args) {
 // }
 
 function interpolate(r,x1,x2,hue) {
-  if (hue === undefined) {
+  if (!hue) {
     return x1 + (x2-x1)*r;
   } else {
     var xd = x2 - x1;
     var xh = xd;
-    // hue is bigger than half, other way is right
-    if (xd>0.5) xh = -1 + xd; 
-    if (xd<-0.5) xh = 1 + xd;
-    // if (xd<0.5) xh = -1 + xd;
-    // var xh = (xd>0.5) ? -1 + xd :  xd;
+    if (hue === 'longer') {
+      if (xd > 0 && xd < 0.5) xh = -1 + xd;
+      else if (xd < 0 && xd > -0.5) xh = 1 + xd;
+      else if (xd === 0) xh = 1;
+    } else {
+      // shorter way (default): hue is bigger than half, other way is right
+      if (xd > 0.5) xh = -1 + xd;
+      if (xd < -0.5) xh = 1 + xd;
+    }
     var hueBounded = hueBound(x1 + xh*r);
     return hueBounded;
   }
@@ -458,7 +462,8 @@ function getRGBColors(args) {
  * args: { len, overdrive,
  *         mode:   'RGB'|'HSL'|'HSV' (default 'RGB') = Raum, in dem interpoliert wird,
  *         c1, c1Mode: 'RGB'|'HSL'|'HSV' (default = mode),
- *         c2, c2Mode: 'RGB'|'HSL'|'HSV' (default = mode) }
+ *         c2, c2Mode: 'RGB'|'HSL'|'HSV' (default = mode),
+ *         hueWay: 'shorter'|'longer' (default 'shorter') }
  * c1, c2 can be
  *   - 6-digit-hexstring with leading # (c1Mode/c2Mode wird ignoriert)
  *   - array in the units of its own mode: RGB 0..255, HSL/HSV [h,s,x] 0..1
@@ -466,6 +471,7 @@ function getRGBColors(args) {
  * give out hex rgb with leading # for css user */
 function getColors(args) {
   var mode = args.mode || 'RGB';
+  var hueWay = args.hueWay || 'shorter';
   args.len = parseInt(args.len);
   var overdrive = (args.overdrive !== undefined) ? parseInt(args.overdrive) : 0;
   var isHue = (mode !== 'RGB');
@@ -520,7 +526,7 @@ function getColors(args) {
     var rel = args.len > 1 ? i / (args.len - 1) : 0;
     var a, b, c;
     if (isHue) {
-      a = hueBound(interpolate(rel, p1[0], p2[0], true));
+      a = hueBound(interpolate(rel, p1[0], p2[0], hueWay));
       b = bound(interpolate(rel, p1[1], p2[1]), 0, 1);
       c = bound(interpolate(rel, p1[2], p2[2]), 0, 1);
     } else {

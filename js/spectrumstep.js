@@ -49,6 +49,7 @@ var themeSwitch = undefined;
 var textColorSelect = undefined;
 var backColorSelect = undefined;
 var gradientDirectionSwitch = undefined;
+var gradientWaySwitch = undefined;
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
@@ -77,6 +78,9 @@ function calcform_cmx_init() {
 	gradientDirectionSwitch = new ButtonSwitch(
 		document.getElementById('gradientDirection'),
 		['right','down','left','up'], ['assets/icons/right-long-solid-full.svg','assets/icons/down-long-solid-full.svg','assets/icons/left-long-solid-full.svg','assets/icons/up-long-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
+	gradientWaySwitch = new ButtonSwitch(
+		document.getElementById('gradientWay'),
+		['shorter','longer'], ['assets/icons/down-left-and-up-right-to-center-solid-full.svg','assets/icons/up-right-and-down-left-from-center-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
 	textColorSelect = new ButtonSelect(
 		document.getElementById('textContrast'),
 		(id, el, instance) => {
@@ -245,6 +249,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const cha = overdrive.get()
 	const gradientMode = gradientSwitch.value;
 	const gradientDirection = gradientDirectionSwitch.value;
+	const gradientWay = gradientWaySwitch.value;
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -253,7 +258,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 		_textColor = undefined
 		_backColor = backColor
 	}
-	var colArr = getColors({ mode:gradientMode, len: rowCnt, c1: hsl[0], c1Mode:colMode[0], c2: hsl[1],c2Mode:colMode[1], overdrive: cha });
+	var colArr = getColors({ mode:gradientMode, len: rowCnt, c1: hsl[0], c1Mode:colMode[0], c2: hsl[1],c2Mode:colMode[1], overdrive: cha, hueWay: gradientWay });
 
 	// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
 	colArr[cha] = inp_cmx_arr[0].get('c');
@@ -276,7 +281,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const rotation = { right: '90deg', down: '180deg',left:'90deg',up:'180deg' }[gradientDirection];
 	let gradientText = ''
 	if (gradientMode!=='RGB') {
-		gradientText += `linear-gradient(${rotation} in hsl shorter hue,`
+		gradientText += `linear-gradient(${rotation} in hsl ${gradientWay} hue,`
 	} else {
 		gradientText += `linear-gradient(${rotation},`
 	}
@@ -390,6 +395,7 @@ function calcform_cmx_onLoad() {
 	overdrive.set(data.overdrive)
 	gradientSwitch.setValue(data.gradientMode)
 	gradientDirectionSwitch.setValue(data.gradientDirection)
+	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay)
 	themeCare(data.theme);
 	calcform_cmx_dyna();
 }
@@ -404,7 +410,8 @@ function calcform_cmx_onSave() {
 		gradientMode:gradientSwitch.value,
 		colMode, 
 		theme:themeSwitch.value,
-		gradientDirection:gradientDirectionSwitch.value
+		gradientDirection:gradientDirectionSwitch.value,
+		gradientWay:gradientWaySwitch.value
 	};
 	storage.saveSetting({ data: data });
 }

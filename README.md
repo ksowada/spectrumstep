@@ -12,6 +12,7 @@
 - enhanced accuracy for HSV and HSL mode, no loss of RGB value
 - each color in gradient holds contrast info including WCAG AA / AAA badges (Pass/Fail)
 - copy function with visual feedback at gradient swatches
+- hue allows 2 gradients, longer and shorter way
 
 ## UI
 - icon: make icons light in dark theme

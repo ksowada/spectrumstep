@@ -99,6 +99,8 @@
 				<fieldset class="flex" id="gradientMode">
 					<legend>Gradient</legend>
 					<div id="gradient-select"></div>
+					<div id="gradientDirection"></div>
+					<div id="gradientWay"></div>
 				</fieldset>
 				<fieldset class="flex-scatter-childs" id="textContrast">
 					<legend>Text color</legend>
@@ -117,10 +119,6 @@
 						<span  id="backContrast-color-preview">Color</span>
 						<input type="color" value="#888888" id="backContrast-color">
 					</label>
-				</fieldset>
-				<fieldset class="flex">
-					<legend>Dir</legend>
-					<div id="gradientDirection"></div>
 				</fieldset>
 			</div>
 			<div id="tab-cmx"></div>
@@ -155,19 +153,20 @@
 					<p>HSL stands for Hue, Saturation, and Lightness and is often also called HLS. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white. HSV stands for hue, saturation, and value, and is also often called HSB. See  <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">wikipedia: HSL and HSV</a></p>
 					<h3>Function description</h3>
 					<ul>
-						<li><strong>C1 and C2:</strong> Enter HEX or decimal RGB, HSL or HSV single values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
-						<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient. Generate smooth color gradients between 2 colors with a configurable number of steps to create custom color palettes and smooth color transitions.</li>
+						<li><strong>Light and dark mode:</strong> Invert appearance to amplify color feeling.</li>
+						<li><strong>Color 1 and 2:</strong> Enter HEX or decimal RGB, HSL or HSV single values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
 						<li><strong>RGB,HSL or HSV:</strong> Select the color space used for interpolation between the two colors.</li>
 						<li><strong>HSL inversion:</strong> Reverse lightness. Might be good to swap colors between dark and light background.</li>
 						<li><strong>RGB inversion:</strong> Invert Color.</li>
+						<li><strong>Click to copy color:</strong> Click any color swatch in the gradient palette to copy its HEX code directly to your clipboard, confirmed with an instant toast notification.</li>
+						<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient. Generate smooth color gradients between 2 colors with a configurable number of steps to create custom color palettes and smooth color transitions.</li>
 						<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
 						<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
 						<li><strong>Back contrast:</strong> Alternatively you make a gradient of text-color and you may choose the static background-color for the whole gradient.</li>
-						<li><strong>Click to copy color:</strong> Click any color swatch in the gradient palette to copy its HEX code directly to your clipboard, confirmed with an instant toast notification.</li>
+						<li><strong>Gradient direction:</strong> Choose direction of linear gradient in all 4 direction.</li>
+						<li><strong>Gradient way:</strong> Choose shorter or longer way of gradient.</li>
 						<li><strong>Gradient output:</strong> Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</li>
-						<li><strong>Gradient direction:</strong> Choose direction of linear gradient in all 4 direction</li>
 						<li><strong>Contrast ratio:</strong> The tool displays the contrast ratio for each color, helping you explore readable text and background combinations, including WCAG AA / AAA badges (Pass/Fail)</li>
-						<li><strong>Light and dark mode:</strong> Invert colors to explore alternative color schemes.</li>
 						<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
 					</ul>
 				</div>

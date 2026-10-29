@@ -7,6 +7,7 @@
 - CSS linear gradient has mouse over that manipulate colors, and needs copy function
 - URL search params with color and gradientsetting to make share of colors easy
 - use tooltips to clarify exactly what utility does
+- contrast info and AA rating is not visible with wrong contrast, shall be always visible
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
