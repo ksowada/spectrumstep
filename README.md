@@ -18,6 +18,7 @@
 - use tooltips to clarify exactly what utility does
 - URL search params with color and gradientsetting to make share of colors easy
 - use storage to retain information, when switching to docu and back
+- documentation in header as link with same header with app and theme switch
 
 ## UI
 - icon: make icons light in dark theme
@@ -27,3 +28,7 @@
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
 - HSL/HSV/RGB-gradient eliminate radio buttons and use single-selection-buttons
 - input for numbers with monospace font
+
+## infrastructure
+- use npm package for
+  - serve (it is needed for having clean links without index.html between docu and app)

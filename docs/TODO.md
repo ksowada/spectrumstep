@@ -5,7 +5,8 @@
 - swap C1 & C2 button
 - RGB text input shall have onkey event
 - CSS linear gradient has mouse over that manipulate colors, and needs copy function
-- given 1 color component, the 2 remaining may visualized by a plain, so you may fix hue and choose the saturation and lightness by choosing a point in area 
+- given 1 color component, the 2 remaining may visualized by a plain, so you may fix hue and choose the saturation and lightness by choosing a point in area
+- what API may help to identify colors or more?
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
@@ -39,5 +40,4 @@
 ## docu-page
 - make externally reference
 - add articles 
-- same header with app and theme switch
-- back link
+

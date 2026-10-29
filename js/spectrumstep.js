@@ -127,16 +127,22 @@ const urlWayToParam = {
 	shorter: 'short',
 	longer: 'long'
 };
-/** initialisiere Anfangsfarben */
-function calcform_cmx_init() {
+const appBaseUrl = document.currentScript ? new URL('../', document.currentScript.src).href : '';
+function initThemeSwitch() {
+	const themeEl = document.getElementById('theme-select');
+	if (!themeEl || themeSwitch) return;
 	themeSwitch = new ButtonSwitch(
-		document.getElementById('theme-select'),
-		themeModes, ['assets/icons/sun-solid-full.svg','assets/icons/moon-solid-full.svg'],undefined, themeCare, {
+		themeEl,
+		themeModes, [appBaseUrl + 'assets/icons/sun-solid-full.svg', appBaseUrl + 'assets/icons/moon-solid-full.svg'], undefined, themeCare, {
 			tooltips: {
 				light: 'UI Theme: Light mode active. Click to switch to Dark mode to evaluate colors against a low-luminance surround.',
 				dark: 'UI Theme: Dark mode active. Click to switch to Light mode to evaluate colors against a high-luminance surround.'
 			}
 		});
+}
+/** initialisiere Anfangsfarben */
+function calcform_cmx_init() {
+	initThemeSwitch();
 
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
@@ -756,7 +762,14 @@ function themeCare(text, ix) {
 	function applyTheme(theme) {
 		document.documentElement.dataset.theme = theme;
 		localStorage.setItem("theme", theme);
-		themeSwitch.setValue(theme, true)
+		if (themeSwitch) themeSwitch.setValue(theme, true);
+		if (!cmxStateReady && storage) {
+			const savedState = storage.loadState();
+			if (savedState && typeof savedState === 'object') {
+				savedState.theme = theme;
+				storage.saveState(savedState);
+			}
+		}
 	}
 	applyTheme(parameterTheme || savedTheme || systemTheme);
 	calcform_cmx_syncState();
@@ -845,6 +858,12 @@ function initTooltips() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+	if (!document.getElementById('form-cmx-0')) {
+		initThemeSwitch();
+		themeCare();
+		initTooltips();
+		return;
+	}
 	calcform_cmx_init();
 	calcform_cmx_doml();
 	themeCare(); // need calcform_cmx_init before
@@ -853,6 +872,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (urlState) {
 		calcform_cmx_applyState(urlState);
 	} else if (savedState) {
+		const savedTheme = localStorage.getItem("theme");
+		if (savedTheme && themeModes.includes(savedTheme)) {
+			savedState.theme = savedTheme;
+		}
 		calcform_cmx_applyState(savedState);
 	}
 	cmxStateReady = true;
