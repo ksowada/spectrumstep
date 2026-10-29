@@ -611,12 +611,15 @@ function getContrastInfo(color1, color2) {
     badgeTitle = 'Passes WCAG AA for Large text only (>= 3:1)';
   }
 
+  const infoColor = ((L2 + 0.05) / 0.05 >= 1.05 / (L2 + 0.05)) ? '#000000' : '#ffffff';
+
   return {
     ratio,
     ratioText: `${ratio.toFixed(2)}:1`,
     badge,
     badgeClass,
     badgeTitle,
+    infoColor,
     normalTextAA: ratio >= 4.5,
     normalTextAAA: ratio >= 7,
     largeTextAA: ratio >= 3,
