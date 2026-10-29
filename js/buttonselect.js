@@ -2,14 +2,20 @@ class ButtonSelect {
     /**
      * @param {HTMLElement} container  Container mit den .btn-select Elementen
      * @param {Function}    onSelect   Callback(selectedId, selectedEl, instance)
+     * @param {string[]|Record<string,string>} [tooltips] Optional tooltips array or id->text map
      */
-    constructor(container, onSelect) {
+    constructor(container, onSelect, tooltips = undefined) {
         this.container = container;
         this.onSelect  = onSelect;
         this.buttons   = Array.from(container.querySelectorAll('.btn-select'));
         this._value    = null;
 
-        this.buttons.forEach(el => {
+        this.buttons.forEach((el, idx) => {
+            if (tooltips) {
+                const tip = Array.isArray(tooltips) ? tooltips[idx] : tooltips[el.id];
+                if (tip) el.dataset.tooltip = tip;
+            }
+
             el.addEventListener('click', () => this.setValue(el.id));
 
             // Color-Input: auf Farbänderung reagieren

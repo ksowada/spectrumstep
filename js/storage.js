@@ -17,13 +17,25 @@ function Storage(args) {
 			}
 			this.inputLoadEl = document.getElementById(this.inputLoadId)
 			this.inputLoadEl.innerHTML = html
-			if (args && args.callback) document.getElementById(this.btnLoadId).onclick = args.callback
+			const btnLoadEl = document.getElementById(this.btnLoadId)
+			if (args && args.callback) btnLoadEl.onclick = args.callback
+			const tips = (args && args.tooltips) || this.tooltips
+			if (tips) {
+				if (tips.inputLoad && this.inputLoadEl) this.inputLoadEl.dataset.tooltip = tips.inputLoad
+				if (tips.btnLoad && btnLoadEl) btnLoadEl.dataset.tooltip = tips.btnLoad
+			}
 		}
 	}
 	this.saveInit = function (args) {
 		if (this.storageEn) {
 			this.inputSaveEl = document.getElementById(this.inputSaveId)
-			document.getElementById(this.btnSaveId).onclick = args.callback
+			const btnSaveEl = document.getElementById(this.btnSaveId)
+			if (args && args.callback) btnSaveEl.onclick = args.callback
+			const tips = (args && args.tooltips) || this.tooltips
+			if (tips) {
+				if (tips.inputSave && this.inputSaveEl) this.inputSaveEl.dataset.tooltip = tips.inputSave
+				if (tips.btnSave && btnSaveEl) btnSaveEl.dataset.tooltip = tips.btnSave
+			}
 		}
 	}
 	this.loadSettings = function (args) {

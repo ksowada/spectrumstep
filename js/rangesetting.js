@@ -1,9 +1,19 @@
 
 class RangeSetting {
-    constructor(id, callback) {
+    constructor(id, callback, tooltip = undefined) {
         this.range = document.getElementById(id);
         this.output = document.getElementById(`${id}-value`);
+        this.label = document.querySelector(`label[for="${id}"]`);
         this.callback = callback;
+
+        if (tooltip) {
+            const rangeTip = typeof tooltip === 'object' ? tooltip.range : tooltip;
+            const labelTip = typeof tooltip === 'object' ? (tooltip.label || tooltip.range) : tooltip;
+            const outputTip = typeof tooltip === 'object' ? (tooltip.output || tooltip.range) : tooltip;
+            if (this.range && rangeTip) this.range.dataset.tooltip = rangeTip;
+            if (this.label && labelTip) this.label.dataset.tooltip = labelTip;
+            if (this.output && outputTip) this.output.dataset.tooltip = outputTip;
+        }
 
         this.value = Number(this.range.value);
         this.output.textContent = this.value;

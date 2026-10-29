@@ -5,7 +5,7 @@ class ButtonSwitch {
      * @param {string|string[]|undefined} icons
      * @param {*} onChangeArg
      * @param {(text:string,index:number,btn:ButtonSwitch,arg:*)=>void} onChange
-     * @param {{ showText?: boolean }} [options]
+     * @param {{ showText?: boolean, tooltips?: string|string[]|Record<string,string> }} [options]
      */
     constructor(cell, texte, icons = undefined, onChangeArg, onChange, options = {}) {
         if (texte.length === 0) {
@@ -17,6 +17,7 @@ class ButtonSwitch {
         this.hasIcon = icons !== undefined;
         this.icons = this.hasIcon ? this._normalizeIcons(icons, texte.length) : null;
         this.showText = options.showText !== false;    // Default: true
+        this.tooltips = options.tooltips !== undefined ? this._normalizeTooltips(options.tooltips, texte) : null;
         this.onChange = onChange;
         this.onChangeArg = onChangeArg;
         this.index = 0;
@@ -36,6 +37,19 @@ class ButtonSwitch {
             return icons.slice();
         }
         throw new TypeError('ButtonSwitch: icons muss string, string[] oder undefined sein');
+    }
+
+    _normalizeTooltips(tooltips, texte) {
+        if (typeof tooltips === 'string') {
+            return Array(texte.length).fill(tooltips);
+        }
+        if (Array.isArray(tooltips)) {
+            return tooltips.slice();
+        }
+        if (typeof tooltips === 'object' && tooltips !== null) {
+            return texte.map(t => tooltips[t] || '');
+        }
+        return null;
     }
 
     _build() {
@@ -75,6 +89,12 @@ class ButtonSwitch {
         }
         if (this.hasIcon) {
             this.icon.src = this.icons[this.index];
+        }
+        if (this.tooltips && this.tooltips[this.index]) {
+            this.btn.dataset.tooltip = this.tooltips[this.index];
+            if (typeof updateActiveTooltip === 'function') {
+                updateActiveTooltip(this.btn);
+            }
         }
     }
 

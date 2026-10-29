@@ -50,7 +50,7 @@
 
 <body class="body" id="SpectrumStep">
 	<header>
-		<a href="https://ardoid.eu/">ardoid.eu</a>
+		<a href="https://ardoid.eu/" data-tooltip="Return to ardoid.eu main page">ardoid.eu</a>
 		<div class="title">SpectrumStep - Color Mixer</div>
 		<div id="theme-select"></div>
 	</header>
@@ -62,10 +62,10 @@
 					<div>
 						<div id="form-cmx-0"></div>
 						<div class="button-container">
-							<button onclick="calcform_cmx_col_shuffle(0)"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
-							<button onclick="calcform_cmx_col_invert(0,false)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-							<button onclick="calcform_cmx_col_invert(0,true)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-							<button onclick="calcform_cmx_use_col(0)"><img class="icon" src="assets/icons/right-long-solid-full.svg"/>Copy</button>
+							<button onclick="calcform_cmx_col_shuffle(0)" data-tooltip="Generate a uniform random 24-bit sRGB color (R, G, B ∈ [0, 255])"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(0,false)" data-tooltip="sRGB complement: invert all RGB channels (255 − R, 255 − G, 255 − B), shifting hue by 180° and inverting lightness"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(0,true)" data-tooltip="HSL lightness inversion: reflect Lightness (L' = 100% − L) while preserving Hue and Saturation for dark/light theme adaptation"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(0)" data-tooltip="Copy Color 1 hex value (#RRGGBB) to Color 2"><img class="icon" src="assets/icons/right-long-solid-full.svg"/>Copy</button>
 						</div>
 					</div>
 				</fieldset>
@@ -74,10 +74,10 @@
 					<div>
 						<div id="form-cmx-1"></div>
 						<div class="button-container">
-							<button onclick="calcform_cmx_col_shuffle(1)"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
-							<button onclick="calcform_cmx_col_invert(1,false)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
-							<button onclick="calcform_cmx_col_invert(1,true)"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
-							<button onclick="calcform_cmx_use_col(1)"><img class="icon" src="assets/icons/left-long-solid-full.svg"/>Copy</button>
+							<button onclick="calcform_cmx_col_shuffle(1)" data-tooltip="Generate a uniform random 24-bit sRGB color (R, G, B ∈ [0, 255])"><img class="icon" src="assets/icons/shuffle-solid-full.svg"/>Random</button>
+							<button onclick="calcform_cmx_col_invert(1,false)" data-tooltip="sRGB complement: invert all RGB channels (255 − R, 255 − G, 255 − B), shifting hue by 180° and inverting lightness"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>RGB-Invert</button>
+							<button onclick="calcform_cmx_col_invert(1,true)" data-tooltip="HSL lightness inversion: reflect Lightness (L' = 100% − L) while preserving Hue and Saturation for dark/light theme adaptation"><img class="icon" src="assets/icons/circle-half-stroke-solid-full.svg"/>HSL-Invert</button>
+							<button onclick="calcform_cmx_use_col(1)" data-tooltip="Copy Color 2 hex value (#RRGGBB) to Color 1"><img class="icon" src="assets/icons/left-long-solid-full.svg"/>Copy</button>
 						</div>
 					</div>
 				</fieldset>
@@ -124,13 +124,13 @@
 			<div id="tab-cmx"></div>
 			<div id="grd-cmx" class="linear-gradient"></div>
 			<details>
-				<summary>User Store to load and save palettes</summary>
+				<summary data-tooltip="Expand local browser storage to load or save named palette configurations">User Store to load and save palettes</summary>
 				<fieldset>
 					<legend>Store</legend>
 					<div class="flex">
 						<div class="flex">
 							<select id="load-input" class="narrow"></select>
-							<button id="load-btn" type="button"><img src="assets/icons/folder-open-solid-full.svg" alt="icon for moon" class="icon" />Load</button>
+							<button id="load-btn" type="button"><img src="assets/icons/folder-open-solid-full.svg" alt="icon for load" class="icon" />Load</button>
 						</div>
 						<div class="flex">
 							<input id="save-input" class="narrow" />
@@ -140,34 +140,31 @@
 				</fieldset>
 			</details>
 			<p class="tool-title">SpectrumStep – Multi-Space Gradient & Contrast Generator</p>
-			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
+			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate WCAG 2.1 text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
 			<details class="tool-guide">
-				<summary>How to use SpectrumStep</summary>
+				<summary data-tooltip="Show technical overview and usage documentation for SpectrumStep">How to use SpectrumStep</summary>
 				<div class="guide-content">
-					<p><strong>1. Configure Colors:</strong> Toggle between HSL, HSV, and RGB spaces for each color picker. Adjust sliders or fine-tune components directly using numeric inputs.</p>
-					<p><strong>2. Invert & Copy:</strong> Invert color channels using the <em>RGB-Invert</em>, <em>HSL-Invert</em>, or copy colors from side to side.</p>
-					<p><strong>3. Set Steps & Overdrive:</strong> Define the exact number of discrete gradient steps and use the Overdrive for outer colors.</p>
-					<p><strong>4. Color Spaces & Contrast:</strong> Switch the interpolation space (HSL, RGB, HSV) and test legibility with custom light, dark, or user-defined background and text combinations.</p>
-					<p><strong>5. Export & Copy:</strong> Click any color step in the palette to copy its HEX value instantly, or copy the ready-to-use linear-gradient CSS code snippet generated at the bottom.</p>
-					<h3>What is HSL?</h3>
-					<p>HSL stands for Hue, Saturation, and Lightness and is often also called HLS. Hue defines the color, Saturation determines its intensity, and Lightness controls its brightness, ranging from black to white. HSV stands for hue, saturation, and value, and is also often called HSB. See  <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">wikipedia: HSL and HSV</a></p>
-					<h3>Function description</h3>
+					<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, and cylindrical <strong>HSV</strong> color models. Adjust live-rendered channel sliders or enter exact numeric and hexadecimal values.</p>
+					<p><strong>2. Transform & Sync Endpoints:</strong> Generate random 24-bit sRGB colors, compute the sRGB complement (<em>RGB-Invert</em>), reflect lightness while preserving hue and saturation (<em>HSL-Invert</em>), or clone colors across endpoints (<em>Copy</em>).</p>
+					<p><strong>3. Set Steps & Overdrive:</strong> Define the number of equidistant interpolation steps (2–16) and optionally extrapolate steps beyond both base colors using <em>Overdrive</em> (0–16).</p>
+					<p><strong>4. Interpolation Space, Direction & Hue Path:</strong> Choose the mixing space (HSL, RGB, HSV), spatial direction (Right, Down, Left, Up), and hue arc (<em>shorter hue</em> vs. <em>longer hue</em>). Evaluate legibility against static foreground text or static background colors.</p>
+					<p><strong>5. Export & Copy:</strong> Click any swatch in the discrete palette to copy its <code>#RRGGBB</code> hex code, or click the continuous gradient bar to copy the ready-to-use CSS <code>linear-gradient(...)</code> declaration.</p>
+					<h3>What are HSL and HSV?</h3>
+					<p><strong>HSL</strong> (Hue, Saturation, Lightness) and <strong>HSV / HSB</strong> (Hue, Saturation, Value / Brightness) are cylindrical-coordinate representations of the sRGB color model. <strong>Hue</strong> specifies the angular position on the color wheel (0°–360°), <strong>Saturation</strong> controls chromatic purity (0%–100%), <strong>Lightness</strong> spans from black (0%) through pure hue (50%) to white (100%), and <strong>Value</strong> controls illumination intensity from black (0%) to full brightness (100%). See <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">Wikipedia: HSL and HSV</a>.</p>
+					<h3>Technical Function Description</h3>
 					<ul>
-						<li><strong>Light and dark mode:</strong> Invert appearance to amplify color feeling.</li>
-						<li><strong>Color 1 and 2:</strong> Enter HEX or decimal RGB, HSL or HSV single values, or select colors using the color picker. Customize your color with range sliders for each color component in HSL, RGB and HSV color space, the slider is colored to actual selection. You may also enter HEX or HSL values by text.</li>
-						<li><strong>RGB,HSL or HSV:</strong> Select the color space used for interpolation between the two colors.</li>
-						<li><strong>HSL inversion:</strong> Reverse lightness. Might be good to swap colors between dark and light background.</li>
-						<li><strong>RGB inversion:</strong> Invert Color.</li>
-						<li><strong>Click to copy color:</strong> Click any color swatch in the gradient palette to copy its HEX code directly to your clipboard, confirmed with an instant toast notification.</li>
-						<li><strong>Steps:</strong> Choose the number of intermediate colors in your palette or gradient. Generate smooth color gradients between 2 colors with a configurable number of steps to create custom color palettes and smooth color transitions.</li>
-						<li><strong>Overdrive:</strong> Extend the color range beyond the two base colors.</li>
-						<li><strong>Text contrast:</strong> Explore text and background color combinations.</li>
-						<li><strong>Back contrast:</strong> Alternatively you make a gradient of text-color and you may choose the static background-color for the whole gradient.</li>
-						<li><strong>Gradient direction:</strong> Choose direction of linear gradient in all 4 direction.</li>
-						<li><strong>Gradient way:</strong> Choose shorter or longer way of gradient.</li>
-						<li><strong>Gradient output:</strong> Generate CSS linear gradients and copy HEX color values for use in websites, GIMP, Inkscape, and other graphics applications. Create color scales for website themes, buttons, backgrounds, and other UI elements. Save and load your color selections directly in your browser without cookies.</li>
-						<li><strong>Contrast ratio:</strong> The tool displays the contrast ratio for each color, helping you explore readable text and background combinations, including WCAG AA / AAA badges (Pass/Fail)</li>
-						<li><strong>Save and load:</strong> Store and restore your color selections locally in your browser without cookies.</li>
+						<li><strong>Light and Dark Theme:</strong> Toggles the surrounding UI luminance between light and dark surfaces so you can judge color appearance and simultaneous contrast accurately.</li>
+						<li><strong>Color 1 and Color 2 Input Models:</strong> Each endpoint supports 6-digit or 3-digit shorthand HEX codes (<code>#RGB</code> → <code>#RRGGBB</code>), native color picking, and high-precision sliders (0.1° / 0.1% resolution in HSL/HSV, 8-bit 0–255 in RGB) with dynamic gradient tracks showing the effect of each parameter.</li>
+						<li><strong>RGB-Invert (Complement):</strong> Inverts all three sRGB channels (<code>255 − R, 255 − G, 255 − B</code>), rotating hue by 180° and inverting lightness simultaneously.</li>
+						<li><strong>HSL-Invert (Lightness Reflection):</strong> Reflects lightness across the midpoint (<code>L' = 100% − L</code>) while keeping Hue and Saturation constant—ideal for converting UI tokens between light and dark themes.</li>
+						<li><strong>Steps & Overdrive Extrapolation:</strong> <em>Steps</em> divides the interval between Color 1 and Color 2 into <code>N</code> equidistant stops. <em>Overdrive</em> extends the linear interpolation parameter below 0 and above 1, extrapolating outer shades and tints with channel clamping and modular hue wrapping.</li>
+						<li><strong>Gradient Space (HSL, RGB, HSV):</strong> Determines the coordinate system used for linear interpolation between endpoints. Endpoint colors are preserved without rounding loss.</li>
+						<li><strong>Gradient Direction:</strong> Orbits the palette layout and CSS gradient vector across all four cardinal directions (Right <code>90deg</code>, Down <code>180deg</code>, Left, and Up).</li>
+						<li><strong>Hue Interpolation Way (Shorter / Longer):</strong> In cylindrical spaces (HSL/HSV), <em>shorter</em> interpolates along the minor arc (<code>|ΔH| ≤ 180°</code>, CSS <code>in hsl shorter hue</code>), whereas <em>longer</em> traverses the major arc (<code>|ΔH| ≥ 180°</code>, CSS <code>in hsl longer hue</code>) across the full spectrum.</li>
+						<li><strong>Text Color & Background Color Contrast Modes:</strong> Test either a fixed foreground text color (Black, White, or custom Color) over your generated background swatches, or apply the generated palette to text over a fixed background surface.</li>
+						<li><strong>WCAG 2.1 Contrast Ratio & Badges:</strong> Computes relative luminance and contrast ratio <code>(L1 + 0.05) / (L2 + 0.05)</code> for every step, displaying real-time compliance badges: <strong>AAA</strong> (≥ 7:1), <strong>AA</strong> (≥ 4.5:1), <strong>AA+</strong> (≥ 3:1 for large text), or <strong>Fail</strong> (&lt; 3:1).</li>
+						<li><strong>One-Click Clipboard Export:</strong> Click any swatch to copy its HEX code or click the continuous preview bar to copy the CSS <code>linear-gradient</code> snippet, confirmed with an instant toast notification.</li>
+						<li><strong>Local User Store:</strong> Save and load complete named palette states (endpoints, color spaces, steps, overdrive, direction, hue arc, contrast settings, and theme) in browser <code>localStorage</code> without cookies.</li>
 					</ul>
 				</div>
 			</details>

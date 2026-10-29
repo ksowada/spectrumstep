@@ -104,6 +104,13 @@ function InputHtml(args) {
     } else {
       window[this.obj]['inputCall'] = this.clickEvent;
     }
+
+    for (var k in this.params) {
+      var tip = (this.tooltips && this.tooltips[k]) || this.params[k].tooltip;
+      if (tip) {
+        this.setTooltip(k, tip);
+      }
+    }
   }
   this.clickEvent = function (callbackName, callbackArgs, varName, paramtype, rangeInput) {
     callbackName = callbackName.name;
@@ -255,6 +262,20 @@ function InputHtml(args) {
   this.setStyle = function (varName, value) {
     var param = this.params[varName];
     document.getElementById(combineToId([this.el, varName])).style = value;
+  }
+  this.setTooltip = function (varName, tooltip) {
+    if (!tooltip) return;
+    var rowEl = document.getElementById(combineToId([this.el, varName, 'row']));
+    var rangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
+    var inputEl = document.getElementById(combineToId([this.el, varName]));
+    var nameTip = typeof tooltip === 'object' ? (tooltip.name || tooltip.range || tooltip.input) : tooltip;
+    var rangeTip = typeof tooltip === 'object' ? (tooltip.range || tooltip.input) : tooltip;
+    var inputTip = typeof tooltip === 'object' ? (tooltip.input || tooltip.range) : tooltip;
+    if (rowEl && rowEl.cells[0] && !rowEl.cells[0].querySelector('button') && nameTip) {
+      rowEl.cells[0].dataset.tooltip = nameTip;
+    }
+    if (rangeEl && rangeTip) rangeEl.dataset.tooltip = rangeTip;
+    if (inputEl && inputTip) inputEl.dataset.tooltip = inputTip;
   }
   // this.storageGet = function (varName,param) {
   //   if (!this.storageEn) return param.value;

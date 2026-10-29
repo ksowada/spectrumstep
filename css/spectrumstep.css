@@ -529,3 +529,75 @@ table.inputs {
 .btn-select span {
 	pointer-events: none;
 }
+/** monochromatic tooltip styling */
+.cmx-tooltip {
+	position: fixed;
+	top: 0;
+	left: 0;
+	max-width: 280px;
+	padding: 7px 11px;
+	border-radius: 6px;
+	font-size: 0.8rem;
+	line-height: 1.35;
+	font-weight: 400;
+	letter-spacing: 0.01em;
+	background: linear-gradient(180deg, #2a2a2a, #171717);
+	color: #f2f2f2;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	box-shadow:
+		0 8px 22px rgba(0, 0, 0, 0.55),
+		inset 0 1px 0 rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(6px);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(4px) scale(0.98);
+	transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s;
+	z-index: 10000;
+	pointer-events: none;
+}
+.cmx-tooltip[data-pos="bottom"] {
+	transform: translateY(-4px) scale(0.98);
+}
+.cmx-tooltip.show {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+}
+.cmx-tooltip::after {
+	content: "";
+	position: absolute;
+	left: var(--arrow-x, 50%);
+	width: 8px;
+	height: 8px;
+	background: #171717;
+	transform: translateX(-50%) rotate(45deg);
+}
+.cmx-tooltip[data-pos="top"]::after {
+	bottom: -5px;
+	border-right: 1px solid rgba(255, 255, 255, 0.22);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+}
+.cmx-tooltip[data-pos="bottom"]::after {
+	top: -5px;
+	background: #2a2a2a;
+	border-left: 1px solid rgba(255, 255, 255, 0.22);
+	border-top: 1px solid rgba(255, 255, 255, 0.22);
+}
+[data-theme="light"] .cmx-tooltip {
+	background: linear-gradient(180deg, #fafafa, #e6e6e6);
+	color: #1a1a1a;
+	border: 1px solid rgba(0, 0, 0, 0.22);
+	box-shadow:
+		0 8px 22px rgba(0, 0, 0, 0.18),
+		inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+[data-theme="light"] .cmx-tooltip[data-pos="top"]::after {
+	background: #e6e6e6;
+	border-right-color: rgba(0, 0, 0, 0.22);
+	border-bottom-color: rgba(0, 0, 0, 0.22);
+}
+[data-theme="light"] .cmx-tooltip[data-pos="bottom"]::after {
+	background: #fafafa;
+	border-left-color: rgba(0, 0, 0, 0.22);
+	border-top-color: rgba(0, 0, 0, 0.22);
+}

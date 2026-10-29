@@ -1,9 +1,68 @@
 var hslInit = false; // hsl initialition possible
 var params_cmx = {
-	c: { name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb' },
+	c: {
+		name: 'RGB', type: 'color', unit: 'hex', callbackName: 'calcform_cmx_rgb',
+		tooltip: {
+			range: 'Native sRGB color picker: visually select endpoint color',
+			input: 'Hexadecimal sRGB color code (#RRGGBB or 3-digit #RGB shorthand)'
+		}
+	},
 	h: { name: 'H', type: 'number', unit: '°', value: 0, min: 0, max: 360, round: -1, step: 'any', rangeStep: '0.1', callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 	s: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: -1, step: 'any', rangeStep: '0.1', callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 	l: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: -1, step: 'any', rangeStep: '0.1', callbackName: 'calcform_cmx_hsl', class:'colorrange'},
+};
+const channelTooltipsForMode = {
+	HSL: [
+		{
+			name: 'Hue (H): angular position on the color wheel (0°–360°)',
+			range: 'Hue angle slider (0° Red, 120° Green, 240° Blue, 360° Red)',
+			input: 'Hue angle in degrees (0–360°, 0.1° resolution)'
+		},
+		{
+			name: 'Saturation (S): chromatic purity in HSL space (0%–100%)',
+			range: 'HSL Saturation slider (0% achromatic gray to 100% pure chroma)',
+			input: 'HSL Saturation percentage (0–100%, 0.1% resolution)'
+		},
+		{
+			name: 'Lightness (L): relative lightness (0% black, 50% pure hue, 100% white)',
+			range: 'HSL Lightness slider (0% black through 50% pure color to 100% white)',
+			input: 'HSL Lightness percentage (0–100%, 0.1% resolution)'
+		}
+	],
+	RGB: [
+		{
+			name: 'Red (R): 8-bit additive sRGB red primary channel (0–255)',
+			range: 'Red channel slider (0–255)',
+			input: 'Red channel 8-bit integer value (0–255)'
+		},
+		{
+			name: 'Green (G): 8-bit additive sRGB green primary channel (0–255)',
+			range: 'Green channel slider (0–255)',
+			input: 'Green channel 8-bit integer value (0–255)'
+		},
+		{
+			name: 'Blue (B): 8-bit additive sRGB blue primary channel (0–255)',
+			range: 'Blue channel slider (0–255)',
+			input: 'Blue channel 8-bit integer value (0–255)'
+		}
+	],
+	HSV: [
+		{
+			name: 'Hue (H): angular position on the color wheel (0°–360°)',
+			range: 'Hue angle slider (0° Red, 120° Green, 240° Blue, 360° Red)',
+			input: 'Hue angle in degrees (0–360°, 0.1° resolution)'
+		},
+		{
+			name: 'Saturation (S): tint purity in HSV space (0% white/gray to 100% pure hue)',
+			range: 'HSV Saturation slider (0%–100%)',
+			input: 'HSV Saturation percentage (0–100%, 0.1% resolution)'
+		},
+		{
+			name: 'Value (V): illumination brightness (0% black to 100% full brightness)',
+			range: 'HSV Value / Brightness slider (0%–100%)',
+			input: 'HSV Value / Brightness percentage (0–100%, 0.1% resolution)'
+		}
+	]
 };
 const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
 var inp_cmx_arr = [];
@@ -42,7 +101,13 @@ var gradientSwitch = undefined;
 var colModeSwitch = [undefined,undefined];
 var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 	inputLoadId:'load-input', btnLoadId:'load-btn',
-	inputSaveId:'save-input', btnSaveId:'save-btn'
+	inputSaveId:'save-input', btnSaveId:'save-btn',
+	tooltips: {
+		inputLoad: 'Select a saved palette preset from browser localStorage',
+		btnLoad: 'Load the selected palette preset (endpoints, color spaces, steps, contrast, and theme)',
+		inputSave: 'Enter a name to store the current palette configuration in browser localStorage',
+		btnSave: 'Save the current palette configuration to browser localStorage (no cookies)'
+	}
 });
 const themeModes = ['light','dark']
 var themeSwitch = undefined;
@@ -54,7 +119,12 @@ var gradientWaySwitch = undefined;
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
 		document.getElementById('theme-select'),
-		themeModes, ['assets/icons/sun-solid-full.svg','assets/icons/moon-solid-full.svg'],undefined, themeCare);
+		themeModes, ['assets/icons/sun-solid-full.svg','assets/icons/moon-solid-full.svg'],undefined, themeCare, {
+			tooltips: {
+				light: 'UI Theme: Light mode active. Click to switch to Dark mode to evaluate colors against a low-luminance surround.',
+				dark: 'UI Theme: Dark mode active. Click to switch to Light mode to evaluate colors against a high-luminance surround.'
+			}
+		});
 
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
@@ -68,19 +138,46 @@ function calcform_cmx_init() {
 		let row = document.getElementById(id+'-c-row');
 		let firstCell = row.cells[0];
 		firstCell.innerHTML = '';
-		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'assets/icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace, {showText:false});
+		colModeSwitch[ix] = new ButtonSwitch(firstCell, colModes, 'assets/icons/arrows-rotate-solid-full.svg',ix, calcform_cmx_colorspace, {
+			showText: false,
+			tooltips: {
+				HSL: 'Input Space: Cylindrical HSL (Hue 0–360°, Saturation 0–100%, Lightness 0–100%). Click to switch to RGB.',
+				RGB: 'Input Space: Additive sRGB (Red, Green, Blue 0–255). Click to switch to HSV.',
+				HSV: 'Input Space: Cylindrical HSV/HSB (Hue 0–360°, Saturation 0–100%, Value 0–100%). Click to switch to HSL.'
+			}
+		});
 	})
-	steps = new RangeSetting('steps',calcform_cmx_dyna);
-	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna);
+	steps = new RangeSetting('steps',calcform_cmx_dyna, 'Discrete interpolation steps (2–16): number of equidistant color stops generated between Color 1 and Color 2');
+	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna, 'Overdrive extrapolation (0–16): linearly extrapolate additional color stops beyond Color 1 and Color 2 on both ends');
 	gradientSwitch = new ButtonSwitch(
 		document.getElementById('gradient-select'),
-		colModes, 'assets/icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna());
+		colModes, 'assets/icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna(), {
+			tooltips: {
+				HSL: 'Interpolation Space: HSL. Linearly interpolates Hue, Saturation, and Lightness. Click to switch to RGB.',
+				RGB: 'Interpolation Space: sRGB. Linearly interpolates Red, Green, and Blue channels. Click to switch to HSV.',
+				HSV: 'Interpolation Space: HSV/HSB. Linearly interpolates Hue, Saturation, and Value. Click to switch to HSL.'
+			}
+		});
 	gradientDirectionSwitch = new ButtonSwitch(
 		document.getElementById('gradientDirection'),
-		['right','down','left','up'], ['assets/icons/right-long-solid-full.svg','assets/icons/down-long-solid-full.svg','assets/icons/left-long-solid-full.svg','assets/icons/up-long-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
+		['right','down','left','up'], ['assets/icons/right-long-solid-full.svg','assets/icons/down-long-solid-full.svg','assets/icons/left-long-solid-full.svg','assets/icons/up-long-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
+			showText: false,
+			tooltips: {
+				right: 'Gradient Direction: Left → Right (90deg CSS linear-gradient). Click to cycle direction.',
+				down: 'Gradient Direction: Top → Bottom (180deg CSS linear-gradient). Click to cycle direction.',
+				left: 'Gradient Direction: Right → Left (reversed 90deg CSS linear-gradient). Click to cycle direction.',
+				up: 'Gradient Direction: Bottom → Top (reversed 180deg CSS linear-gradient). Click to cycle direction.'
+			}
+		});
 	gradientWaySwitch = new ButtonSwitch(
 		document.getElementById('gradientWay'),
-		['shorter','longer'], ['assets/icons/down-left-and-up-right-to-center-solid-full.svg','assets/icons/up-right-and-down-left-from-center-solid-full.svg'],undefined, () => calcform_cmx_dyna(),{showText:false});
+		['shorter','longer'], ['assets/icons/down-left-and-up-right-to-center-solid-full.svg','assets/icons/up-right-and-down-left-from-center-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
+			showText: false,
+			tooltips: {
+				shorter: "Hue Path: Shorter arc (|ΔH| ≤ 180°, CSS 'in hsl shorter hue'). Interpolates along the direct path on the color wheel.",
+				longer: "Hue Path: Longer arc (|ΔH| ≥ 180°, CSS 'in hsl longer hue'). Interpolates around the far side of the color wheel."
+			}
+		});
 	textColorSelect = new ButtonSelect(
 		document.getElementById('textContrast'),
 		(id, el, instance) => {
@@ -92,6 +189,11 @@ function calcform_cmx_init() {
 			}
 			backColorSelect.setValue(undefined, false)
 			calcform_cmx_dyna(color, undefined); // dein Callback-Ziel
+		},
+		{
+			'textContrast-black': 'Foreground Contrast Mode: Test static Black (#000000) text over the generated gradient background swatches',
+			'textContrast-white': 'Foreground Contrast Mode: Test static White (#ffffff) text over the generated gradient background swatches',
+			'textContrast-label': 'Foreground Contrast Mode: Pick a custom foreground text color to evaluate contrast over the gradient background swatches'
 		}
 	);
 	backColorSelect = new ButtonSelect(
@@ -105,6 +207,11 @@ function calcform_cmx_init() {
 			}
 			textColorSelect.setValue(undefined, false)
 			calcform_cmx_dyna(undefined,color); // dein Callback-Ziel
+		},
+		{
+			'backContrast-black': 'Background Contrast Mode: Apply the gradient to text color over a static Black (#000000) background',
+			'backContrast-white': 'Background Contrast Mode: Apply the gradient to text color over a static White (#ffffff) background',
+			'backContrast-label': 'Background Contrast Mode: Pick a custom static background color behind gradient-colored text'
 		}
 	);
 	textColorSelect.setValue('textContrast-black')
@@ -203,13 +310,16 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 			inp_cmx_arr[ix].params[hslKeys[i]].round = roundForMode[colMode[ix]][i];
 		}
 	})
-	// manipulate row heads
+	// manipulate row heads and channel tooltips
 	const rowIds = ['-h-row','-s-row','-l-row']
 	rowIds.forEach((id,i) => {
 		const newId = inp_cmx_ids[ix]+id;
 		const row = document.getElementById(newId);
 		const firstCell = row.cells[0];
 		firstCell.innerHTML = colModes[colModes.indexOf(colMode[ix])].charAt(i);
+		if (inp_cmx_arr[ix] && channelTooltipsForMode[colMode[ix]]) {
+			inp_cmx_arr[ix].setTooltip(hslKeys[i], channelTooltipsForMode[colMode[ix]][i]);
+		}
 	})
 	if (!init) calcform_cmx_rgb(ix);
 }
@@ -270,9 +380,9 @@ function calcform_cmx_dyna(textColor, backColor) {
 		const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
 		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
 		const contrastInfo = getContrastInfo(textRgb, backRgb)
-		const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" title="' + contrastInfo.badgeTitle + '">' + contrastInfo.badge + '</span>';
-		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" title="Click to copy ' + colArr[rowIx] + '" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
-		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" title="Click to copy ' + colArr[rowIx] + '" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
+		const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
+		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
+		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+contrastInfo.ratioText+'<br/>'+badgeHtml+'</span></div>';
 	}
 	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
@@ -291,7 +401,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	div_grd.innerHTML = gradientText
 	div_grd.style.background = gradientText
 	div_grd.style.color = _textColor
-	div_grd.title = "Click to copy CSS gradient";
+	div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
 	div_grd.onclick = () => copyColorStep(gradientText, div_grd);
 }
 
@@ -454,8 +564,91 @@ function themeCare(text, ix) {
 	applyTheme(parameterTheme || savedTheme || systemTheme);
 }
 
+var activeTooltipTarget = null;
+function getTooltipEl() {
+	let tip = document.getElementById('cmx-tooltip');
+	if (!tip) {
+		tip = document.createElement('div');
+		tip.id = 'cmx-tooltip';
+		tip.className = 'cmx-tooltip';
+		tip.setAttribute('role', 'tooltip');
+		document.body.appendChild(tip);
+	}
+	return tip;
+}
+
+function positionTooltip(target) {
+	if (!target || !target.dataset.tooltip) return;
+	const tip = getTooltipEl();
+	tip.textContent = target.dataset.tooltip;
+	tip.classList.add('show');
+
+	const rect = target.getBoundingClientRect();
+	const tipRect = tip.getBoundingClientRect();
+	const gap = 9;
+	const margin = 8;
+
+	let pos = 'top';
+	let top = rect.top - tipRect.height - gap;
+	if (top < margin) {
+		pos = 'bottom';
+		top = rect.bottom + gap;
+	}
+	const centerX = rect.left + rect.width / 2;
+	let left = centerX - tipRect.width / 2;
+	left = Math.max(margin, Math.min(left, window.innerWidth - tipRect.width - margin));
+	const arrowX = Math.max(12, Math.min(centerX - left, tipRect.width - 12));
+
+	tip.dataset.pos = pos;
+	tip.style.top = `${Math.round(top)}px`;
+	tip.style.left = `${Math.round(left)}px`;
+	tip.style.setProperty('--arrow-x', `${Math.round(arrowX)}px`);
+}
+
+function updateActiveTooltip(el) {
+	if (activeTooltipTarget === el && el && el.dataset.tooltip) {
+		positionTooltip(el);
+	}
+}
+
+function hideTooltip() {
+	activeTooltipTarget = null;
+	const tip = document.getElementById('cmx-tooltip');
+	if (tip) tip.classList.remove('show');
+}
+
+function initTooltips() {
+	document.addEventListener('mouseover', function (e) {
+		const target = e.target.closest('[data-tooltip]');
+		if (!target || !target.dataset.tooltip) {
+			hideTooltip();
+			return;
+		}
+		activeTooltipTarget = target;
+		positionTooltip(target);
+	});
+	document.addEventListener('mouseout', function (e) {
+		if (!activeTooltipTarget) return;
+		const related = e.relatedTarget ? e.relatedTarget.closest('[data-tooltip]') : null;
+		if (related !== activeTooltipTarget) {
+			hideTooltip();
+		}
+	});
+	document.addEventListener('focusin', function (e) {
+		const target = e.target.closest('[data-tooltip]');
+		if (target && target.dataset.tooltip) {
+			activeTooltipTarget = target;
+			positionTooltip(target);
+		}
+	});
+	document.addEventListener('focusout', hideTooltip);
+	window.addEventListener('scroll', hideTooltip, { passive: true });
+	window.addEventListener('resize', hideTooltip, { passive: true });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 	calcform_cmx_init();
 	calcform_cmx_doml();
 	themeCare(); // need calcform_cmx_init before
+	initTooltips();
 });
