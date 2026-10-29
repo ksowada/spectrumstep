@@ -1,4 +1,4 @@
-# HSL-Mixer
+# SpectrumStep
 
 ## features
 - besides HSL, use RGB and HSV mixing
