@@ -116,7 +116,7 @@ function InputHtml(args) {
       closeButton.addEventListener("click", this.toggleModal.bind(this));
       window.addEventListener("click", this.windowOnClick.bind(this)); 
     }
-    // this.rangeInput = false;
+    this.rangeInput = false;
   }
   this.toggleModal = function ()  {
     document.querySelector(".modal").remove();
@@ -212,7 +212,7 @@ function InputHtml(args) {
   this.getRange = function (varName) {
     var param = this.params[varName];
     param.value = document.getElementById(combineToId([this.el, varName, 'range'])).value; // change slider
-    param.value = parseFloat(param.value);
+    if (param.type !== 'color') param.value = parseFloat(param.value);
     document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
     return param.value;
   }

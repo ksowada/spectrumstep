@@ -287,7 +287,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	div_grd.style.background = gradientText
 	div_grd.style.color = _textColor
 	div_grd.title = "Click to copy CSS gradient";
-	div_grd.onclick = () => copyText(gradientText, '✓ Copied CSS gradient!');
+	div_grd.onclick = () => copyColorStep(gradientText, div_grd);
 }
 
 let toastTimeout = null;
