@@ -486,16 +486,18 @@ table.inputs {
 	color: violet;
 }
 #backContrast-white {
-	background-color: white;
-	color: gray;
+	background: white;
 }
 #backContrast-black {
-	background-color: black;
-	color: gray;
+	background: black;
 }
 #backContrast-label {
-	background-color: gray;
-	color: black;
+	background: gray;
+}
+#backContrast .btn-select span {
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
 }
 /** special styles for color button in gradient text */
 .btn-select {
@@ -509,6 +511,7 @@ table.inputs {
 	background: #eee;
 	cursor: pointer;
 	font: inherit;
+	font-weight: bold;
 }
 .btn-select.selected {
 	border-color: var(--variable, #333);

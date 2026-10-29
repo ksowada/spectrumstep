@@ -403,6 +403,13 @@ function calcform_cmx_dyna(textColor, backColor) {
 	div_grd.style.color = _textColor
 	div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
 	div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+
+	document.querySelectorAll('#textContrast .btn-select').forEach(el => {
+		el.style.background = gradientText;
+	});
+	document.querySelectorAll('#backContrast .btn-select span').forEach(span => {
+		span.style.backgroundImage = gradientText;
+	});
 }
 
 let toastTimeout = null;
