@@ -17,6 +17,8 @@
 ## visu
 - mark edge colors as in overdrive it is unvisible, f.e. a frame around base gradient
 - header is cutted at broad width display, it shall be full-width
+- docu as extra tab, not below gradient, there should be nothing
+  - in docu use icons for explain
 
 ## ChatGPT
 - HEX-Werte direkt anklickbar machen - Schnelleres Arbeiten

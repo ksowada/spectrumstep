@@ -101,6 +101,7 @@
 					<div id="gradient-select"></div>
 					<div id="gradientDirection"></div>
 					<div id="gradientWay"></div>
+					<div id="contrastVisibility"></div>
 				</fieldset>
 				<fieldset class="flex-scatter-childs" id="textContrast">
 					<legend>Text color</legend>
@@ -147,7 +148,7 @@
 					<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, and cylindrical <strong>HSV</strong> color models. Adjust live-rendered channel sliders or enter exact numeric and hexadecimal values.</p>
 					<p><strong>2. Transform & Sync Endpoints:</strong> Generate random 24-bit sRGB colors, compute the sRGB complement (<em>RGB-Invert</em>), reflect lightness while preserving hue and saturation (<em>HSL-Invert</em>), or clone colors across endpoints (<em>Copy</em>).</p>
 					<p><strong>3. Set Steps & Overdrive:</strong> Define the number of equidistant interpolation steps (2–16) and optionally extrapolate steps beyond both base colors using <em>Overdrive</em> (0–16).</p>
-					<p><strong>4. Interpolation Space, Direction & Hue Path:</strong> Choose the mixing space (HSL, RGB, HSV), spatial direction (Right, Down, Left, Up), and hue arc (<em>shorter hue</em> vs. <em>longer hue</em>). Evaluate legibility against static foreground text or static background colors.</p>
+					<p><strong>4. Interpolation Space, Direction & Hue Path:</strong> Choose the mixing space (HSL, RGB, HSV), spatial direction (Right, Down, Left, Up), hue arc (<em>shorter hue</em> vs. <em>longer hue</em>), and toggle contrast info visibility. Evaluate legibility against static foreground text or static background colors.</p>
 					<p><strong>5. Export & Copy:</strong> Click any swatch in the discrete palette to copy its <code>#RRGGBB</code> hex code, or click the continuous gradient bar to copy the ready-to-use CSS <code>linear-gradient(...)</code> declaration.</p>
 					<h3>What are HSL and HSV?</h3>
 					<p><strong>HSL</strong> (Hue, Saturation, Lightness) and <strong>HSV / HSB</strong> (Hue, Saturation, Value / Brightness) are cylindrical-coordinate representations of the sRGB color model. <strong>Hue</strong> specifies the angular position on the color wheel (0°–360°), <strong>Saturation</strong> controls chromatic purity (0%–100%), <strong>Lightness</strong> spans from black (0%) through pure hue (50%) to white (100%), and <strong>Value</strong> controls illumination intensity from black (0%) to full brightness (100%). See <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">Wikipedia: HSL and HSV</a>.</p>
@@ -161,10 +162,11 @@
 						<li><strong>Gradient Space (HSL, RGB, HSV):</strong> Determines the coordinate system used for linear interpolation between endpoints. Endpoint colors are preserved without rounding loss.</li>
 						<li><strong>Gradient Direction:</strong> Orbits the palette layout and CSS gradient vector across all four cardinal directions (Right <code>90deg</code>, Down <code>180deg</code>, Left, and Up).</li>
 						<li><strong>Hue Interpolation Way (Shorter / Longer):</strong> In cylindrical spaces (HSL/HSV), <em>shorter</em> interpolates along the minor arc (<code>|ΔH| ≤ 180°</code>, CSS <code>in hsl shorter hue</code>), whereas <em>longer</em> traverses the major arc (<code>|ΔH| ≥ 180°</code>, CSS <code>in hsl longer hue</code>) across the full spectrum.</li>
+						<li><strong>Contrast Info Visibility (Show / Hide):</strong> Toggles the display of WCAG contrast ratios and compliance badges on the palette swatches, allowing a distraction-free view showing only the <code>#RRGGBB</code> hex values.</li>
 						<li><strong>Text Color & Background Color Contrast Modes:</strong> Test either a fixed foreground text color (Black, White, or custom Color) over your generated background swatches, or apply the generated palette to text over a fixed background surface.</li>
 						<li><strong>WCAG 2.1 Contrast Ratio & Badges:</strong> Computes relative luminance and contrast ratio <code>(L1 + 0.05) / (L2 + 0.05)</code> for every step, displaying real-time compliance badges: <strong>AAA</strong> (≥ 7:1), <strong>AA</strong> (≥ 4.5:1), <strong>AA+</strong> (≥ 3:1 for large text), or <strong>Fail</strong> (&lt; 3:1).</li>
 						<li><strong>One-Click Clipboard Export:</strong> Click any swatch to copy its HEX code or click the continuous preview bar to copy the CSS <code>linear-gradient</code> snippet, confirmed with an instant toast notification.</li>
-						<li><strong>Local User Store:</strong> Save and load complete named palette states (endpoints, color spaces, steps, overdrive, direction, hue arc, contrast settings, and theme) in browser <code>localStorage</code> without cookies.</li>
+						<li><strong>Local User Store:</strong> Save and load complete named palette states (endpoints, color spaces, steps, overdrive, direction, hue arc, contrast visibility, contrast settings, and theme) in browser <code>localStorage</code> without cookies.</li>
 					</ul>
 				</div>
 			</details>

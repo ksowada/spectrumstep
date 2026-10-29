@@ -283,12 +283,17 @@ table.inputs {
 }
 .color-palette-down, .color-palette-up {
 	display: grid;
-	grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+	grid-template-rows: repeat(auto-fit, 1fr);
 	gap: 4px;
+}
+.color-palette-down .color-step, .color-palette-up .color-step {
+	min-height: 34px;
+}
+.color-palette-right .color-step, .color-palette-left .color-step {
+	min-height: 144px;
 }
 .color-step {
 	min-width: 0;
-	min-height: 144px;
 	display: flex;
 	align-items: center;
 	justify-content: center;

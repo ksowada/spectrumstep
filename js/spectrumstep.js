@@ -115,6 +115,7 @@ var textColorSelect = undefined;
 var backColorSelect = undefined;
 var gradientDirectionSwitch = undefined;
 var gradientWaySwitch = undefined;
+var contrastVisibilitySwitch = undefined;
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	themeSwitch = new ButtonSwitch(
@@ -176,6 +177,15 @@ function calcform_cmx_init() {
 			tooltips: {
 				shorter: "Hue Path: Shorter arc (|ΔH| ≤ 180°, CSS 'in hsl shorter hue'). Interpolates along the direct path on the color wheel.",
 				longer: "Hue Path: Longer arc (|ΔH| ≥ 180°, CSS 'in hsl longer hue'). Interpolates around the far side of the color wheel."
+			}
+		});
+	contrastVisibilitySwitch = new ButtonSwitch(
+		document.getElementById('contrastVisibility'),
+		['show','hide'], ['assets/icons/eye-solid-full.svg','assets/icons/eye-slash-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
+			showText: false,
+			tooltips: {
+				show: 'Hide contrast info',
+				hide: 'Show contrast info'
 			}
 		});
 	textColorSelect = new ButtonSelect(
@@ -360,6 +370,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const gradientMode = gradientSwitch.value;
 	const gradientDirection = gradientDirectionSwitch.value;
 	const gradientWay = gradientWaySwitch.value;
+	const showContrast = contrastVisibilitySwitch.value !== 'hide';
 	if (textColor) {
 		_textColor = textColor
 		_backColor = undefined
@@ -377,13 +388,17 @@ function calcform_cmx_dyna(textColor, backColor) {
 	if (gradientDirection==='left'||gradientDirection==='up')colArr.reverse()
 	var html = `<div class="color-palette-${gradientDirection}">`
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
-		const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
-		const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
-		const contrastInfo = getContrastInfo(textRgb, backRgb)
-		const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
-		const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
-		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + '<br/>'+infoHtml+'</span></div>';
-		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + '<br/>'+infoHtml+'</span></div>';
+		let infoBlock = '';
+		if (showContrast) {
+			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
+			const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
+			const contrastInfo = getContrastInfo(textRgb, backRgb)
+			const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
+			const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
+			infoBlock = '<br/>' + infoHtml;
+		}
+		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + infoBlock + '</span></div>';
+		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + infoBlock + '</span></div>';
 	}
 	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
@@ -514,6 +529,7 @@ function calcform_cmx_onLoad() {
 	gradientSwitch.setValue(data.gradientMode)
 	gradientDirectionSwitch.setValue(data.gradientDirection)
 	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay)
+	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility)
 	themeCare(data.theme);
 	calcform_cmx_dyna();
 }
@@ -529,7 +545,8 @@ function calcform_cmx_onSave() {
 		colMode, 
 		theme:themeSwitch.value,
 		gradientDirection:gradientDirectionSwitch.value,
-		gradientWay:gradientWaySwitch.value
+		gradientWay:gradientWaySwitch.value,
+		contrastVisibility:contrastVisibilitySwitch.value
 	};
 	storage.saveSetting({ data: data });
 }
