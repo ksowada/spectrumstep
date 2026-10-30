@@ -165,6 +165,9 @@ function calcform_cmx_init() {
 			}
 		});
 	})
+	if (typeof initColorPlaneButtons === 'function') {
+		initColorPlaneButtons();
+	}
 	steps = new RangeSetting('steps',calcform_cmx_dyna, 'Discrete interpolation steps (2–16): number of equidistant color stops generated between Color 1 and Color 2');
 	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna, 'Overdrive extrapolation (0–16): linearly extrapolate additional color stops beyond Color 1 and Color 2 on both ends');
 	gradientSwitch = new ButtonSwitch(
@@ -345,12 +348,19 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 		const newId = inp_cmx_ids[ix]+id;
 		const row = document.getElementById(newId);
 		const firstCell = row.cells[0];
-		firstCell.innerHTML = colModes[colModes.indexOf(colMode[ix])].charAt(i);
+		const btn = firstCell.querySelector('.channel-plane-btn');
+		const label = colModes[colModes.indexOf(colMode[ix])].charAt(i);
+		if (btn) {
+			btn.textContent = label;
+		} else {
+			firstCell.innerHTML = label;
+		}
 		if (inp_cmx_arr[ix] && channelTooltipsForMode[colMode[ix]]) {
 			inp_cmx_arr[ix].setTooltip(hslKeys[i], channelTooltipsForMode[colMode[ix]][i]);
 		}
 	})
 	if (!init) calcform_cmx_rgb(ix);
+	if (typeof updateColorPlaneButtons === 'function') updateColorPlaneButtons(ix);
 }
 /** calculate HSL from RGB input */
 function calcform_cmx_rgb(ix,init) {
@@ -367,6 +377,7 @@ function calcform_cmx_rgb(ix,init) {
 	})
 	calcform_cmx_range(ix, colMode[ix],hslLongRounded[0], hslLongRounded[1], hslLongRounded[2])
 	hslKeys.forEach((key,i) => inp_cmx_arr[ix].set(key, hslLong[i]))
+	if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 	if (init == undefined) calcform_cmx_dyna();
 }
 /** calculate RGB from HSL input */
@@ -380,6 +391,7 @@ function calcform_cmx_hsl(ix,init) {
 	const rgb_per = colorConvertToRgb(colMode[ix], hsl[ix]);
 	rgbh[ix] = rgbToColor(rgb_per);
 	inp_cmx_arr[ix].set('c', rgbh[ix]);
+	if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 	if (init == undefined) calcform_cmx_dyna();
 }
 /** berechne Farbtabelle */
@@ -574,6 +586,7 @@ function calcform_cmx_applyState(data) {
 			const r = roundForMode[colMode[ix]];
 			calcform_cmx_range(ix, colMode[ix], round(hslLong[0], r[0]), round(hslLong[1], r[1]), round(hslLong[2], r[2]));
 			hslKeys.forEach((key, i) => inp_cmx_arr[ix].set(key, hslLong[i]));
+			if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 		} else {
 			calcform_cmx_rgb(ix, true);
 		}

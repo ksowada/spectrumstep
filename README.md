@@ -19,6 +19,7 @@
 - URL search params with color and gradientsetting to make share of colors easy
 - use storage to retain information, when switching to docu and back
 - documentation in header as link with same header with app and theme switch
+- 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V) to pick the remaining 2 components (X/Y) with real-time gradient updates
 
 ## UI
 - icon: make icons light in dark theme
@@ -28,6 +29,7 @@
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
 - HSL/HSV/RGB-gradient eliminate radio buttons and use single-selection-buttons
 - input for numbers with monospace font
+- channel identifier buttons in first column open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
 
 ## infrastructure
 - use npm package for
