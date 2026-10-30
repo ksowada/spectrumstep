@@ -60,18 +60,85 @@
 	<main>
 		<article class="middle docu-article" id="middle">
 			<h1 class="tool-title">SpectrumStep – Multi-Space Gradient &amp; Contrast Generator</h1>
-			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate WCAG 2.1 text contrast in real time across HSL, HSV, and RGB color spaces.</em></p>
+			<p class="tool-intro"><em>Create precise discrete color gradients and evaluate WCAG 2.1 text contrast in real time across HSL, RGB, HSV, OKLab, and OKLCH color spaces.</em></p>
 
 			<section class="guide-content">
 				<h2>How to use SpectrumStep</h2>
-				<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, and cylindrical <strong>HSV</strong> color models (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Cycle color space" /></span>). Adjust live-rendered channel sliders, enter exact numeric and hexadecimal values, or click any channel button (<span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">L</span> / <span class="docu-icon-chip">R</span><span class="docu-icon-chip">G</span><span class="docu-icon-chip">B</span> / <span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">V</span>) to fix that component and pick the other two on a 2D color plane (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-left-right-solid-full.svg" alt="X-axis channel" /><img class="icon" src="../assets/icons/arrows-up-down-solid-full.svg" alt="Y-axis channel" /></span>).</p>
+				<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, cylindrical <strong>HSV</strong>, perceptual Cartesian <strong>Oklab</strong>, and perceptual cylindrical <strong>Oklch</strong> color models (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Cycle color space" /></span>). Adjust live-rendered channel sliders, enter exact numeric and hexadecimal values, or click any channel button in the first column (<span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">L</span> / <span class="docu-icon-chip">R</span><span class="docu-icon-chip">G</span><span class="docu-icon-chip">B</span> / <span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">V</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">a</span><span class="docu-icon-chip">b</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">c</span><span class="docu-icon-chip">h</span>) to fix that component and pick the other two on a 2D color plane (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-left-right-solid-full.svg" alt="X-axis channel" /><img class="icon" src="../assets/icons/arrows-up-down-solid-full.svg" alt="Y-axis channel" /></span>).</p>
 				<p><strong>2. Transform &amp; Sync Endpoints:</strong> Generate random 24-bit sRGB colors (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/shuffle-solid-full.svg" alt="Random" />Random</span>), compute the sRGB complement (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/circle-half-stroke-solid-full.svg" alt="RGB-Invert" />RGB-Invert</span>), reflect lightness while preserving hue and saturation (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/circle-half-stroke-solid-full.svg" alt="HSL-Invert" />HSL-Invert</span>), or clone colors across endpoints (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/right-long-solid-full.svg" alt="Copy right" /><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="Copy left" />Copy</span>).</p>
 				<p><strong>3. Set Steps &amp; Overdrive:</strong> Define the number of equidistant interpolation steps (2–16) and optionally extrapolate steps beyond both base colors using <em>Overdrive</em> (0–16).</p>
-				<p><strong>4. Interpolation Space, Direction &amp; Hue Path:</strong> Choose the mixing space (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Interpolation space" />HSL / RGB / HSV</span>), spatial direction (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/right-long-solid-full.svg" alt="Right" /><img class="icon" src="../assets/icons/down-long-solid-full.svg" alt="Down" /><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="Left" /><img class="icon" src="../assets/icons/up-long-solid-full.svg" alt="Up" /></span>), hue arc (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/down-left-and-up-right-to-center-solid-full.svg" alt="Shorter hue" />shorter</span> vs. <span class="docu-icon-chip"><img class="icon" src="../assets/icons/up-right-and-down-left-from-center-solid-full.svg" alt="Longer hue" />longer</span>), and toggle contrast info visibility (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/eye-solid-full.svg" alt="Show contrast" /><img class="icon" src="../assets/icons/eye-slash-solid-full.svg" alt="Hide contrast" /></span>). Evaluate legibility against static foreground text or static background colors.</p>
-				<p><strong>5. Export, Share &amp; Copy:</strong> Click any swatch in the discrete palette to copy its <code>#RRGGBB</code> hex code, click the continuous gradient bar to copy the ready-to-use CSS <code>linear-gradient(...)</code> declaration, or copy the browser URL to share or bookmark your exact palette configuration.</p>
+				<p><strong>4. Interpolation Space, Direction &amp; Hue Path:</strong> Choose the mixing space (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Interpolation space" />HSL / RGB / HSV / Oklab / Oklch</span>), spatial direction (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/right-long-solid-full.svg" alt="Right" /><img class="icon" src="../assets/icons/down-long-solid-full.svg" alt="Down" /><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="Left" /><img class="icon" src="../assets/icons/up-long-solid-full.svg" alt="Up" /></span>), hue arc (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/down-left-and-up-right-to-center-solid-full.svg" alt="Shorter hue" />shorter</span> vs. <span class="docu-icon-chip"><img class="icon" src="../assets/icons/up-right-and-down-left-from-center-solid-full.svg" alt="Longer hue" />longer</span>), and toggle contrast info visibility (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/eye-solid-full.svg" alt="Show contrast" /><img class="icon" src="../assets/icons/eye-slash-solid-full.svg" alt="Hide contrast" /></span>). Evaluate legibility against static foreground text or static background colors.</p>
+				<p><strong>5. Export, Share &amp; Copy:</strong> Click any swatch in the discrete palette to copy its <code>#RRGGBB</code> hex code, click the continuous gradient bar to copy the ready-to-use CSS <code>linear-gradient(...)</code> declaration using native CSS color space interpolation, or copy the browser URL to share or bookmark your exact palette configuration.</p>
 
-				<h3>What are HSL and HSV?</h3>
-				<p><strong>HSL</strong> (Hue, Saturation, Lightness) and <strong>HSV / HSB</strong> (Hue, Saturation, Value / Brightness) are cylindrical-coordinate representations of the sRGB color model. <strong>Hue</strong> specifies the angular position on the color wheel (0°–360°), <strong>Saturation</strong> controls chromatic purity (0%–100%), <strong>Lightness</strong> spans from black (0%) through pure hue (50%) to white (100%), and <strong>Value</strong> controls illumination intensity from black (0%) to full brightness (100%). See <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">Wikipedia: HSL and HSV</a>.</p>
+				<h3>Color Spaces: RGB, HSL, HSV, OKLab, and OKLCH</h3>
+				<p><strong>HSL</strong> (Hue, Saturation, Lightness) and <strong>HSV / HSB</strong> (Hue, Saturation, Value / Brightness) are cylindrical-coordinate transformations of the additive <strong>sRGB</strong> color model (<a href="https://en.wikipedia.org/wiki/HSL_and_HSV">Wikipedia: HSL and HSV</a>). While intuitive for basic adjustments, neither HSL nor HSV is perceptually uniform—changing hue at a constant HSL lightness produces dramatic jumps in perceived brightness (for example, pure yellow appears much brighter than pure blue).</p>
+				<p><strong>OKLab</strong> and its cylindrical counterpart <strong>OKLCH</strong> (designed by <a href="https://bottosson.github.io/posts/oklab/">Björn Ottosson</a> and standardized in CSS Color Level 4) model human visual perception so equal numerical steps correspond closely to equal perceived color differences:</p>
+				<ul>
+					<li><strong>OKLab (<code>l</code>, <code>a</code>, <code>b</code>):</strong> Represents colors using perceptual Lightness <code>l</code> (0–100%) and two opponent Cartesian axes: <code>a</code> (green −0.4 to red +0.4) and <code>b</code> (blue −0.4 to yellow +0.4). Interpolating linearly in OKLab produces smooth, natural transitions without the muddy gray midpoints common in sRGB or the brightness spikes of HSL.</li>
+					<li><strong>OKLCH (<code>l</code>, <code>c</code>, <code>h</code>):</strong> Expresses OKLab in polar coordinates using perceptual Lightness <code>l</code> (0–100%), Chroma <code>c</code> (0 neutral gray to 0.4 vivid colorfulness), and Hue angle <code>h</code> (0°–360°). OKLCH is ideal when you want predictable lightness and vividness across hues or when building accessible UI color ramps.</li>
+				</ul>
+
+				<table class="docu-table">
+					<thead>
+						<tr>
+							<th>Color space</th>
+							<th>Channels (1st col)</th>
+							<th>CSS Gradient Syntax</th>
+							<th>Main advantage</th>
+							<th>Typical limitation</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>RGB</strong></td>
+							<td><code>R</code>, <code>G</code>, <code>B</code> (0–255)</td>
+							<td><code>linear-gradient(90deg, …)</code></td>
+							<td>Familiar, predictable channel interpolation</td>
+							<td>Can produce visually uneven gradients and desaturated midpoints between complementary colors</td>
+						</tr>
+						<tr>
+							<td><strong>HSL</strong></td>
+							<td><code>H</code> (0–360°), <code>S</code>, <code>L</code> (0–100%)</td>
+							<td><code>in hsl shorter|longer hue</code></td>
+							<td>Intuitive hue, saturation, and lightness controls</td>
+							<td>Lightness and saturation do not correspond consistently to human perception</td>
+						</tr>
+						<tr>
+							<td><strong>HSV</strong></td>
+							<td><code>H</code> (0–360°), <code>S</code>, <code>V</code> (0–100%)</td>
+							<td><code>in hsl shorter|longer hue</code></td>
+							<td>Convenient for picking and manipulating colors</td>
+							<td>Value and saturation are not perceptually uniform; no native CSS <code>in hsv</code> interpolation space</td>
+						</tr>
+						<tr>
+							<td><strong>OKLab</strong></td>
+							<td><code>l</code> (0–100%), <code>a</code>, <code>b</code> (−0.4–0.4)</td>
+							<td><code>in oklab</code></td>
+							<td>Perceptually oriented interpolation using three Cartesian coordinates</td>
+							<td>Less intuitive for manually choosing a color</td>
+						</tr>
+						<tr>
+							<td><strong>OKLCH</strong></td>
+							<td><code>l</code> (0–100%), <code>c</code> (0–0.4), <code>h</code> (0–360°)</td>
+							<td><code>in oklch shorter|longer hue</code></td>
+							<td>Perceptually oriented controls for lightness, chroma, and hue</td>
+							<td>Hue behavior and sRGB gamut boundaries require some care</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h3>What happens when you convert an out-of-gamut color to HEX? (Gamut Mapping)</h3>
+				<p>Unlike HSL and HSV—which are mathematical re-mappings of the sRGB cube—<strong>OKLab</strong> and <strong>OKLCH</strong> can describe colors across the entire human visual gamut, including ultra-vivid colors that cannot be displayed on standard sRGB monitors or encoded as 24-bit <code>#RRGGBB</code> HEX values. Out-of-gamut coordinates can occur both when picking high chroma values manually and when interpolating in OKLCH between two in-gamut colors.</p>
+				<p><strong>Reduce the chroma until the color fits:</strong> Suppose the desired color is too vivid for sRGB. Instead of naively clamping individual R, G, and B channels (which distorts both hue and perceived lightness), SpectrumStep gradually reduces the color's <strong>chroma</strong> via binary search while holding <strong>lightness</strong> and <strong>hue</strong> constant until the color can be represented within the sRGB gamut:</p>
+				<pre class="docu-flow">Original:      L = 70%, C = 0.30, H = 145°
+                         ↓
+Reduce chroma: L = 70%, C = 0.20, H = 145°
+                         ↓
+Convert to sRGB
+                         ↓
+Output HEX</pre>
+				<p><em>Note: The numbers above illustrate the conceptual process; they are not a computed conversion of the example color.</em></p>
+				<p>By preserving perceptual lightness (<code>l</code>) and hue angle (<code>h</code>) while reducing chroma (<code>c</code>, or proportionally scaling <code>a</code> and <code>b</code> in OKLab), you obtain a much closer visual match to the intended color and preserve consistent WCAG contrast ratios. This process is called <strong>gamut mapping</strong>. While more sophisticated algorithms (such as CSS Color 4 ΔEOK gamut mapping) are possible, chroma reduction at constant lightness and hue is a fast, predictable, and visually faithful method.</p>
 
 				<h3>Technical Function Description</h3>
 				<ul class="docu-feature-list">
@@ -81,14 +148,16 @@
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Color space switch" /></span>
-						<strong>Color 1 and Color 2 Input Models:</strong> Each endpoint supports 6-digit or 3-digit shorthand HEX codes (<code>#RGB</code> → <code>#RRGGBB</code>), native color picking, and high-precision sliders (0.1° / 0.1% resolution in HSL/HSV, 8-bit 0–255 in RGB) with dynamic gradient tracks showing the effect of each parameter.
+						<strong>Color 1 and Color 2 Input Models (HSL, RGB, HSV, Oklab, Oklch):</strong> Each endpoint supports 6-digit or 3-digit shorthand HEX codes (<code>#RGB</code> → <code>#RRGGBB</code>), native color picking, and high-precision sliders (0.1° / 0.1% resolution in HSL/HSV, 8-bit 0–255 in RGB, 0.001 resolution for OKLab <code>a</code>/<code>b</code> and OKLCH <code>c</code>) with dynamic gradient tracks showing the effect of each parameter. The first column displays the active model's component identifiers (<code>H/S/L</code>, <code>R/G/B</code>, <code>H/S/V</code>, lowercase <code>l/a/b</code>, or lowercase <code>l/c/h</code>).
 					</li>
 					<li>
 						<span class="docu-icon-chip">H / S / L</span>
 						<span class="docu-icon-chip">R / G / B</span>
 						<span class="docu-icon-chip">H / S / V</span>
+						<span class="docu-icon-chip">l / a / b</span>
+						<span class="docu-icon-chip">l / c / h</span>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-left-right-solid-full.svg" alt="Horizontal X-axis component" /><img class="icon" src="../assets/icons/arrows-up-down-solid-full.svg" alt="Vertical Y-axis component" /></span>
-						<strong>2D Color Plane Picker Popup:</strong> Clicking any channel button in the first column fixes that color component and opens a 2D color plane directly below the selected row, aligned to the exact width of the channel range slider and sized so it never overlaps the gradient swatches below. Dragging across the plane selects the remaining two components simultaneously—first remaining channel along X (left → right: 0 → max) and second along Y (bottom → top: 0 → max)—while updating the gradient palette in real time.
+						<strong>2D Color Plane Picker Popup:</strong> Clicking any channel button in the first column fixes that color component and opens a 2D color plane directly below the selected row, aligned to the exact width of the channel range slider and sized so it never overlaps the gradient swatches below. Dragging across the plane selects the remaining two components simultaneously—first remaining channel along X (left → right: min → max) and second along Y (bottom → top: min → max)—while updating the gradient palette in real time.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/shuffle-solid-full.svg" alt="Random color" /></span>
@@ -107,11 +176,11 @@
 						<strong>Copy Endpoint Color:</strong> Transfers the exact hexadecimal color from Color 1 to Color 2 or from Color 2 to Color 1 as a starting point for monochromatic or analogous variations.
 					</li>
 					<li>
-						<strong>Steps &amp; Overdrive Extrapolation:</strong> <em>Steps</em> divides the interval between Color 1 and Color 2 into <code>N</code> equidistant stops. <em>Overdrive</em> extends the linear interpolation parameter below 0 and above 1, extrapolating outer shades and tints with channel clamping and modular hue wrapping.
+						<strong>Steps &amp; Overdrive Extrapolation:</strong> <em>Steps</em> divides the interval between Color 1 and Color 2 into <code>N</code> equidistant stops. <em>Overdrive</em> extends the linear interpolation parameter below 0 and above 1, extrapolating outer shades and tints with channel clamping, modular hue wrapping, and chroma-reduction gamut mapping.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Gradient space" /></span>
-						<strong>Gradient Space (HSL, RGB, HSV):</strong> Determines the coordinate system used for linear interpolation between endpoints. Endpoint colors are preserved without rounding loss.
+						<strong>Gradient Space (HSL, RGB, HSV, Oklab, Oklch):</strong> Determines the coordinate system used for linear interpolation between endpoints and updates the continuous CSS preview bar to use native CSS Color 4 gradient interpolation (<code>in oklab</code>, <code>in oklch shorter|longer hue</code>, <code>in hsl shorter|longer hue</code>). Endpoint colors are preserved without rounding loss.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/right-long-solid-full.svg" alt="Right" /><img class="icon" src="../assets/icons/down-long-solid-full.svg" alt="Down" /><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="Left" /><img class="icon" src="../assets/icons/up-long-solid-full.svg" alt="Up" /></span>
@@ -119,7 +188,7 @@
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/down-left-and-up-right-to-center-solid-full.svg" alt="Shorter hue arc" /><img class="icon" src="../assets/icons/up-right-and-down-left-from-center-solid-full.svg" alt="Longer hue arc" /></span>
-						<strong>Hue Interpolation Way (Shorter / Longer):</strong> In cylindrical spaces (HSL/HSV), <em>shorter</em> interpolates along the minor arc (<code>|ΔH| ≤ 180°</code>, CSS <code>in hsl shorter hue</code>), whereas <em>longer</em> traverses the major arc (<code>|ΔH| ≥ 180°</code>, CSS <code>in hsl longer hue</code>) across the full spectrum.
+						<strong>Hue Interpolation Way (Shorter / Longer):</strong> In cylindrical spaces (HSL, HSV, and OKLCH), <em>shorter</em> interpolates along the minor arc (<code>|ΔH| ≤ 180°</code>, CSS <code>shorter hue</code>), whereas <em>longer</em> traverses the major arc (<code>|ΔH| ≥ 180°</code>, CSS <code>longer hue</code>) across the full spectrum.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/eye-solid-full.svg" alt="Show contrast" /><img class="icon" src="../assets/icons/eye-slash-solid-full.svg" alt="Hide contrast" /></span>

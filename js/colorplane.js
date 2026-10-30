@@ -20,7 +20,11 @@
 	}
 
 	function getChannelLabel(mode, idx) {
-		return (mode || 'HSL').charAt(idx);
+		var m = mode || 'HSL';
+		if (typeof channelLabelsForMode !== 'undefined' && channelLabelsForMode[m]) {
+			return channelLabelsForMode[m][idx];
+		}
+		return m.charAt(idx);
 	}
 
 	function ensurePopupDom() {
@@ -109,6 +113,7 @@
 
 	function getNormalizedChannels(ix) {
 		var mode = colMode[ix] || 'HSL';
+		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
 		var maxes = rangeMaxForMode[mode];
 		var factors = factorForMode[mode];
 		var norm = [0, 0, 0];
@@ -119,7 +124,8 @@
 			} else {
 				val = inp_cmx_arr[ix].get(hslKeys[i]);
 			}
-			norm[i] = maxes[i] > 0 ? bound(val / maxes[i], 0, 1) : 0;
+			var span = maxes[i] - mins[i];
+			norm[i] = span > 0 ? bound((val - mins[i]) / span, 0, 1) : 0;
 		}
 		return norm;
 	}
@@ -179,8 +185,12 @@
 		var xIdx = rem[0];
 		var yIdx = rem[1];
 
+		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
+		var maxes = rangeMaxForMode[mode];
+		var factors = factorForMode[mode];
+
 		var norm = getNormalizedChannels(ix);
-		var fixedVal = norm[fixedIdx];
+		var fixedNorm = norm[fixedIdx];
 
 		if (canvasEl.width !== width || canvasEl.height !== height) {
 			canvasEl.width = width;
@@ -192,30 +202,31 @@
 		var data = imgData.data;
 
 		var u = [0, 0, 0];
-		u[fixedIdx] = fixedVal;
+		u[fixedIdx] = (mins[fixedIdx] + fixedNorm * (maxes[fixedIdx] - mins[fixedIdx])) / factors[fixedIdx];
 
 		var wDenom = width > 1 ? width - 1 : 1;
 		var hDenom = height > 1 ? height - 1 : 1;
 		var ptr = 0;
 
+		var minX = mins[xIdx], spanX = maxes[xIdx] - mins[xIdx], facX = factors[xIdx];
+		var minY = mins[yIdx], spanY = maxes[yIdx] - mins[yIdx], facY = factors[yIdx];
+
 		for (var py = 0; py < height; py++) {
 			var normY = 1 - py / hDenom;
-			u[yIdx] = normY;
+			u[yIdx] = (minY + normY * spanY) / facY;
 			for (var px = 0; px < width; px++) {
 				var normX = px / wDenom;
-				u[xIdx] = normX;
+				u[xIdx] = (minX + normX * spanX) / facX;
 
 				var rgbArr;
 				if (mode === 'RGB') {
 					rgbArr = [
-						Math.round(u[0] * 255),
-						Math.round(u[1] * 255),
-						Math.round(u[2] * 255)
+						Math.round(u[0]),
+						Math.round(u[1]),
+						Math.round(u[2])
 					];
-				} else if (mode === 'HSL') {
-					rgbArr = hslToRgb(u[0], u[1], u[2]);
 				} else {
-					rgbArr = hsvToRgb(u);
+					rgbArr = colorConvertToRgb(mode, u);
 				}
 
 				data[ptr++] = rgbArr[0];
@@ -268,13 +279,16 @@
 		var xIdx = rem[0];
 		var yIdx = rem[1];
 
+		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
+		var minX = mins[xIdx];
+		var minY = mins[yIdx];
 		var maxX = rangeMaxForMode[mode][xIdx];
 		var maxY = rangeMaxForMode[mode][yIdx];
 		var roundX = roundForMode[mode][xIdx];
 		var roundY = roundForMode[mode][yIdx];
 
-		var valX = round(normX * maxX, roundX);
-		var valY = round(normY * maxY, roundY);
+		var valX = round(minX + normX * (maxX - minX), roundX);
+		var valY = round(minY + normY * (maxY - minY), roundY);
 
 		inp_cmx_arr[ix].set(hslKeys[xIdx], valX);
 		inp_cmx_arr[ix].set(hslKeys[yIdx], valY);

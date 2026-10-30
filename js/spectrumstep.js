@@ -62,7 +62,48 @@ const channelTooltipsForMode = {
 			range: 'HSV Value / Brightness slider (0%–100%)',
 			input: 'HSV Value / Brightness percentage (0–100%, 0.1% resolution)'
 		}
+	],
+	Oklab: [
+		{
+			name: 'Perceptual Lightness (l): OKLab perceived lightness (0% black to 100% white)',
+			range: 'OKLab Lightness slider (0% black to 100% white)',
+			input: 'OKLab Lightness percentage (0–100%, 0.1% resolution)'
+		},
+		{
+			name: 'Green–Red opponent axis (a): OKLab Cartesian a-coordinate (−0.4 green to +0.4 red)',
+			range: 'OKLab a-axis slider (−0.4 green through 0 neutral to +0.4 magenta/red)',
+			input: 'OKLab a-axis value (−0.4 to +0.4, 0.001 resolution)'
+		},
+		{
+			name: 'Blue–Yellow opponent axis (b): OKLab Cartesian b-coordinate (−0.4 blue to +0.4 yellow)',
+			range: 'OKLab b-axis slider (−0.4 blue through 0 neutral to +0.4 yellow)',
+			input: 'OKLab b-axis value (−0.4 to +0.4, 0.001 resolution)'
+		}
+	],
+	Oklch: [
+		{
+			name: 'Perceptual Lightness (l): OKLCH perceived lightness (0% black to 100% white)',
+			range: 'OKLCH Lightness slider (0% black to 100% white)',
+			input: 'OKLCH Lightness percentage (0–100%, 0.1% resolution)'
+		},
+		{
+			name: 'Chroma (c): OKLCH perceptual colorfulness (0 neutral gray to 0.4 vivid; gamut-mapped to sRGB via chroma reduction)',
+			range: 'OKLCH Chroma slider (0 achromatic to 0.4 vivid chroma)',
+			input: 'OKLCH Chroma value (0–0.4, 0.001 resolution)'
+		},
+		{
+			name: 'Hue (h): OKLCH perceptual hue angle (0°–360°)',
+			range: 'OKLCH Hue angle slider (0°–360°)',
+			input: 'OKLCH Hue angle in degrees (0–360°, 0.1° resolution)'
+		}
 	]
+};
+const channelLabelsForMode = {
+	HSL: ['H', 'S', 'L'],
+	RGB: ['R', 'G', 'B'],
+	HSV: ['H', 'S', 'V'],
+	Oklab: ['l', 'a', 'b'],
+	Oklch: ['l', 'c', 'h']
 };
 const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
 var inp_cmx_arr = [];
@@ -74,29 +115,44 @@ let steps = undefined;
 let overdrive = undefined;
 var _textColor = undefined;
 var _backColor = undefined;
+const rangeMinForMode = {
+	RGB:[0,0,0],
+	HSL:[0,0,0],
+	HSV:[0,0,0],
+	Oklab:[0,-0.4,-0.4],
+	Oklch:[0,0,0],
+}
 const rangeMaxForMode = {
 	RGB:[255,255,255],
 	HSL:[360,100,100],
 	HSV:[360,100,100],
+	Oklab:[100,0.4,0.4],
+	Oklch:[100,0.4,360],
 }
 const rangeStepForMode = {
 	RGB:['1','1','1'],
 	HSL:['0.1','0.1','0.1'],
 	HSV:['0.1','0.1','0.1'],
+	Oklab:['0.1','0.001','0.001'],
+	Oklch:['0.1','0.001','0.1'],
 }
 const roundForMode = {
 	RGB:[0,0,0],
 	HSL:[-1,-1,-1],
 	HSV:[-1,-1,-1],
+	Oklab:[-1,-3,-3],
+	Oklch:[-1,-3,-1],
 }
 const factorForMode = {
 	RGB:[1,1,1],
 	HSL:[360,100,100],
 	HSV:[360,100,100],
+	Oklab:[100,1,1],
+	Oklch:[100,1,360],
 }
 const hslKeys = ['h','s','l']
 var colMode = ['HSL','HSL']
-const colModes = ['HSL', 'RGB', 'HSV']
+const colModes = ['HSL', 'RGB', 'HSV', 'Oklab', 'Oklch']
 var gradientSwitch = undefined;
 var colModeSwitch = [undefined,undefined];
 var storage = new Storage({ unit: 'color-mixer', storageEn: true,
@@ -161,7 +217,9 @@ function calcform_cmx_init() {
 			tooltips: {
 				HSL: 'Input Space: Cylindrical HSL (Hue 0–360°, Saturation 0–100%, Lightness 0–100%). Click to switch to RGB.',
 				RGB: 'Input Space: Additive sRGB (Red, Green, Blue 0–255). Click to switch to HSV.',
-				HSV: 'Input Space: Cylindrical HSV/HSB (Hue 0–360°, Saturation 0–100%, Value 0–100%). Click to switch to HSL.'
+				HSV: 'Input Space: Cylindrical HSV/HSB (Hue 0–360°, Saturation 0–100%, Value 0–100%). Click to switch to Oklab.',
+				Oklab: 'Input Space: Perceptual Cartesian OKLab (l 0–100%, a −0.4–0.4, b −0.4–0.4). Click to switch to Oklch.',
+				Oklch: 'Input Space: Perceptual Cylindrical OKLCH (l 0–100%, c 0–0.4, h 0–360°). Click to switch to HSL.'
 			}
 		});
 	})
@@ -176,7 +234,9 @@ function calcform_cmx_init() {
 			tooltips: {
 				HSL: 'Interpolation Space: HSL. Linearly interpolates Hue, Saturation, and Lightness. Click to switch to RGB.',
 				RGB: 'Interpolation Space: sRGB. Linearly interpolates Red, Green, and Blue channels. Click to switch to HSV.',
-				HSV: 'Interpolation Space: HSV/HSB. Linearly interpolates Hue, Saturation, and Value. Click to switch to HSL.'
+				HSV: 'Interpolation Space: HSV/HSB. Linearly interpolates Hue, Saturation, and Value. Click to switch to Oklab.',
+				Oklab: 'Interpolation Space: OKLab. Perceptually uniform Cartesian interpolation (l, a, b) with chroma-reduction gamut mapping. Click to switch to Oklch.',
+				Oklch: 'Interpolation Space: OKLCH. Perceptually uniform cylindrical interpolation (l, c, h) with chroma-reduction gamut mapping. Click to switch to HSL.'
 			}
 		});
 	gradientDirectionSwitch = new ButtonSwitch(
@@ -195,8 +255,8 @@ function calcform_cmx_init() {
 		['shorter','longer'], ['assets/icons/down-left-and-up-right-to-center-solid-full.svg','assets/icons/up-right-and-down-left-from-center-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
 			showText: false,
 			tooltips: {
-				shorter: "Hue Path: Shorter arc (|ΔH| ≤ 180°, CSS 'in hsl shorter hue'). Interpolates along the direct path on the color wheel.",
-				longer: "Hue Path: Longer arc (|ΔH| ≥ 180°, CSS 'in hsl longer hue'). Interpolates around the far side of the color wheel."
+				shorter: "Hue Path: Shorter arc (|ΔH| ≤ 180°, CSS 'shorter hue' in HSL/OKLCH). Interpolates along the direct path on the color wheel.",
+				longer: "Hue Path: Longer arc (|ΔH| ≥ 180°, CSS 'longer hue' in HSL/OKLCH). Interpolates around the far side of the color wheel."
 			}
 		});
 	contrastVisibilitySwitch = new ButtonSwitch(
@@ -273,11 +333,13 @@ function calcform_cmx_doml() {
 /**
  * Unterlegt die drei Ranges (Komponente 1, 2, 3) farblich.
  * @param {number} ix     Nummer des Mischers
- * @param {string} mode   'RGB' | 'HSL' | 'HSV'
+ * @param {string} mode   'RGB' | 'HSL' | 'HSV' | 'Oklab' | 'Oklch'
  * @param {number} c1,c2,c3
  *   RGB: r,g,b  (0-255)
  *   HSL: h (0-360), s (0-100), l (0-100)
  *   HSV: h (0-360), s (0-100), v (0-100)
+ *   Oklab: l (0-100), a (-0.4..0.4), b (-0.4..0.4)
+ *   Oklch: l (0-100), c (0..0.4), h (0-360)
  */
 function calcform_cmx_range(ix, mode, c1, c2, c3) {
 	// IDs der drei Ranges, ggf. an deine Benennung anpassen
@@ -288,6 +350,8 @@ function calcform_cmx_range(ix, mode, c1, c2, c3) {
 	const hsl = (h, s, l) => `hsl(${h}, ${s}%, ${l}%)`;
 	// CSS kennt kein HSV, daher über deine hsvToRgb() nach RGB umrechnen
 	const hsv = (h, s, v) => rgb(...hsvToRgb([h / 360, s / 100, v / 100]));
+	const oklab = (l, a, b) => rgb(...oklabToRgb(l / 100, a, b));
+	const oklch = (l, c, h) => rgb(...oklchToRgb(l / 100, c, h / 360));
 
 	const grad = stops => `linear-gradient(90deg, ${stops.join(', ')})`;
 	const hues = [0, 60, 120, 180, 240, 300, 360];
@@ -314,6 +378,18 @@ function calcform_cmx_range(ix, mode, c1, c2, c3) {
 			g3 = grad([hsv(c1, c2, 0), hsv(c1, c2, 100)]);
 			break;
 
+		case 'Oklab':
+			g1 = grad([0, 25, 50, 75, 100].map(l => oklab(l, c2, c3)));
+			g2 = grad([-0.4, -0.2, 0, 0.2, 0.4].map(a => oklab(c1, a, c3)));
+			g3 = grad([-0.4, -0.2, 0, 0.2, 0.4].map(b => oklab(c1, c2, b)));
+			break;
+
+		case 'Oklch':
+			g1 = grad([0, 25, 50, 75, 100].map(l => oklch(l, c2, c3)));
+			g2 = grad([0, 0.1, 0.2, 0.3, 0.4].map(c => oklch(c1, c, c3)));
+			g3 = grad(hues.map(h => oklch(c1, c2, h)));
+			break;
+
 		default:
 			return;
 	}
@@ -322,7 +398,11 @@ function calcform_cmx_range(ix, mode, c1, c2, c3) {
 	el(2).style.background = g3;
 }
 function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
+	const modeChanged = colMode[ix] !== mode;
 	colMode[ix] = mode;
+	if (modeChanged && !init) {
+		hsl[ix] = [];
+	}
 	
 	// use RGB color as base
 	rgb[ix] = hexToRgb(inp_cmx_arr[ix].get('c'));
@@ -333,10 +413,12 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 		const newId = inp_cmx_ids[ix]+id;
 		const rangeEl = document.getElementById(newId);
 		if (rangeEl) {
+			rangeEl.min = rangeMinForMode[colMode[ix]][i];
 			rangeEl.max = rangeMaxForMode[colMode[ix]][i];
 			rangeEl.step = rangeStepForMode[colMode[ix]][i];
 		}
 		if (inp_cmx_arr[ix] && inp_cmx_arr[ix].params && inp_cmx_arr[ix].params[hslKeys[i]]) {
+			inp_cmx_arr[ix].params[hslKeys[i]].min = rangeMinForMode[colMode[ix]][i];
 			inp_cmx_arr[ix].params[hslKeys[i]].max = rangeMaxForMode[colMode[ix]][i];
 			inp_cmx_arr[ix].params[hslKeys[i]].rangeStep = rangeStepForMode[colMode[ix]][i];
 			inp_cmx_arr[ix].params[hslKeys[i]].round = roundForMode[colMode[ix]][i];
@@ -349,7 +431,8 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 		const row = document.getElementById(newId);
 		const firstCell = row.cells[0];
 		const btn = firstCell.querySelector('.channel-plane-btn');
-		const label = colModes[colModes.indexOf(colMode[ix])].charAt(i);
+		const labels = channelLabelsForMode[colMode[ix]] || channelLabelsForMode.HSL;
+		const label = labels[i];
 		if (btn) {
 			btn.textContent = label;
 		} else {
@@ -366,7 +449,8 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 function calcform_cmx_rgb(ix,init) {
 	rgbh[ix] = inp_cmx_arr[ix].get('c');
 	rgb[ix] = hexToRgb(rgbh[ix]);
-	const oldHue = (hsl[ix] && hsl[ix][0] !== undefined) ? hsl[ix][0] : undefined;
+	const hueIdx = colMode[ix] === 'Oklch' ? 2 : 0;
+	const oldHue = (hsl[ix] && hsl[ix][hueIdx] !== undefined) ? hsl[ix][hueIdx] : undefined;
 	hsl[ix] = colorConvertFromRgb(colMode[ix], rgb[ix], oldHue);
 	const hslLong = []
 	const hslLongRounded = []
@@ -434,16 +518,17 @@ function calcform_cmx_dyna(textColor, backColor) {
 	html += '</div>'
 	document.getElementById('tab-cmx').innerHTML = html;
 
-	// build CSS linear gradient
+	// build CSS linear gradient using CSS native color space interpolation
 	const rotation = { right: '90deg', down: '180deg',left:'90deg',up:'180deg' }[gradientDirection];
-	let gradientText = ''
-	if (gradientMode!=='RGB') {
-		gradientText += `linear-gradient(${rotation} in hsl ${gradientWay} hue,`
-	} else {
-		gradientText += `linear-gradient(${rotation},`
+	let gradientSpace = '';
+	if (gradientMode === 'Oklab') {
+		gradientSpace = ' in oklab';
+	} else if (gradientMode === 'Oklch') {
+		gradientSpace = ` in oklch ${gradientWay} hue`;
+	} else if (gradientMode !== 'RGB') {
+		gradientSpace = ` in hsl ${gradientWay} hue`;
 	}
-	gradientText += colArr[0] + ','
-	gradientText += colArr[colArr.length - 1] + ')'
+	let gradientText = `linear-gradient(${rotation}${gradientSpace},${colArr[0]},${colArr[colArr.length - 1]})`
 	const div_grd = document.getElementById('grd-cmx')
 	div_grd.innerHTML = gradientText
 	div_grd.style.background = gradientText
@@ -571,7 +656,7 @@ function calcform_cmx_applyState(data) {
 		}
 	}
 	if (Array.isArray(data.colMode) && data.colMode.length === 2) {
-		colMode = data.colMode.slice();
+		colMode = data.colMode.map(m => colModes.find(cm => cm.toLowerCase() === String(m).toLowerCase()) || 'HSL');
 	}
 	for (let ix = 0; ix < 2; ix++) {
 		inp_cmx_arr[ix].set('c', rgbh[ix]);
@@ -593,7 +678,10 @@ function calcform_cmx_applyState(data) {
 	}
 	if (data.steps !== undefined) steps.set(Number(data.steps));
 	if (data.overdrive !== undefined) overdrive.set(Number(data.overdrive));
-	if (data.gradientMode) gradientSwitch.setValue(data.gradientMode, true);
+	if (data.gradientMode) {
+		const matchedGm = colModes.find(cm => cm.toLowerCase() === String(data.gradientMode).toLowerCase());
+		if (matchedGm) gradientSwitch.setValue(matchedGm, true);
+	}
 	if (data.gradientDirection) gradientDirectionSwitch.setValue(data.gradientDirection, true);
 	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay, true);
 	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility, true);
@@ -646,8 +734,9 @@ function calcform_cmx_getUrlState() {
 	[0, 1].forEach(ix => {
 		const num = ix + 1;
 		const mParam = params.get('m' + num);
-		if (mParam && colModes.includes(mParam.toUpperCase())) {
-			state.colMode[ix] = mParam.toUpperCase();
+		const matchedMode = mParam ? colModes.find(cm => cm.toLowerCase() === mParam.toLowerCase()) : null;
+		if (matchedMode) {
+			state.colMode[ix] = matchedMode;
 		}
 		const mode = state.colMode[ix];
 		const cParam = params.get('c' + num);
@@ -656,11 +745,12 @@ function calcform_cmx_getUrlState() {
 
 		let parsedCh = null;
 		if (chParam) {
-			const parts = chParam.split(/[-_,]/).map(Number);
+			const parts = chParam.split(/(?<=[\d.])-|[_,]/).map(Number);
 			if (parts.length === 3 && parts.every(n => !isNaN(n))) {
+				const mins = rangeMinForMode[mode];
 				const maxes = rangeMaxForMode[mode];
 				const factors = factorForMode[mode];
-				parsedCh = parts.map((val, i) => bound(val, 0, maxes[i]) / factors[i]);
+				parsedCh = parts.map((val, i) => bound(val, mins[i], maxes[i]) / factors[i]);
 			}
 		}
 
@@ -670,7 +760,8 @@ function calcform_cmx_getUrlState() {
 			if (hexFromCh === validHex) {
 				state.hsl[ix] = parsedCh;
 			} else {
-				state.hsl[ix] = colorConvertFromRgb(mode, hexToRgb(validHex), parsedCh[0]);
+				const hueIdx = mode === 'Oklch' ? 2 : 0;
+				state.hsl[ix] = colorConvertFromRgb(mode, hexToRgb(validHex), parsedCh[hueIdx]);
 			}
 		} else if (validHex) {
 			state.rgbh[ix] = validHex;
@@ -692,8 +783,9 @@ function calcform_cmx_getUrlState() {
 		if (!isNaN(od)) state.overdrive = bound(od, 0, 16);
 	}
 	if (params.has('gm')) {
-		const gm = params.get('gm').toUpperCase();
-		if (colModes.includes(gm)) state.gradientMode = gm;
+		const gmParam = params.get('gm');
+		const matchedGm = gmParam ? colModes.find(cm => cm.toLowerCase() === gmParam.toLowerCase()) : null;
+		if (matchedGm) state.gradientMode = matchedGm;
 	}
 	if (params.has('gd')) {
 		const gd = params.get('gd').toLowerCase();
@@ -754,7 +846,8 @@ function calcform_cmx_use_col(ix) {
 function calcform_cmx_col_invert(ix,hslMode) {
 	let invertedHex = undefined
 	if (hslMode) {
-		const invertedHsl = [hsl[ix][0], hsl[ix][1], 1-hsl[ix][2]]
+		const curHsl = colMode[ix] === 'HSL' ? hsl[ix] : rgbToHsl(hexToRgb(rgbh[ix]));
+		const invertedHsl = [curHsl[0], curHsl[1], 1-curHsl[2]]
 		const invertedRgb = hslToRgb(invertedHsl)
 		invertedHex = rgbToColor(invertedRgb)
 	} else {

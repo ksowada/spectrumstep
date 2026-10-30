@@ -409,15 +409,140 @@ function interpolate(r,x1,x2,hue) {
     return hueBounded;
   }
 }
+function srgbChannelToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+function linearChannelToSrgb(c) {
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+}
+function oklabToLinearSrgb(L, a, b) {
+  var l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  var m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  var s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+  var l = l_ * l_ * l_;
+  var m = m_ * m_ * m_;
+  var s = s_ * s_ * s_;
+  return [
+    +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+  ];
+}
+function isLinearRgbInGamut(rgbLin) {
+  var eps = 1e-6;
+  return rgbLin[0] >= -eps && rgbLin[0] <= 1 + eps &&
+         rgbLin[1] >= -eps && rgbLin[1] <= 1 + eps &&
+         rgbLin[2] >= -eps && rgbLin[2] <= 1 + eps;
+}
+/**
+ * Converts an OKLab color [L, a, b] (L in [0, 1], a & b in [-0.4, 0.4]) to sRGB [0..255].
+ * Out-of-gamut colors are gamut-mapped by reducing chroma (scaling a and b equally
+ * while preserving lightness L and hue angle) until the color fits within sRGB.
+ */
+function oklabToRgb() {
+  var L, a, b;
+  if (arguments.length === 3) {
+    L = arguments[0]; a = arguments[1]; b = arguments[2];
+  } else {
+    L = arguments[0][0]; a = arguments[0][1]; b = arguments[0][2];
+  }
+  if (L <= 0) return [0, 0, 0];
+  if (L >= 1) return [255, 255, 255];
+
+  var rgbLin = oklabToLinearSrgb(L, a, b);
+  if (!isLinearRgbInGamut(rgbLin)) {
+    var low = 0;
+    var high = 1;
+    for (var iter = 0; iter < 18; iter++) {
+      var mid = (low + high) * 0.5;
+      var testLin = oklabToLinearSrgb(L, a * mid, b * mid);
+      if (isLinearRgbInGamut(testLin)) {
+        low = mid;
+        rgbLin = testLin;
+      } else {
+        high = mid;
+      }
+    }
+    rgbLin = oklabToLinearSrgb(L, a * low, b * low);
+  }
+
+  return [
+    Math.round(bound(linearChannelToSrgb(bound(rgbLin[0], 0, 1)), 0, 1) * 255),
+    Math.round(bound(linearChannelToSrgb(bound(rgbLin[1], 0, 1)), 0, 1) * 255),
+    Math.round(bound(linearChannelToSrgb(bound(rgbLin[2], 0, 1)), 0, 1) * 255)
+  ];
+}
+/**
+ * Converts an sRGB color [r, g, b] in [0..255] to OKLab [L, a, b] (L in [0, 1]).
+ */
+function rgbToOklab(args) {
+  var r = srgbChannelToLinear(args[0] / 255);
+  var g = srgbChannelToLinear(args[1] / 255);
+  var b = srgbChannelToLinear(args[2] / 255);
+
+  var l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+  var m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+  var s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+
+  var l_ = Math.cbrt(l);
+  var m_ = Math.cbrt(m);
+  var s_ = Math.cbrt(s);
+
+  var L = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
+  var okA = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
+  var okB = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
+
+  return [bound(L, 0, 1), okA, okB];
+}
+/**
+ * Converts an OKLCH color [L, C, h] (L in [0, 1], C >= 0, h in [0, 1]) to sRGB [0..255]
+ * using chroma reduction gamut mapping when out of sRGB gamut.
+ */
+function oklchToRgb() {
+  var L, C, h;
+  if (arguments.length === 3) {
+    L = arguments[0]; C = arguments[1]; h = arguments[2];
+  } else {
+    L = arguments[0][0]; C = arguments[0][1]; h = arguments[0][2];
+  }
+  var cSafe = Math.max(0, C);
+  var rad = h * 2 * Math.PI;
+  var a = cSafe * Math.cos(rad);
+  var b = cSafe * Math.sin(rad);
+  return oklabToRgb(L, a, b);
+}
+/**
+ * Converts an sRGB color [r, g, b] in [0..255] to OKLCH [L, C, h] (L in [0, 1], h in [0, 1]).
+ */
+function rgbToOklch(args, fallbackHue) {
+  var lab = rgbToOklab(args);
+  var L = lab[0];
+  var a = lab[1];
+  var b = lab[2];
+  var C = Math.sqrt(a * a + b * b);
+  var h;
+  if (C <= 0.0001) {
+    h = (fallbackHue !== undefined && !isNaN(fallbackHue)) ? fallbackHue : 0;
+    C = 0;
+  } else {
+    h = Math.atan2(b, a) / (2 * Math.PI);
+    if (h < 0) h += 1;
+  }
+  return [L, C, h];
+}
 function colorConvertFromRgb(mode, rgb, fallbackHue) {
   if (mode==='RGB') return rgb;
   if (mode==='HSL') return rgbToHsl(rgb, fallbackHue);
   if (mode==='HSV') return rgbToHsv(rgb, fallbackHue);
+  if (mode==='Oklab') return rgbToOklab(rgb);
+  if (mode==='Oklch') return rgbToOklch(rgb, fallbackHue);
 }
 function colorConvertToRgb(mode, col) {
   if (mode==='RGB') return col;
   if (mode==='HSL') return hslToRgb(col);
   if (mode==='HSV') return hsvToRgb(col);
+  if (mode==='Oklab') return oklabToRgb(col);
+  if (mode==='Oklch') return oklchToRgb(col);
 }
 /** calculate HSL colors from h1 to h2, and so on, period is repetition
  * give out hex rgb with leading # for css user */
@@ -458,15 +583,15 @@ function getRGBColors(args) {
   }
   return rgbColors;
 }
-/** calculate colors interpolating from c1 to c2 in RGB, HSL or HSV space, overdrive extrapolates linearly
+/** calculate colors interpolating from c1 to c2 in RGB, HSL, HSV, Oklab, or Oklch space, overdrive extrapolates linearly
  * args: { len, overdrive,
- *         mode:   'RGB'|'HSL'|'HSV' (default 'RGB') = Raum, in dem interpoliert wird,
- *         c1, c1Mode: 'RGB'|'HSL'|'HSV' (default = mode),
- *         c2, c2Mode: 'RGB'|'HSL'|'HSV' (default = mode),
+ *         mode:   'RGB'|'HSL'|'HSV'|'Oklab'|'Oklch' (default 'RGB') = Raum, in dem interpoliert wird,
+ *         c1, c1Mode: 'RGB'|'HSL'|'HSV'|'Oklab'|'Oklch' (default = mode),
+ *         c2, c2Mode: 'RGB'|'HSL'|'HSV'|'Oklab'|'Oklch' (default = mode),
  *         hueWay: 'shorter'|'longer' (default 'shorter') }
  * c1, c2 can be
  *   - 6-digit-hexstring with leading # (c1Mode/c2Mode wird ignoriert)
- *   - array in the units of its own mode: RGB 0..255, HSL/HSV [h,s,x] 0..1
+ *   - array in the units of its own mode: RGB 0..255, HSL/HSV [h,s,x] 0..1, Oklab [L,a,b], Oklch [L,C,h]
  * or (old style) rgb1, rgb2 as array 0..255
  * give out hex rgb with leading # for css user */
 function getColors(args) {
@@ -474,7 +599,7 @@ function getColors(args) {
   var hueWay = args.hueWay || 'shorter';
   args.len = parseInt(args.len);
   var overdrive = (args.overdrive !== undefined) ? parseInt(args.overdrive) : 0;
-  var isHue = (mode !== 'RGB');
+  var isHue = (mode === 'HSL' || mode === 'HSV' || mode === 'Oklch');
 
   var conv = {
     RGB: { toRgb: function (a, b, c) { return getRGBColor(a, b, c); },
@@ -482,7 +607,11 @@ function getColors(args) {
     HSL: { toRgb: function (h, s, l) { return hslToRgb(h, s, l); },
       fromRgb: rgbToHsl },
     HSV: { toRgb: function (h, s, v) { return hsvToRgb([h, s, v]); },
-      fromRgb: rgbToHsv }
+      fromRgb: rgbToHsv },
+    Oklab: { toRgb: function (l, a, b) { return oklabToRgb(l, a, b); },
+      fromRgb: rgbToOklab },
+    Oklch: { toRgb: function (l, c, h) { return oklchToRgb(l, c, h); },
+      fromRgb: rgbToOklch }
   };
 
   // Farbe aus ihrem eigenen Modus in den Interpolationsraum bringen
@@ -506,18 +635,24 @@ function getColors(args) {
     p1 = p1.slice();
     p2 = p2.slice();
 
-    var isAchromatic1 = (mode === 'HSL')
-      ? (p1[2] <= 0.0001 || p1[2] >= 0.9999 || p1[1] <= 0.0001)
-      : (p1[2] <= 0.0001 || p1[1] <= 0.0001);
-
-    var isAchromatic2 = (mode === 'HSL')
-      ? (p2[2] <= 0.0001 || p2[2] >= 0.9999 || p2[1] <= 0.0001)
-      : (p2[2] <= 0.0001 || p2[1] <= 0.0001);
+    var hueIdx = (mode === 'Oklch') ? 2 : 0;
+    var isAchromatic1, isAchromatic2;
+    if (mode === 'HSL') {
+      isAchromatic1 = (p1[2] <= 0.0001 || p1[2] >= 0.9999 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[2] <= 0.0001 || p2[2] >= 0.9999 || p2[1] <= 0.0001);
+    } else if (mode === 'HSV') {
+      isAchromatic1 = (p1[2] <= 0.0001 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[2] <= 0.0001 || p2[1] <= 0.0001);
+    } else {
+      // Oklch: [L, C, h]
+      isAchromatic1 = (p1[0] <= 0.0001 || p1[0] >= 0.9999 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[0] <= 0.0001 || p2[0] >= 0.9999 || p2[1] <= 0.0001);
+    }
 
     if (isAchromatic2 && !isAchromatic1) {
-      p2[0] = p1[0];
+      p2[hueIdx] = p1[hueIdx];
     } else if (isAchromatic1 && !isAchromatic2) {
-      p1[0] = p2[0];
+      p1[hueIdx] = p2[hueIdx];
     }
   }
 
@@ -525,10 +660,18 @@ function getColors(args) {
   for (var i = -overdrive; i < args.len + overdrive; i++) {
     var rel = args.len > 1 ? i / (args.len - 1) : 0;
     var a, b, c;
-    if (isHue) {
+    if (mode === 'HSL' || mode === 'HSV') {
       a = hueBound(interpolate(rel, p1[0], p2[0], hueWay));
       b = bound(interpolate(rel, p1[1], p2[1]), 0, 1);
       c = bound(interpolate(rel, p1[2], p2[2]), 0, 1);
+    } else if (mode === 'Oklch') {
+      a = bound(interpolate(rel, p1[0], p2[0]), 0, 1);
+      b = bound(interpolate(rel, p1[1], p2[1]), 0, 0.4);
+      c = hueBound(interpolate(rel, p1[2], p2[2], hueWay));
+    } else if (mode === 'Oklab') {
+      a = bound(interpolate(rel, p1[0], p2[0]), 0, 1);
+      b = interpolate(rel, p1[1], p2[1]);
+      c = interpolate(rel, p1[2], p2[2]);
     } else {
       a = interpolate(rel, p1[0], p2[0]);
       b = interpolate(rel, p1[1], p2[1]);
@@ -549,9 +692,9 @@ function getRGBColor(r,g,b) {
 /** calculate RGB colors from r1 to r2, and so on, period is repetition */
 function getRGBColorByStr(rgbString) {
   var rgbArray = [];
-  var rgbStringShorted = rgbString.substr(1);
+  var rgbStringShorted = (rgbString.charAt(0) === '#') ? rgbString.substr(1) : rgbString;
   for (var i=0;i<3;i++) {
-    var rgbToken = rgbString.substr(0+i*2,2);
+    var rgbToken = rgbStringShorted.substr(0+i*2,2);
     var rgbValue = parseInt(rgbToken, 16);
     rgbArray.push(rgbValue);
   }

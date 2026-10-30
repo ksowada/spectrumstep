@@ -1,7 +1,9 @@
 # SpectrumStep
 
 ## features
-- besides HSL, use RGB and HSV mixing
+- besides HSL, use RGB, HSV, Oklab, and Oklch mixing and input spaces
+- gamut mapping via chroma reduction when converting out-of-gamut Oklab/Oklch colors to sRGB HEX
+- native CSS Color 4 linear-gradient interpolation (`in oklab`, `in oklch shorter|longer hue`, `in hsl shorter|longer hue`)
 - C2 to C1 copy color and vice versa
 - store in details to hide if unused
 - theme option in store
@@ -9,17 +11,17 @@
 - random color button
 - expands 3-digit hex colors
 - gradientDirection in all 4 direction
-- enhanced accuracy for HSV and HSL mode, no loss of RGB value
+- enhanced accuracy for HSV, HSL, Oklab, and Oklch modes, no loss of RGB value
 - each color in gradient holds contrast info including WCAG AA / AAA badges (Pass/Fail)
   - contrast info and the gradient rating always be visible
   - contrast info can be disabled
 - copy function with visual feedback at gradient swatches
-- hue allows 2 gradients, longer and shorter way
+- hue allows 2 gradients, longer and shorter way (HSL, HSV, Oklch)
 - use tooltips to clarify exactly what utility does
 - URL search params with color and gradientsetting to make share of colors easy
 - use storage to retain information, when switching to docu and back
 - documentation in header as link with same header with app and theme switch
-- 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V) to pick the remaining 2 components (X/Y) with real-time gradient updates
+- 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V, l/a/b, l/c/h) to pick the remaining 2 components (X/Y) with real-time gradient updates
 
 ## UI
 - icon: make icons light in dark theme
@@ -27,9 +29,9 @@
 - split Color1 and Color2 to 2 equal inputs, flex-wrap horizontally
 - Steps & Overdrive without text input next to each other, for mobile with flex-wrap 
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
-- HSL/HSV/RGB-gradient eliminate radio buttons and use single-selection-buttons
+- HSL/RGB/HSV/Oklab/Oklch-gradient eliminate radio buttons and use single-selection-buttons
 - input for numbers with monospace font
-- channel identifier buttons in first column open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
+- channel identifier buttons in first column (`H/S/L`, `R/G/B`, `H/S/V`, `l/a/b`, `l/c/h`) open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
 
 ## infrastructure
 - use npm package for

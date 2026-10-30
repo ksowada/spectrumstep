@@ -10,6 +10,11 @@
 - oklab what is this
 - how to handle 3 slides at the same time/movement
 - handle text input in realtime
+- what about monochromatic, triadic color manipulations
+- what about fixed color palettes like RAL
+- create html in index.html instead in JS dynamically only use ids : for SEO, including default parameter and tooltip
+- color plane should open at double click
+- theme selection may pick a individual background-color (may be introduce transparency)
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
