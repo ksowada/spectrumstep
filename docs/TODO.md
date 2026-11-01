@@ -2,11 +2,8 @@
 
 ## tasks
 - HSL, HSV, RBG output at gradient: write values next to rgb-hexstring, f.e. `hsl(30deg 82% 43%)`
-- what API may help to identify colors or more?
 - how to handle 3 slides at the same time/movement
-- what about fixed color palettes like RAL
 - create html in index.html instead in JS dynamically only use ids : for SEO, including default parameter and tooltip
-- color plane should open at double click
 - theme selection may pick a individual background-color from extra color input or from existing 2 colors (may be introduce transparency)
 - fullscreen mode for both gradient swatch and linear (without labels)
 - swatch export mode, for swatch copy function. f.e. hsl() & various formats
@@ -60,3 +57,4 @@
 
 ## not usable ideas
 - monochromatic, triadic color manipulations (mostly build 3 color, that don't fit in concept)
+- what API may help to identify colors or more? (later, use RAL for closest color, place below C1 color chooser)

@@ -355,6 +355,26 @@
 
 				firstCell.appendChild(btn);
 				channelBtns[ix][i] = btn;
+
+				var rangeId = combineToId([id, hslKeys[i], 'range']);
+				var rangeEl = document.getElementById(rangeId);
+				if (rangeEl && !rangeEl._hasColorPlaneDblClick) {
+					rangeEl._hasColorPlaneDblClick = true;
+					rangeEl.addEventListener('dblclick', function (e) {
+						e.stopPropagation();
+						toggleColorPlane(ix, i, btn);
+					});
+				}
+				var rangeCell = rangeEl ? rangeEl.parentElement : null;
+				if (rangeCell && !rangeCell._hasColorPlaneDblClick) {
+					rangeCell._hasColorPlaneDblClick = true;
+					rangeCell.addEventListener('dblclick', function (e) {
+						if (e.target === rangeCell) {
+							e.stopPropagation();
+							toggleColorPlane(ix, i, btn);
+						}
+					});
+				}
 			});
 			updateColorPlaneButtons(ix);
 		});
@@ -372,9 +392,21 @@
 			var yLabel = getChannelLabel(mode, rem[1]);
 			btn.textContent = label;
 			var baseTip = (tips && tips[i] && tips[i].name) ? tips[i].name : label;
-			btn.dataset.tooltip = baseTip + '. Click to fix ' + label + ' and pick ' + xLabel + ' (X) & ' + yLabel + ' (Y) on a 2D color plane.';
+			btn.dataset.tooltip = baseTip + '. Click (or double-click slider) to fix ' + label + ' and pick ' + xLabel + ' (X) & ' + yLabel + ' (Y) on a 2D color plane.';
 			if (typeof updateActiveTooltip === 'function') {
 				updateActiveTooltip(btn);
+			}
+
+			var rangeId = combineToId([inp_cmx_ids[ix], hslKeys[i], 'range']);
+			var rangeEl = document.getElementById(rangeId);
+			if (rangeEl) {
+				var baseRangeTip = (tips && tips[i] && tips[i].range) ? tips[i].range : '';
+				if (baseRangeTip) {
+					rangeEl.dataset.tooltip = baseRangeTip + ' (Double-click to open 2D color plane)';
+					if (typeof updateActiveTooltip === 'function') {
+						updateActiveTooltip(rangeEl);
+					}
+				}
 			}
 		}
 		if (activeState && activeState.ix === ix) {

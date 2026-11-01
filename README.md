@@ -23,7 +23,7 @@
 - URL search params with color and gradientsetting to make share of colors easy
 - use storage to retain information, when switching to docu and back
 - documentation in header as link with same header with app and theme switch
-- 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V, l/a/b, l/c/h) to pick the remaining 2 components (X/Y) with real-time gradient updates
+- 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V, l/a/b, l/c/h) to pick the remaining 2 components (X/Y) with real-time gradient updates (opened via channel button or double-clicking the range slider)
 
 ## UI
 - icon: make icons light in dark theme
@@ -33,7 +33,7 @@
 - text/back-color eliminate radio buttons and use colored-empty-buttons just as color
 - HSL/RGB/HSV/Oklab/Oklch-gradient eliminate radio buttons and use single-selection-buttons
 - input for numbers with monospace font
-- channel identifier buttons in first column (`H/S/L`, `R/G/B`, `H/S/V`, `l/a/b`, `l/c/h`) open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
+- channel identifier buttons in first column (`H/S/L`, `R/G/B`, `H/S/V`, `l/a/b`, `l/c/h`) and double-clicking channel range sliders open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
 
 ## infrastructure
 - use npm package for
