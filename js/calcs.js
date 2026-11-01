@@ -193,6 +193,8 @@ function hueBound(hue) {
   return hue;
 }
 function rgbCorrect(value) {
+  if (typeof value !== 'string') return '#000000';
+  value = value.trim();
   // 1. Remove leading '#' if present
   value = (value.charAt(0) === '#') ? value.slice(1) : value;
   // 2. Handle accidental double '#' (e.g. "##333")
@@ -204,7 +206,7 @@ function rgbCorrect(value) {
         + value[2] + value[2];
   }
   // 4. Re-add the single leading '#'
-  return '#' + value;
+  return '#' + value.toLowerCase();
 }
 /**
  * Converts an HSL color value to RGB. Conversion formula
@@ -354,7 +356,13 @@ function rgbToHsv(args, fallbackHue){
  * @returns {number[]} array with 0..255 per color
  */
 function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return [0, 0, 0];
+  hex = hex.trim();
   if (hex.charAt(0)=='#') hex = hex.substr(1);
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return [0, 0, 0];
   var bigint = parseInt(hex, 16);
   var r = (bigint >> 16) & 255;
   var g = (bigint >> 8) & 255;

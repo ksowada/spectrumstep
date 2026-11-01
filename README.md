@@ -9,13 +9,15 @@
 - theme option in store
 - light/dark theme in header
 - random color button
-- expands 3-digit hex colors
+- RGB text input
+  - expands 3-digit hex colors
+  - **onkey event:** At each key, it check for valid color, then update color and gradient. If  value is invalid then don't display color (keep the last), warn with tooltip, "invalid entry". also when user leaves input with a invalid color, f.e.  5 digits instead of 6
 - gradientDirection in all 4 direction
 - enhanced accuracy for HSV, HSL, Oklab, and Oklch modes, no loss of RGB value
 - each color in gradient holds contrast info including WCAG AA / AAA badges (Pass/Fail)
   - contrast info and the gradient rating always be visible
   - contrast info can be disabled
-- copy function with visual feedback at gradient swatches
+- copy function with visual feedback at gradient swatches & CSS linear gradient
 - hue allows 2 gradients, longer and shorter way (HSL, HSV, Oklch)
 - use tooltips to clarify exactly what utility does
 - URL search params with color and gradientsetting to make share of colors easy

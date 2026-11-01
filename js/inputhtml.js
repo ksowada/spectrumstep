@@ -57,8 +57,8 @@ function InputHtml(args) {
             break;
           case 'color':
             param.value = rgbCorrect(param.value);
-            html_range = '<td class="form-value color"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '" onchange="'+html_oninput+',true)"/></td>';
-            html += html_name + html_range + '<td class="form-value color"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" onchange="'+html_oninput+',false)"/></td>' + html_unit;
+            html_range = '<td class="form-value color"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '"/></td>';
+            html += html_name + html_range + '<td class="form-value color"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" autocomplete="off" spellcheck="false"/></td>' + html_unit;
             break;
           case 'button':
           case 'popup':
@@ -109,6 +109,12 @@ function InputHtml(args) {
       var tip = (this.tooltips && this.tooltips[k]) || this.params[k].tooltip;
       if (tip) {
         this.setTooltip(k, tip);
+      }
+    }
+
+    for (var cp in this.params) {
+      if (this.params[cp].type === 'color') {
+        this.bindColorEvents(cp);
       }
     }
   }
@@ -197,11 +203,14 @@ function InputHtml(args) {
         return param.value;
       case 'color':
         if (this.rangeInput) return this.getRange(varName);
-        var val = document.getElementById(combineToId([this.el, varName])).value;
-        val = rgbCorrect(val);
-        document.getElementById(combineToId([this.el, varName])).value = val;
-        this.setRange(varName, val);
-        param.value = val;
+        var inputEl = document.getElementById(combineToId([this.el, varName]));
+        var val = inputEl ? inputEl.value.trim() : param.value;
+        if (/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(val)) {
+          var corrected = rgbCorrect(val).toLowerCase();
+          param.value = corrected;
+          this.setRange(varName, corrected);
+          return corrected;
+        }
         return param.value;
       case 'checkbox':
         param.value = document.getElementById(combineToId([this.el, varName])).checked;
@@ -219,12 +228,15 @@ function InputHtml(args) {
   this.getRange = function (varName) {
     var param = this.params[varName];
     param.value = document.getElementById(combineToId([this.el, varName, 'range'])).value; // change slider
-    if (param.type !== 'color') param.value = parseFloat(param.value);
-    document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
+    if (param.type !== 'color') {
+      param.value = parseFloat(param.value);
+      document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
+    }
     return param.value;
   }
   this.setRange = function (varName, value) {
-    document.getElementById(combineToId([this.el, varName, 'range'])).value = value; // change slider
+    var rangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
+    if (rangeEl) rangeEl.value = value; // change slider
   }
   this.getId = function (varName, varSuffix) {
     return combineToId([this.el, varName, varSuffix])
@@ -242,8 +254,22 @@ function InputHtml(args) {
       case 'color':
         value = rgbCorrect(value);
         param.value = value;
-        document.getElementById(combineToId([this.el, varName])).value = value;
-        document.getElementById(combineToId([this.el, varName, 'range'])).value = value;
+        var textEl = document.getElementById(combineToId([this.el, varName]));
+        var rangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
+        if (textEl) {
+          textEl.value = value;
+          textEl.classList.remove('is-invalid');
+          textEl.setAttribute('aria-invalid', 'false');
+          if (textEl.dataset.originalTooltip) {
+            textEl.dataset.tooltip = textEl.dataset.originalTooltip;
+          }
+          if (typeof hideTooltip === 'function' && window.activeTooltipTarget === textEl) {
+            hideTooltip();
+          }
+        }
+        if (rangeEl) {
+          rangeEl.value = value;
+        }
         break;
       default:
         value = (param.min !== undefined) ? bound(value, param.min, param.max) : value;
@@ -275,7 +301,141 @@ function InputHtml(args) {
       rowEl.cells[0].dataset.tooltip = nameTip;
     }
     if (rangeEl && rangeTip) rangeEl.dataset.tooltip = rangeTip;
-    if (inputEl && inputTip) inputEl.dataset.tooltip = inputTip;
+    if (inputEl && inputTip) {
+      inputEl.dataset.originalTooltip = inputTip;
+      if (!inputEl.classList.contains('is-invalid')) {
+        inputEl.dataset.tooltip = inputTip;
+      }
+    }
+  }
+  this.triggerColorCallback = function (varName, isRange) {
+    var param = this.params[varName];
+    var callbackName = (param.callbackName !== undefined) ? param.callbackName : this.callbackName;
+    this.rangeInput = !!isRange;
+    if (typeof callbackName === 'function') {
+      callbackName(this.callbackArgs);
+    } else if (typeof window[callbackName] === 'function') {
+      window[callbackName](this.callbackArgs);
+    } else if (typeof callbackName === 'object' && callbackName.name && typeof window[callbackName.name] === 'function') {
+      window[callbackName.name](this.callbackArgs);
+    }
+    this.rangeInput = false;
+  }
+  this.bindColorEvents = function (varName) {
+    var self = this;
+    var textEl = document.getElementById(combineToId([this.el, varName]));
+    var rangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
+    if (!textEl || !rangeEl) return;
+
+    var param = this.params[varName];
+    var getOrigTooltip = function () {
+      return textEl.dataset.originalTooltip || (param.tooltip && (param.tooltip.input || param.tooltip)) || '';
+    };
+
+    textEl.addEventListener('input', function () {
+      var raw = textEl.value;
+      var trimmed = raw.trim();
+      var isValidColor = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed);
+      var isValidPrefix = /^#?[0-9a-fA-F]{0,6}$/.test(trimmed);
+      var origTip = getOrigTooltip();
+
+      if (isValidColor) {
+        textEl.classList.remove('is-invalid');
+        textEl.setAttribute('aria-invalid', 'false');
+        textEl.dataset.tooltip = origTip;
+        if (typeof hideTooltip === 'function' && window.activeTooltipTarget === textEl) {
+          hideTooltip();
+        }
+
+        var normalized = rgbCorrect(trimmed).toLowerCase();
+        param.value = normalized;
+        self.setRange(varName, normalized);
+        self.triggerColorCallback(varName, false);
+      } else if (!isValidPrefix) {
+        textEl.classList.add('is-invalid');
+        textEl.setAttribute('aria-invalid', 'true');
+        textEl.dataset.tooltip = 'invalid entry';
+        if (typeof positionTooltip === 'function') {
+          positionTooltip(textEl);
+          window.activeTooltipTarget = textEl;
+        }
+      } else {
+        textEl.classList.remove('is-invalid');
+        textEl.setAttribute('aria-invalid', 'false');
+        textEl.dataset.tooltip = origTip;
+        if (typeof hideTooltip === 'function' && window.activeTooltipTarget === textEl) {
+          hideTooltip();
+        }
+      }
+    });
+
+    textEl.addEventListener('blur', function () {
+      var raw = textEl.value;
+      var trimmed = raw.trim();
+      var isValidColor = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed);
+      var origTip = getOrigTooltip();
+
+      if (isValidColor) {
+        var normalized = rgbCorrect(trimmed).toLowerCase();
+        textEl.value = normalized;
+        param.value = normalized;
+        self.setRange(varName, normalized);
+        textEl.classList.remove('is-invalid');
+        textEl.setAttribute('aria-invalid', 'false');
+        textEl.dataset.tooltip = origTip;
+        if (typeof hideTooltip === 'function' && window.activeTooltipTarget === textEl) {
+          hideTooltip();
+        }
+      } else {
+        textEl.classList.add('is-invalid');
+        textEl.setAttribute('aria-invalid', 'true');
+        textEl.dataset.tooltip = 'invalid entry';
+
+        setTimeout(function () {
+          if (textEl.classList.contains('is-invalid')) {
+            if (typeof positionTooltip === 'function') {
+              positionTooltip(textEl);
+              window.activeTooltipTarget = textEl;
+            }
+          }
+        }, 20);
+
+        if (textEl._invalidTipTimeout) clearTimeout(textEl._invalidTipTimeout);
+        textEl._invalidTipTimeout = setTimeout(function () {
+          if (window.activeTooltipTarget === textEl && document.activeElement !== textEl) {
+            if (typeof hideTooltip === 'function') hideTooltip();
+          }
+        }, 2800);
+      }
+    });
+
+    textEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        textEl.blur();
+      } else if (e.key === 'Escape') {
+        textEl.value = param.value;
+        textEl.classList.remove('is-invalid');
+        textEl.setAttribute('aria-invalid', 'false');
+        textEl.dataset.tooltip = getOrigTooltip();
+        if (typeof hideTooltip === 'function') hideTooltip();
+      }
+    });
+
+    var onPickerChange = function () {
+      var val = rangeEl.value;
+      param.value = val;
+      textEl.value = val;
+      textEl.classList.remove('is-invalid');
+      textEl.setAttribute('aria-invalid', 'false');
+      textEl.dataset.tooltip = getOrigTooltip();
+      if (typeof hideTooltip === 'function' && window.activeTooltipTarget === textEl) {
+        hideTooltip();
+      }
+      self.triggerColorCallback(varName, true);
+    };
+
+    rangeEl.addEventListener('input', onPickerChange);
+    rangeEl.addEventListener('change', onPickerChange);
   }
   // this.storageGet = function (varName,param) {
   //   if (!this.storageEn) return param.value;

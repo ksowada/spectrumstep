@@ -168,6 +168,11 @@ input[type="text"],input[type="number"]{
 			inset 0 2px 5px rgb(0 0 0 / 25%),
 			inset 0 -1px 0 rgb(255 255 255 / 5%);
 }
+input[type="text"].is-invalid,
+input[type="text"].is-invalid:focus {
+	border-color: #e53935 !important;
+	box-shadow: 0 0 0 1px #e53935, inset 0 2px 5px rgb(0 0 0 / 25%) !important;
+}
 input[type="color"] {
 	padding: 0; /* fill color picking area full with color */
 	height: 43px;
@@ -596,7 +601,7 @@ table.inputs {
 	font-weight: bold;
 }
 .btn-select.selected {
-	border-color: var(--variable, #333);
+	border-color: var(--text-muted);
 	border-style: solid;
 	border-width: 4px;
 }

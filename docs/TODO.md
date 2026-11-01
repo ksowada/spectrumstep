@@ -1,20 +1,26 @@
 # TODO
 
 ## tasks
-- HSL, HSV, RBG output at gradient: write values next to rgb-hexstring
-- swap C1 & C2 button
-- RGB text input shall have onkey event
-- CSS linear gradient has mouse over that manipulate colors, and needs copy function
-- given 1 color component, the 2 remaining may visualized by a plain, so you may fix hue and choose the saturation and lightness by choosing a point in area
+- HSL, HSV, RBG output at gradient: write values next to rgb-hexstring, f.e. `hsl(30deg 82% 43%)`
 - what API may help to identify colors or more?
-- oklab what is this
 - how to handle 3 slides at the same time/movement
-- handle text input in realtime
-- what about monochromatic, triadic color manipulations
 - what about fixed color palettes like RAL
 - create html in index.html instead in JS dynamically only use ids : for SEO, including default parameter and tooltip
 - color plane should open at double click
-- theme selection may pick a individual background-color (may be introduce transparency)
+- theme selection may pick a individual background-color from extra color input or from existing 2 colors (may be introduce transparency)
+- fullscreen mode for both gradient swatch and linear (without labels)
+- swatch export mode, for swatch copy function. f.e. hsl() & various formats
+- **recent color view**: a list of most recent colors
+  - may be tagged and retain in storage, may be exported
+- swatch form: instead of default appearance, choose quadratic or circles
+- swap C1 & C2 button (gradientDirection does similar)
+
+### extension: user defined swatch pos in gradient
+- show gradient as colored bar, styled similar as given input range, but with multiple selectable pos-points, the pos determines the swatch interpolation input
+  - show extend of overdrive in this bar, and highlight color 1 & 2, for easy export of a found color
+  - if overdrive gets saturated remove the points
+  - points count origins from count & overdrive rangeselect, but may be extended dynamically by user add + and x (how this looks like?)
+- gradient may be in middle of 2 endpoints. Or 1 endpoint is middle-point. So gradient extends symetrically around 1 endpoint. potentially C1 is middle-point
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead
@@ -30,6 +36,7 @@
 - selection for textContrast etc. shall be monochromatic and more visible
 - all buttons and esp. the color inputs have small borders, they should be plain 
 - seperate fieldset for steps and overdrive to have consistent UI
+- use always the available viewport, for extending color experience, in height & width
 
 ## ChatGPT
 - HEX-Werte direkt anklickbar machen - Schnelleres Arbeiten
@@ -49,4 +56,7 @@
 ## docu-page
 - make externally reference
 - add articles 
+- create task diagrams with napkin
 
+## not usable ideas
+- monochromatic, triadic color manipulations (mostly build 3 color, that don't fit in concept)
