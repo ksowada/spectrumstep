@@ -115,6 +115,8 @@ let steps = undefined;
 let overdrive = undefined;
 var _textColor = undefined;
 var _backColor = undefined;
+let gradientSlider = undefined;
+let currentRelRange = { relStart: 0, relEnd: 1 };
 const rangeMinForMode = {
 	RGB:[0,0,0],
 	HSL:[0,0,0],
@@ -316,6 +318,11 @@ function calcform_cmx_init() {
 			inp_cmx_arr[ix].set('c', rgbh[ix]);
 		}
 	}
+	gradientSlider = new GradientPosSlider('grd-slider', {
+		onMove: handleGradientSliderMove,
+		onSelect: handleGradientSliderSelect,
+		onCopy: (css, el) => copyColorStep(css, el)
+	});
 }
 /** berechne HSL */
 function calcform_cmx_doml() {
@@ -480,46 +487,127 @@ function calcform_cmx_hsl(ix,init) {
 }
 /** berechne Farbtabelle */
 function calcform_cmx_dyna(textColor, backColor) {
-	const rowCnt = steps.get()
-	const cha = overdrive.get()
+	const rowCnt = steps.get();
+	const cha = overdrive.get();
 	const gradientMode = gradientSwitch.value;
 	const gradientDirection = gradientDirectionSwitch.value;
 	const gradientWay = gradientWaySwitch.value;
 	const showContrast = contrastVisibilitySwitch.value !== 'hide';
 	if (textColor) {
-		_textColor = textColor
-		_backColor = undefined
+		_textColor = textColor;
+		_backColor = undefined;
 	}
 	if (backColor) {
-		_textColor = undefined
-		_backColor = backColor
+		_textColor = undefined;
+		_backColor = backColor;
 	}
-	var colArr = getColors({ mode:gradientMode, len: rowCnt, c1: hsl[0], c1Mode:colMode[0], c2: hsl[1],c2Mode:colMode[1], overdrive: cha, hueWay: gradientWay });
+	var colArr = getColors({
+		mode: gradientMode,
+		len: rowCnt,
+		c1: hsl[0],
+		c1Mode: colMode[0],
+		c2: hsl[1],
+		c2Mode: colMode[1],
+		overdrive: cha,
+		hueWay: gradientWay,
+		pruneSaturated: true
+	});
 
 	// this hack is for accuracy of rgb c1 and c2. When hsl interpolated sometimes calc is inaccurate
-	colArr[cha] = inp_cmx_arr[0].get('c');
-	colArr[cha + rowCnt - 1] = inp_cmx_arr[1].get('c');
+	const c1Idx = colArr.c1Index !== undefined ? colArr.c1Index : cha;
+	const c2Idx = colArr.c2Index !== undefined ? colArr.c2Index : (cha + rowCnt - 1);
+	colArr[c1Idx] = inp_cmx_arr[0].get('c');
+	colArr[c2Idx] = inp_cmx_arr[1].get('c');
 
-	if (gradientDirection==='left'||gradientDirection==='up')colArr.reverse()
-	var html = `<div class="color-palette-${gradientDirection}">`
+	const isReversed = (gradientDirection === 'left' || gradientDirection === 'up');
+	const details = colArr.details ? colArr.details.slice() : [];
+	if (isReversed) {
+		colArr.reverse();
+		details.reverse();
+	}
+	const finalC1Idx = isReversed ? (colArr.length - 1 - c1Idx) : c1Idx;
+	const finalC2Idx = isReversed ? (colArr.length - 1 - c2Idx) : c2Idx;
+
+	// Store rel range for interactive dragging across the gradient bar
+	if (details.length > 0) {
+		currentRelRange.relStart = details[0].rel;
+		currentRelRange.relEnd = details[details.length - 1].rel;
+	} else {
+		currentRelRange.relStart = 0;
+		currentRelRange.relEnd = 1;
+	}
+
+	const isVertical = (gradientDirection === 'down' || gradientDirection === 'up');
+	let swatchesHtml = '';
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
 		let infoBlock = '';
 		if (showContrast) {
-			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx])
-			const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor)
-			const contrastInfo = getContrastInfo(textRgb, backRgb)
+			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(colArr[rowIx]);
+			const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor);
+			const contrastInfo = getContrastInfo(textRgb, backRgb);
 			const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
 			const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
 			infoBlock = '<br/>' + infoHtml;
 		}
-		if (_backColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + colArr[rowIx] + ';color:'+_textColor+'"><span>' + colArr[rowIx] + infoBlock + '</span></div>';
-		if (_textColor==undefined) html += '<div class="color-step" onclick="copyColorStep(\'' + colArr[rowIx] + '\', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="background-color:' + _backColor + ';color:'+colArr[rowIx]+'"><span>' + colArr[rowIx] + infoBlock + '</span></div>';
+
+		let stepClasses = 'color-step';
+		if (rowIx === finalC1Idx) {
+			stepClasses += ' is-c1';
+		} else if (rowIx === finalC2Idx) {
+			stepClasses += ' is-c2';
+		}
+
+		const contentInner = '<span><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
+		const stepStyle = _backColor === undefined
+			? 'background-color:' + colArr[rowIx] + ';color:' + _textColor
+			: 'background-color:' + _backColor + ';color:' + colArr[rowIx];
+
+		swatchesHtml += '<div class="' + stepClasses + '" data-index="' + rowIx + '" onclick="calcform_cmx_stepClick(' + rowIx + ', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="' + stepStyle + '">' + contentInner + '</div>';
 	}
-	html += '</div>'
+
+	// Build corner color markers line under the gradient swatches
+	const minCornerIdx = Math.min(finalC1Idx, finalC2Idx);
+	const maxCornerIdx = Math.max(finalC1Idx, finalC2Idx);
+	const pointerSymbol = isVertical ? '◀' : '▲';
+
+	let markersHtml = `<div class="palette-corner-markers palette-corner-markers-${gradientDirection}">`;
+	for (let i = 0; i < colArr.length; i++) {
+		const isInRange = (i >= minCornerIdx && i <= maxCornerIdx);
+		let cellClasses = 'corner-marker-cell';
+		if (isInRange) cellClasses += ' in-range';
+
+		let cellContent = '';
+		if (i === finalC1Idx) {
+			cellClasses += ' is-c1';
+			cellContent = `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 1</span>`;
+		} else if (i === finalC2Idx) {
+			cellClasses += ' is-c2';
+			cellContent = `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 2</span>`;
+		}
+
+		if (i === finalC1Idx || i === finalC2Idx) {
+			const labelName = (i === finalC1Idx) ? 'Color 1' : 'Color 2';
+			markersHtml += `<div class="${cellClasses}" data-index="${i}" onclick="calcform_cmx_markerClick(${i})" data-tooltip="Click to copy ${labelName} HEX ${colArr[i]} to clipboard">${cellContent}</div>`;
+		} else {
+			markersHtml += `<div class="${cellClasses}" data-index="${i}">${cellContent}</div>`;
+		}
+	}
+	markersHtml += '</div>';
+
+	let html = '';
+	if (isVertical) {
+		html = `<div class="palette-vertical-layout">`
+			+ `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`
+			+ markersHtml
+			+ `</div>`;
+	} else {
+		html = `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`
+			+ markersHtml;
+	}
 	document.getElementById('tab-cmx').innerHTML = html;
 
 	// build CSS linear gradient using CSS native color space interpolation
-	const rotation = { right: '90deg', down: '180deg',left:'90deg',up:'180deg' }[gradientDirection];
+	const rotation = { right: '90deg', down: '180deg', left: '90deg', up: '180deg' }[gradientDirection];
 	let gradientSpace = '';
 	if (gradientMode === 'Oklab') {
 		gradientSpace = ' in oklab';
@@ -528,13 +616,35 @@ function calcform_cmx_dyna(textColor, backColor) {
 	} else if (gradientMode !== 'RGB') {
 		gradientSpace = ` in hsl ${gradientWay} hue`;
 	}
-	let gradientText = `linear-gradient(${rotation}${gradientSpace},${colArr[0]},${colArr[colArr.length - 1]})`
-	const div_grd = document.getElementById('grd-cmx')
-	div_grd.innerHTML = gradientText
-	div_grd.style.background = gradientText
-	div_grd.style.color = _textColor
-	div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
-	div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+	let gradientText = `linear-gradient(${rotation}${gradientSpace},${colArr[0]},${colArr[colArr.length - 1]})`;
+
+	// restore preview of CSS linear-gradient on grd-cmx as before
+	const div_grd = document.getElementById('grd-cmx');
+	if (div_grd) {
+		div_grd.innerHTML = gradientText;
+		div_grd.style.background = gradientText;
+		div_grd.style.color = _textColor;
+		div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
+		div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+	}
+
+	// update GradientPosSlider unit
+	if (gradientSlider) {
+		const points = colArr.map((col, idx) => {
+			const pos = colArr.length > 1 ? idx / (colArr.length - 1) : 0;
+			const rel = details[idx] ? details[idx].rel : pos;
+			return {
+				index: idx,
+				pos: pos,
+				color: col,
+				isC1: idx === finalC1Idx,
+				isC2: idx === finalC2Idx,
+				rel: rel
+			};
+		});
+		gradientSlider.setPoints(points);
+		gradientSlider.updateGradient(gradientText, gradientDirection);
+	}
 
 	document.querySelectorAll('#textContrast .btn-select').forEach(el => {
 		el.style.background = gradientText;
@@ -543,6 +653,82 @@ function calcform_cmx_dyna(textColor, backColor) {
 		span.style.backgroundImage = gradientText;
 	});
 	calcform_cmx_syncState();
+}
+
+function handleGradientSliderMove({ index, pos, point, points }) {
+	const gradientMode = gradientSwitch.value;
+	const gradientWay = gradientWaySwitch.value;
+	const showContrast = contrastVisibilitySwitch.value !== 'hide';
+
+	// Compute interpolation input rel from pos across currentRelRange
+	const rel = currentRelRange.relStart + pos * (currentRelRange.relEnd - currentRelRange.relStart);
+	point.rel = rel;
+	const newColor = getColorAtRel(rel, gradientMode, hsl[0], colMode[0], hsl[1], colMode[1], gradientWay, rgbh[0], rgbh[1]);
+	point.color = newColor;
+
+	// Update corresponding swatch in DOM
+	const swatches = document.querySelectorAll('#tab-cmx .color-step');
+	const swatchEl = swatches[index];
+	if (swatchEl) {
+		if (_backColor === undefined) {
+			swatchEl.style.backgroundColor = newColor;
+			if (_textColor) swatchEl.style.color = _textColor;
+		} else {
+			swatchEl.style.backgroundColor = _backColor;
+			swatchEl.style.color = newColor;
+		}
+		const hexSpan = swatchEl.querySelector('.color-hex');
+		if (hexSpan) hexSpan.textContent = newColor;
+		swatchEl.dataset.tooltip = `Click to copy HEX color ${newColor} to clipboard`;
+
+		if (showContrast) {
+			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(newColor);
+			const backRgb = _textColor ? hexToRgb(newColor) : hexToRgb(_backColor);
+			const contrastInfo = getContrastInfo(textRgb, backRgb);
+			const contrastEl = swatchEl.querySelector('.contrast-info');
+			if (contrastEl) {
+				contrastEl.style.color = contrastInfo.infoColor;
+				const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
+				contrastEl.innerHTML = contrastInfo.ratioText + '<br/>' + badgeHtml;
+			}
+		}
+	}
+}
+
+function handleGradientSliderSelect({ index }) {
+	const swatches = document.querySelectorAll('#tab-cmx .color-step');
+	swatches.forEach((s, i) => {
+		if (i === index) {
+			s.classList.add('is-selected');
+		} else {
+			s.classList.remove('is-selected');
+		}
+	});
+	const markerCells = document.querySelectorAll('#tab-cmx .corner-marker-cell');
+	markerCells.forEach((m, i) => {
+		if (i === index) {
+			m.classList.add('is-selected');
+		} else {
+			m.classList.remove('is-selected');
+		}
+	});
+}
+
+function calcform_cmx_markerClick(index) {
+	const swatchEl = document.querySelector(`#tab-cmx .color-step[data-index="${index}"]`);
+	if (swatchEl) {
+		calcform_cmx_stepClick(index, swatchEl);
+	}
+}
+
+function calcform_cmx_stepClick(index, el) {
+	if (gradientSlider) {
+		gradientSlider.selectPoint(index);
+	}
+	handleGradientSliderSelect({ index });
+	const hexSpan = el.querySelector('.color-hex');
+	const hex = hexSpan ? hexSpan.textContent.trim() : el.style.backgroundColor;
+	copyColorStep(hex, el);
 }
 
 let toastTimeout = null;

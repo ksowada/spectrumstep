@@ -1,23 +1,17 @@
 # TODO
 
 ## tasks
+- **recent color view**: a list of most recent colors
+  - may be tagged and retain in storage, may be exported
 - HSL, HSV, RBG output at gradient: write values next to rgb-hexstring, f.e. `hsl(30deg 82% 43%)`
 - how to handle 3 slides at the same time/movement
 - create html in index.html instead in JS dynamically only use ids : for SEO, including default parameter and tooltip
 - theme selection may pick a individual background-color from extra color input or from existing 2 colors (may be introduce transparency)
 - fullscreen mode for both gradient swatch and linear (without labels)
 - swatch export mode, for swatch copy function. f.e. hsl() & various formats
-- **recent color view**: a list of most recent colors
-  - may be tagged and retain in storage, may be exported
 - swatch form: instead of default appearance, choose quadratic or circles
 - swap C1 & C2 button (gradientDirection does similar)
-
-### extension: user defined swatch pos in gradient
-- show gradient as colored bar, styled similar as given input range, but with multiple selectable pos-points, the pos determines the swatch interpolation input
-  - show extend of overdrive in this bar, and highlight color 1 & 2, for easy export of a found color
-  - if overdrive gets saturated remove the points
-  - points count origins from count & overdrive rangeselect, but may be extended dynamically by user add + and x (how this looks like?)
-- gradient may be in middle of 2 endpoints. Or 1 endpoint is middle-point. So gradient extends symetrically around 1 endpoint. potentially C1 is middle-point
+- gradient may be in middle of 2 endpoints. Or 1 endpoint is middle-point. So gradient extends symmetric around 1 endpoint. potentially C1 is middle-point
 
 ## code
 - var rgb, rgbh, hsl are redundant use input inp_cmx_arr instead

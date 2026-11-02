@@ -446,11 +446,218 @@ table.inputs {
 	user-select: none;
 	position: relative;
 	transition: transform 0.1s ease, box-shadow 0.1s ease;
+	word-break: break-all;
 }
 .linear-gradient:hover {
 	transform: scale(1.01);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 	z-index: 2;
+}
+#grd-slider,
+.gradient-slider-container {
+	margin: 0.75rem 0 0.25rem 0;
+	position: relative;
+	user-select: none;
+}
+.gradient-slider-unit {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+.gradient-slider-track-wrap {
+	position: relative;
+	width: 100%;
+	padding: 12px 10px 22px 10px;
+	box-sizing: border-box;
+}
+.gradient-slider-track {
+	position: relative;
+	width: 100%;
+	height: 10px;
+	border-radius: 5px;
+	border: 1px solid rgba(0, 0, 0, 0.3);
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.08);
+	cursor: pointer;
+	transition: box-shadow 0.15s ease;
+}
+[data-theme="light"] .gradient-slider-track {
+	border-color: rgba(0, 0, 0, 0.22);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.gradient-slider-track:hover {
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--focus);
+}
+.gradient-slider-knobs-layer {
+	position: absolute;
+	top: 12px;
+	left: 10px;
+	right: 10px;
+	height: 10px;
+	pointer-events: none;
+}
+.gradient-slider-knob {
+	position: absolute;
+	top: 50%;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: #dbdbdb;
+	background: var(--border);
+	box-shadow: 0 1px 1px #000, 0 0 1px #0d0d0d;
+	transform: translate(-50%, -50%);
+	cursor: grab;
+	pointer-events: auto;
+	touch-action: none;
+	user-select: none;
+	z-index: 2;
+	transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.gradient-slider-knob:hover {
+	transform: translate(-50%, -50%) scale(1.15);
+	z-index: 5;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 2px var(--focus);
+}
+.gradient-slider-knob:active,
+.gradient-slider-knob.is-dragging {
+	cursor: grabbing;
+	transform: translate(-50%, -50%) scale(1.22);
+	z-index: 10;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.55), 0 0 0 2px var(--focus);
+}
+.gradient-slider-knob:focus-visible,
+.gradient-slider-knob.is-selected {
+	outline: none;
+	box-shadow: 0 0 0 3px var(--focus), 0 2px 6px rgba(0, 0, 0, 0.4);
+	z-index: 6;
+}
+.gradient-knob-tooltip {
+	position: absolute;
+	top: 22px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 0.7rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	padding: 2px 6px;
+	border-radius: 3px;
+	background: rgba(10, 16, 24, 0.92);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.12s ease, visibility 0.12s ease;
+	z-index: 12;
+}
+[data-theme="light"] .gradient-knob-tooltip {
+	background: rgba(245, 245, 245, 0.95);
+	color: #1a1a1a;
+	border-color: rgba(0, 0, 0, 0.2);
+}
+.gradient-slider-knob:hover .gradient-knob-tooltip,
+.gradient-slider-knob.is-dragging .gradient-knob-tooltip,
+.gradient-slider-knob:focus-visible .gradient-knob-tooltip {
+	opacity: 1;
+	visibility: visible;
+}
+/* Corner color markers line under the gradient swatches */
+.palette-corner-markers {
+	display: grid;
+	gap: 4px;
+	margin-top: 4px;
+	margin-bottom: 8px;
+	user-select: none;
+}
+.palette-corner-markers-right,
+.palette-corner-markers-left {
+	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+}
+.corner-marker-cell {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding-top: 3px;
+	font-family: var(--font-monospace);
+	font-size: 0.68rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	position: relative;
+	min-height: 22px;
+	box-sizing: border-box;
+}
+.corner-marker-cell.in-range {
+	border-top: 1px solid var(--border);
+}
+.corner-marker-cell.is-c1,
+.corner-marker-cell.is-c2 {
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: color 0.15s ease, transform 0.1s ease;
+}
+.corner-marker-cell.is-c1:hover,
+.corner-marker-cell.is-c2:hover,
+.corner-marker-cell.is-selected {
+	color: var(--text-bright);
+}
+.corner-marker-pointer {
+	font-size: 0.5rem;
+	line-height: 1;
+	margin-bottom: 2px;
+	opacity: 0.75;
+}
+.corner-marker-text {
+	white-space: nowrap;
+	line-height: 1.1;
+	text-align: center;
+}
+.palette-vertical-layout {
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	align-items: stretch;
+}
+.palette-vertical-layout > [class^="color-palette-"] {
+	flex: 1;
+}
+.palette-corner-markers-down,
+.palette-corner-markers-up {
+	display: grid;
+	grid-template-rows: repeat(auto-fit, 1fr);
+	gap: 4px;
+	width: 90px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.palette-corner-markers-down .corner-marker-cell,
+.palette-corner-markers-up .corner-marker-cell {
+	min-height: 34px;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	padding-top: 0;
+	padding-left: 6px;
+	border-top: none;
+}
+.palette-corner-markers-down .corner-marker-cell.in-range,
+.palette-corner-markers-up .corner-marker-cell.in-range {
+	border-top: none;
+	border-left: 1px solid var(--border);
+}
+.palette-corner-markers-down .corner-marker-pointer,
+.palette-corner-markers-up .corner-marker-pointer {
+	margin-bottom: 0;
+	margin-right: 4px;
+}
+.color-step.is-selected {
+	outline: 2px solid var(--links);
+	outline-offset: -2px;
+	z-index: 3;
 }
 .cmx-toast {
 	position: fixed;

@@ -4,6 +4,9 @@
 - besides HSL, use RGB, HSV, Oklab, and Oklch mixing and input spaces
 - gamut mapping via chroma reduction when converting out-of-gamut Oklab/Oklch colors to sRGB HEX
 - native CSS Color 4 linear-gradient interpolation (`in oklab`, `in oklch shorter|longer hue`, `in hsl shorter|longer hue`)
+- interactive multi-pos gradient slider: thin colored bar with draggable circle knobs (same size and color as range slider thumbs) for each swatch, slidable across the full extent (0%–100%) with overtaking, real-time percentage tooltip, and live swatch color interpolation
+- overdrive extrapolation with automatic pruning of duplicate saturated/clamped points
+- dedicated indicator line under the gradient swatches with small monochromatic Color 1 & Color 2 markers, indicating the gradient belonging to the corner colors for instant recognition and easy HEX export
 - C2 to C1 copy color and vice versa
 - store in details to hide if unused
 - theme option in store

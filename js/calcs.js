@@ -664,9 +664,7 @@ function getColors(args) {
     }
   }
 
-  var rgbColors = [];
-  for (var i = -overdrive; i < args.len + overdrive; i++) {
-    var rel = args.len > 1 ? i / (args.len - 1) : 0;
+  function computeColorAtRel(rel, mode, p1, p2, hueWay, conv) {
     var a, b, c;
     if (mode === 'HSL' || mode === 'HSV') {
       a = hueBound(interpolate(rel, p1[0], p2[0], hueWay));
@@ -685,9 +683,134 @@ function getColors(args) {
       b = interpolate(rel, p1[1], p2[1]);
       c = interpolate(rel, p1[2], p2[2]);
     }
-    rgbColors.push('#' + rgbToColor(conv[mode].toRgb(a, b, c)));
+    return '#' + rgbToColor(conv[mode].toRgb(a, b, c));
   }
+
+  function isOverdriveSaturated(mode, rel, p1, p2, color, prevColor, c1Hex, c2Hex) {
+    // An overdrive color is saturated / clipped when it produces the exact same color as the adjacent step
+    if (prevColor && color.toLowerCase() === prevColor.toLowerCase()) return true;
+    return false;
+  }
+
+  var prune = (args.pruneSaturated !== false);
+  var baseSteps = [];
+  var baseDetails = [];
+  var c1Hex = null, c2Hex = null;
+
+  for (var i = 0; i < args.len; i++) {
+    var rel = args.len > 1 ? i / (args.len - 1) : 0;
+    var color = computeColorAtRel(rel, mode, p1, p2, hueWay, conv);
+    if (i === 0) c1Hex = color;
+    if (i === args.len - 1) c2Hex = color;
+    baseSteps.push(color);
+    baseDetails.push({ i: i, rel: rel, color: color, isC1: (i === 0), isC2: (i === args.len - 1), isOverdrive: false });
+  }
+
+  var leftSteps = [];
+  var leftDetails = [];
+  var prevColor = c1Hex;
+  for (var i = -1; i >= -overdrive; i--) {
+    var rel = args.len > 1 ? i / (args.len - 1) : 0;
+    var color = computeColorAtRel(rel, mode, p1, p2, hueWay, conv);
+    if (prune && isOverdriveSaturated(mode, rel, p1, p2, color, prevColor, c1Hex, c2Hex)) {
+      break;
+    }
+    leftSteps.unshift(color);
+    leftDetails.unshift({ i: i, rel: rel, color: color, isC1: false, isC2: false, isOverdrive: true });
+    prevColor = color;
+  }
+
+  var rightSteps = [];
+  var rightDetails = [];
+  prevColor = c2Hex;
+  for (var i = args.len; i < args.len + overdrive; i++) {
+    var rel = args.len > 1 ? i / (args.len - 1) : 0;
+    var color = computeColorAtRel(rel, mode, p1, p2, hueWay, conv);
+    if (prune && isOverdriveSaturated(mode, rel, p1, p2, color, prevColor, c1Hex, c2Hex)) {
+      break;
+    }
+    rightSteps.push(color);
+    rightDetails.push({ i: i, rel: rel, color: color, isC1: false, isC2: false, isOverdrive: true });
+    prevColor = color;
+  }
+
+  var rgbColors = leftSteps.concat(baseSteps, rightSteps);
+  rgbColors.details = leftDetails.concat(baseDetails, rightDetails);
+  rgbColors.leftKept = leftSteps.length;
+  rgbColors.rightKept = rightSteps.length;
+  rgbColors.c1Index = leftSteps.length;
+  rgbColors.c2Index = leftSteps.length + args.len - 1;
   return rgbColors;
+}
+
+/**
+ * Calculates a single color at relative position rel in given mode between c1 and c2.
+ */
+function getColorAtRel(rel, mode, c1, c1Mode, c2, c2Mode, hueWay, c1Hex, c2Hex) {
+  if (Math.abs(rel) < 1e-5 && c1Hex) return c1Hex;
+  if (Math.abs(rel - 1) < 1e-5 && c2Hex) return c2Hex;
+  if (Math.abs(rel) < 1e-5 && typeof c1 === 'string') return c1;
+  if (Math.abs(rel - 1) < 1e-5 && typeof c2 === 'string') return c2;
+
+  mode = mode || 'RGB';
+  hueWay = hueWay || 'shorter';
+  var isHue = (mode === 'HSL' || mode === 'HSV' || mode === 'Oklch');
+  var conv = {
+    RGB: { toRgb: function (a, b, c) { return getRGBColor(a, b, c); }, fromRgb: function (rgb) { return rgb; } },
+    HSL: { toRgb: function (h, s, l) { return hslToRgb(h, s, l); }, fromRgb: rgbToHsl },
+    HSV: { toRgb: function (h, s, v) { return hsvToRgb([h, s, v]); }, fromRgb: rgbToHsv },
+    Oklab: { toRgb: function (l, a, b) { return oklabToRgb(l, a, b); }, fromRgb: rgbToOklab },
+    Oklch: { toRgb: function (l, c, h) { return oklchToRgb(l, c, h); }, fromRgb: rgbToOklch }
+  };
+  function resolve(c, cm) {
+    if (typeof c === 'string') return conv[mode].fromRgb(getRGBColorByStr(c));
+    cm = cm || mode;
+    if (cm === mode) return c;
+    var rgb = conv[cm].toRgb(c[0], c[1], c[2]);
+    return conv[mode].fromRgb(rgb);
+  }
+  var p1 = resolve(c1, c1Mode);
+  var p2 = resolve(c2, c2Mode);
+  if (isHue && Array.isArray(p1) && Array.isArray(p2)) {
+    p1 = p1.slice();
+    p2 = p2.slice();
+    var hueIdx = (mode === 'Oklch') ? 2 : 0;
+    var isAchromatic1, isAchromatic2;
+    if (mode === 'HSL') {
+      isAchromatic1 = (p1[2] <= 0.0001 || p1[2] >= 0.9999 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[2] <= 0.0001 || p2[2] >= 0.9999 || p2[1] <= 0.0001);
+    } else if (mode === 'HSV') {
+      isAchromatic1 = (p1[2] <= 0.0001 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[2] <= 0.0001 || p2[1] <= 0.0001);
+    } else {
+      isAchromatic1 = (p1[0] <= 0.0001 || p1[0] >= 0.9999 || p1[1] <= 0.0001);
+      isAchromatic2 = (p2[0] <= 0.0001 || p2[0] >= 0.9999 || p2[1] <= 0.0001);
+    }
+    if (isAchromatic2 && !isAchromatic1) p2[hueIdx] = p1[hueIdx];
+    else if (isAchromatic1 && !isAchromatic2) p1[hueIdx] = p2[hueIdx];
+  }
+  var a, b, c;
+  if (mode === 'HSL' || mode === 'HSV') {
+    a = hueBound(interpolate(rel, p1[0], p2[0], hueWay));
+    b = bound(interpolate(rel, p1[1], p2[1]), 0, 1);
+    c = bound(interpolate(rel, p1[2], p2[2]), 0, 1);
+  } else if (mode === 'Oklch') {
+    a = bound(interpolate(rel, p1[0], p2[0]), 0, 1);
+    b = bound(interpolate(rel, p1[1], p2[1]), 0, 0.4);
+    c = hueBound(interpolate(rel, p1[2], p2[2], hueWay));
+  } else if (mode === 'Oklab') {
+    a = bound(interpolate(rel, p1[0], p2[0]), 0, 1);
+    b = interpolate(rel, p1[1], p2[1]);
+    c = interpolate(rel, p1[2], p2[2]);
+  } else {
+    a = interpolate(rel, p1[0], p2[0]);
+    b = interpolate(rel, p1[1], p2[1]);
+    c = interpolate(rel, p1[2], p2[2]);
+  }
+  var computed = '#' + rgbToColor(conv[mode].toRgb(a, b, c));
+  if (Math.abs(rel) < 1e-4 && c1Hex) return c1Hex;
+  if (Math.abs(rel - 1) < 1e-4 && c2Hex) return c2Hex;
+  return computed;
 }
 /** calculate RGB colors from r1 to r2, and so on, period is repetition */
 function getRGBColor(r,g,b) {
