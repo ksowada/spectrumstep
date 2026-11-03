@@ -117,6 +117,7 @@ var _textColor = undefined;
 var _backColor = undefined;
 let gradientSlider = undefined;
 let currentRelRange = { relStart: 0, relEnd: 1 };
+var currentSwatches = [];
 const rangeMinForMode = {
 	RGB:[0,0,0],
 	HSL:[0,0,0],
@@ -204,6 +205,7 @@ function calcform_cmx_init() {
 
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
+	initExportAndLoadModals();
 
 	inp_cmx_ids.forEach((id,ix) => {
 		inp_cmx_arr[ix] = new InputHtml({ obj: `inp_cmx_arr[${ix}]`, params: params_cmx, el: id, callbackName: 'calcform_cmx_doml', callbackArgs:ix,callAtInit: false, storageEn: true });
@@ -527,6 +529,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	}
 	const finalC1Idx = isReversed ? (colArr.length - 1 - c1Idx) : c1Idx;
 	const finalC2Idx = isReversed ? (colArr.length - 1 - c2Idx) : c2Idx;
+	currentSwatches = colArr.slice();
 
 	// Store rel range for interactive dragging across the gradient bar
 	if (details.length > 0) {
@@ -546,8 +549,12 @@ function calcform_cmx_dyna(textColor, backColor) {
 			const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor);
 			const contrastInfo = getContrastInfo(textRgb, backRgb);
 			const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
-			const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
-			infoBlock = '<br/>' + infoHtml;
+			if (isVertical) {
+				infoBlock = '<span class="contrast-ratio" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '</span>' + badgeHtml;
+			} else {
+				const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
+				infoBlock = '<br/>' + infoHtml;
+			}
 		}
 
 		let stepClasses = 'color-step';
@@ -557,7 +564,9 @@ function calcform_cmx_dyna(textColor, backColor) {
 			stepClasses += ' is-c2';
 		}
 
-		const contentInner = '<span><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
+		const contentInner = isVertical
+			? '<div class="color-step-content' + (showContrast ? ' has-contrast' : '') + '"><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</div>'
+			: '<span><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
 		const stepStyle = _backColor === undefined
 			? 'background-color:' + colArr[rowIx] + ';color:' + _textColor
 			: 'background-color:' + _backColor + ';color:' + colArr[rowIx];
@@ -685,11 +694,21 @@ function handleGradientSliderMove({ index, pos, point, points }) {
 			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(newColor);
 			const backRgb = _textColor ? hexToRgb(newColor) : hexToRgb(_backColor);
 			const contrastInfo = getContrastInfo(textRgb, backRgb);
-			const contrastEl = swatchEl.querySelector('.contrast-info');
-			if (contrastEl) {
-				contrastEl.style.color = contrastInfo.infoColor;
+			const contrastInfoEl = swatchEl.querySelector('.contrast-info');
+			const contrastRatioEl = swatchEl.querySelector('.contrast-ratio');
+			if (contrastInfoEl) {
+				contrastInfoEl.style.color = contrastInfo.infoColor;
 				const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
-				contrastEl.innerHTML = contrastInfo.ratioText + '<br/>' + badgeHtml;
+				contrastInfoEl.innerHTML = contrastInfo.ratioText + '<br/>' + badgeHtml;
+			} else if (contrastRatioEl) {
+				contrastRatioEl.style.color = contrastInfo.infoColor;
+				contrastRatioEl.textContent = contrastInfo.ratioText;
+				const badgeEl = swatchEl.querySelector('.wcag-badge');
+				if (badgeEl) {
+					badgeEl.className = 'wcag-badge ' + contrastInfo.badgeClass;
+					badgeEl.textContent = contrastInfo.badge;
+					badgeEl.dataset.tooltip = contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')';
+				}
 			}
 		}
 	}
@@ -801,6 +820,11 @@ function calcform_cmx_getState() {
 }
 function calcform_cmx_applyState(data) {
 	if (!data) return;
+	if (!data.rgbh && data.c1 && data.c2) {
+		data.rgbh = [data.c1, data.c2];
+	} else if (!data.rgbh && data.color1 && data.color2) {
+		data.rgbh = [data.color1, data.color2];
+	}
 	if (Array.isArray(data.rgbh) && data.rgbh.length === 2) {
 		rgbh = data.rgbh.map(c => rgbCorrect(c));
 	}
@@ -1011,13 +1035,379 @@ function calcform_cmx_syncState() {
 	storage.saveState(state);
 	calcform_cmx_updateUrl(state);
 }
+function openExportModal() {
+	hideTooltip();
+	const modal = document.getElementById('export-modal');
+	if (modal) {
+		modal.classList.add('open');
+		const input = document.getElementById('save-input');
+		if (input) {
+			input.focus();
+			input.select();
+		}
+	}
+}
+
+function closeExportModal() {
+	hideTooltip();
+	const modal = document.getElementById('export-modal');
+	if (modal) modal.classList.remove('open');
+}
+
+function openLoadModal() {
+	hideTooltip();
+	if (storage) storage.loadInit();
+	const modal = document.getElementById('load-modal');
+	if (modal) {
+		modal.classList.add('open');
+		const select = document.getElementById('load-input');
+		if (select) select.focus();
+	}
+}
+
+function closeLoadModal() {
+	hideTooltip();
+	const modal = document.getElementById('load-modal');
+	if (modal) modal.classList.remove('open');
+}
+
+function getExportFilename(defaultName = 'spectrumstep-palette') {
+	const input = document.getElementById('save-input');
+	let name = input ? input.value.trim() : '';
+	if (!name) name = defaultName;
+	name = name.replace(/\.(png|svg|json|txt|css)$/i, '').trim();
+	return name || defaultName;
+}
+
+function triggerDownload(blobOrUrl, filename) {
+	const url = (typeof blobOrUrl === 'string') ? blobOrUrl : URL.createObjectURL(blobOrUrl);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	if (typeof blobOrUrl !== 'string') {
+		setTimeout(() => URL.revokeObjectURL(url), 1000);
+	}
+}
+
+function getHexColorList() {
+	if (currentSwatches && currentSwatches.length > 0) {
+		return currentSwatches.join('\n');
+	}
+	const stepsEls = document.querySelectorAll('#tab-cmx .color-step .color-hex');
+	return Array.from(stepsEls).map(el => el.textContent.trim()).join('\n');
+}
+
+function getCssVariables() {
+	const swatches = (currentSwatches && currentSwatches.length > 0)
+		? currentSwatches
+		: Array.from(document.querySelectorAll('#tab-cmx .color-step .color-hex')).map(el => el.textContent.trim());
+	const lines = swatches.map((col, idx) => `  --spectrum-${idx + 1}: ${col};`);
+	return `:root {\n${lines.join('\n')}\n}`;
+}
+
+function generateExportJson() {
+	const state = calcform_cmx_getState();
+	const canonicalEl = document.querySelector('link[rel="canonical"]');
+	const baseUrl = canonicalEl ? canonicalEl.href : 'https://ardoid.eu/spectrumstep/';
+	const cleanBase = baseUrl.split('?')[0].replace(/\/+$/, '') + '/';
+	const actualLink = cleanBase + window.location.search;
+
+	const swatches = (currentSwatches && currentSwatches.length > 0)
+		? currentSwatches.slice()
+		: Array.from(document.querySelectorAll('#tab-cmx .color-step .color-hex')).map(el => el.textContent.trim());
+
+	const exportObj = {
+		gradientSteps: swatches,
+		link: actualLink,
+		options: {
+			c1: state.rgbh[0],
+			c2: state.rgbh[1],
+			colMode: state.colMode,
+			rgbh: state.rgbh,
+			hsl: state.hsl,
+			steps: state.steps,
+			overdrive: state.overdrive,
+			gradientMode: state.gradientMode,
+			gradientDirection: state.gradientDirection,
+			gradientWay: state.gradientWay,
+			contrastVisibility: state.contrastVisibility,
+			textColor: state.textColor || null,
+			backColor: state.backColor || null,
+			theme: state.theme
+		}
+	};
+	return JSON.stringify(exportObj, null, 2);
+}
+
+function exportPaletteToPng(filename) {
+	const paletteEl = document.querySelector('#tab-cmx [class*="color-palette-"]') || document.getElementById('tab-cmx');
+	if (!paletteEl) return;
+	const pRect = paletteEl.getBoundingClientRect();
+	const width = Math.round(pRect.width);
+	const height = Math.round(pRect.height);
+	if (width <= 0 || height <= 0) return;
+
+	const canvas = document.createElement('canvas');
+	canvas.width = width;
+	canvas.height = height;
+	const ctx = canvas.getContext('2d');
+
+	const bg = window.getComputedStyle(paletteEl).backgroundColor;
+	ctx.fillStyle = (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') ? bg : (window.getComputedStyle(document.body).backgroundColor || '#202b38');
+	ctx.fillRect(0, 0, width, height);
+
+	const steps = paletteEl.querySelectorAll('.color-step');
+	steps.forEach(step => {
+		const sRect = step.getBoundingClientRect();
+		const sx = Math.round(sRect.left - pRect.left);
+		const sy = Math.round(sRect.top - pRect.top);
+		const sw = Math.round(sRect.width);
+		const sh = Math.round(sRect.height);
+		const stepStyle = window.getComputedStyle(step);
+
+		ctx.fillStyle = stepStyle.backgroundColor;
+		ctx.fillRect(sx, sy, sw, sh);
+
+		const hexEl = step.querySelector('.color-hex');
+		if (hexEl) {
+			const hRect = hexEl.getBoundingClientRect();
+			const hStyle = window.getComputedStyle(hexEl);
+			ctx.font = `${hStyle.fontWeight} ${hStyle.fontSize} ${hStyle.fontFamily}`;
+			ctx.fillStyle = hStyle.color;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(hexEl.textContent.trim(), Math.round(hRect.left - pRect.left + hRect.width / 2), Math.round(hRect.top - pRect.top + hRect.height / 2));
+		}
+
+		const contrastEl = step.querySelector('.contrast-info, .contrast-ratio');
+		if (contrastEl) {
+			const cStyle = window.getComputedStyle(contrastEl);
+			const ratioText = contrastEl.childNodes[0]?.textContent?.trim() || contrastEl.textContent.trim();
+			if (ratioText) {
+				const cRect = contrastEl.getBoundingClientRect();
+				ctx.font = `${cStyle.fontWeight} ${cStyle.fontSize} ${cStyle.fontFamily}`;
+				ctx.fillStyle = cStyle.color;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(ratioText, Math.round(cRect.left - pRect.left + cRect.width / 2), Math.round(cRect.top - pRect.top + cRect.height / 2));
+			}
+		}
+
+		const badgeEl = step.querySelector('.wcag-badge');
+		if (badgeEl) {
+			const bRect = badgeEl.getBoundingClientRect();
+			const bStyle = window.getComputedStyle(badgeEl);
+			const bx = Math.round(bRect.left - pRect.left);
+			const by = Math.round(bRect.top - pRect.top);
+			const bw = Math.round(bRect.width);
+			const bh = Math.round(bRect.height);
+
+			ctx.fillStyle = bStyle.backgroundColor;
+			const rad = parseFloat(bStyle.borderRadius) || 3;
+			ctx.beginPath();
+			if (ctx.roundRect) {
+				ctx.roundRect(bx, by, bw, bh, rad);
+			} else {
+				ctx.rect(bx, by, bw, bh);
+			}
+			ctx.fill();
+
+			ctx.strokeStyle = bStyle.borderColor;
+			ctx.lineWidth = parseFloat(bStyle.borderWidth) || 1;
+			ctx.stroke();
+
+			ctx.font = `${bStyle.fontWeight} ${bStyle.fontSize} ${bStyle.fontFamily}`;
+			ctx.fillStyle = bStyle.color;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(badgeEl.textContent.trim(), bx + bw / 2, by + bh / 2);
+		}
+	});
+
+	canvas.toBlob(blob => {
+		if (blob) {
+			triggerDownload(blob, filename);
+			showToast(`✓ Downloaded PNG palette: ${filename}`);
+			closeExportModal();
+		}
+	}, 'image/png');
+}
+
+function exportPaletteToSvg(filename) {
+	const paletteEl = document.querySelector('#tab-cmx [class*="color-palette-"]') || document.getElementById('tab-cmx');
+	if (!paletteEl) return;
+	const pRect = paletteEl.getBoundingClientRect();
+	const width = Math.round(pRect.width);
+	const height = Math.round(pRect.height);
+	const steps = paletteEl.querySelectorAll('.color-step');
+
+	let rectsSvg = '';
+	steps.forEach(step => {
+		const sRect = step.getBoundingClientRect();
+		const sx = Math.round(sRect.left - pRect.left);
+		const sy = Math.round(sRect.top - pRect.top);
+		const sw = Math.round(sRect.width);
+		const sh = Math.round(sRect.height);
+		const bg = window.getComputedStyle(step).backgroundColor;
+		rectsSvg += `  <rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" fill="${bg}" />\n`;
+	});
+
+	const svgDoc = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n` +
+		rectsSvg +
+		`</svg>\n`;
+
+	const blob = new Blob([svgDoc], { type: 'image/svg+xml;charset=utf-8' });
+	triggerDownload(blob, filename);
+	showToast(`✓ Downloaded SVG palette: ${filename}`);
+	closeExportModal();
+}
+
+function exportPaletteToJson(filename) {
+	const jsonContent = generateExportJson();
+	const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8' });
+	triggerDownload(blob, filename);
+	showToast(`✓ Downloaded JSON file: ${filename}`);
+	closeExportModal();
+}
+
+function loadJsonFile(file) {
+	if (!file) return;
+	const reader = new FileReader();
+	reader.onload = function (e) {
+		try {
+			const data = JSON.parse(e.target.result);
+			const state = data.options || data;
+			calcform_cmx_applyState(state);
+			showToast(`✓ Palette loaded from ${file.name}`);
+			closeLoadModal();
+		} catch (err) {
+			alert('Failed to parse JSON file: ' + err.message);
+		}
+	};
+	reader.readAsText(file);
+}
+
 function calcform_cmx_onLoad() {
 	var data = storage.loadSetting();
 	if (data === null) return;
 	calcform_cmx_applyState(data);
+	const loadSelect = document.getElementById('load-input');
+	const name = (loadSelect && loadSelect.value) ? loadSelect.value : 'palette';
+	showToast(`✓ Loaded palette "${name}"`);
+	closeLoadModal();
 }
+
 function calcform_cmx_onSave() {
-	storage.saveSetting({ data: calcform_cmx_getState() });
+	const name = getExportFilename();
+	storage.saveSetting({ name: name, data: calcform_cmx_getState() });
+	showToast(`✓ Palette "${name}" saved to storage`);
+	closeExportModal();
+}
+
+function initExportAndLoadModals() {
+	const mainLoadBtn = document.getElementById('main-load-btn');
+	const mainExportBtn = document.getElementById('main-export-btn');
+	const exportModal = document.getElementById('export-modal');
+	const loadModal = document.getElementById('load-modal');
+	const exportCloseBtn = document.getElementById('export-modal-close');
+	const loadCloseBtn = document.getElementById('load-modal-close');
+
+	if (mainLoadBtn) mainLoadBtn.onclick = openLoadModal;
+	if (mainExportBtn) mainExportBtn.onclick = openExportModal;
+
+	if (exportCloseBtn) exportCloseBtn.onclick = closeExportModal;
+	if (loadCloseBtn) loadCloseBtn.onclick = closeLoadModal;
+
+	if (exportModal) {
+		exportModal.addEventListener('click', function (e) {
+			if (e.target === exportModal) closeExportModal();
+		});
+	}
+	if (loadModal) {
+		loadModal.addEventListener('click', function (e) {
+			if (e.target === loadModal) closeLoadModal();
+		});
+	}
+
+	document.addEventListener('keydown', function (e) {
+		if (e.key === 'Escape') {
+			closeExportModal();
+			closeLoadModal();
+		}
+	});
+
+	const copyHexBtn = document.getElementById('btn-copy-hex');
+	if (copyHexBtn) {
+		copyHexBtn.onclick = function () {
+			fallbackCopy(getHexColorList(), '✓ Copied HEX color list to clipboard');
+			closeExportModal();
+		};
+	}
+
+	const copyCssBtn = document.getElementById('btn-copy-css');
+	if (copyCssBtn) {
+		copyCssBtn.onclick = function () {
+			fallbackCopy(getCssVariables(), '✓ Copied CSS variables to clipboard');
+			closeExportModal();
+		};
+	}
+
+	const exportPngBtn = document.getElementById('btn-export-png');
+	if (exportPngBtn) {
+		exportPngBtn.onclick = function () {
+			exportPaletteToPng(getExportFilename() + '.png');
+		};
+	}
+
+	const exportSvgBtn = document.getElementById('btn-export-svg');
+	if (exportSvgBtn) {
+		exportSvgBtn.onclick = function () {
+			exportPaletteToSvg(getExportFilename() + '.svg');
+		};
+	}
+
+	const exportJsonBtn = document.getElementById('btn-export-json');
+	if (exportJsonBtn) {
+		exportJsonBtn.onclick = function () {
+			exportPaletteToJson(getExportFilename() + '.json');
+		};
+	}
+
+	const triggerJsonUpload = document.getElementById('btn-trigger-json-upload');
+	const jsonFileInput = document.getElementById('load-json-file-input');
+	if (triggerJsonUpload && jsonFileInput) {
+		triggerJsonUpload.onclick = function () {
+			jsonFileInput.click();
+		};
+		jsonFileInput.onchange = function (e) {
+			const file = e.target.files && e.target.files[0];
+			if (file) {
+				loadJsonFile(file);
+				jsonFileInput.value = '';
+			}
+		};
+	}
+
+	// Drag & Drop JSON file support onto load modal
+	if (loadModal) {
+		loadModal.addEventListener('dragover', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+		});
+		loadModal.addEventListener('drop', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			const dt = e.dataTransfer;
+			const file = dt && dt.files && dt.files[0];
+			if (file && (file.name.endsWith('.json') || file.type.includes('json'))) {
+				loadJsonFile(file);
+			}
+		});
+	}
 }
 function calcform_cmx_col_shuffle(ix) {
 	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));

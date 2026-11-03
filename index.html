@@ -12,7 +12,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="description" content="Mix colors with this HSL color mixer and palette generator. Create custom color transitions, adjust HSL and RGB values, and generate CSS linear gradients with HEX color codes." />
 	<title>SpectrumStep – Multi-Space Gradient & Contrast Generator</title>
-	<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+	<link rel="icon" href="assets/favicon.png" type="image/png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="assets/SpectrumStep.apple-touch-icon.png"/>
 	<link rel="stylesheet" type="text/css" href="css/water.css" />
 	<link rel="stylesheet" type="text/css" href="assets/fonts/fonts.css" />
 	<link rel="stylesheet" type="text/css" href="css/spectrumstep.css" />
@@ -53,7 +54,11 @@
 <body class="body" id="SpectrumStep">
 	<header class="site-header">
 		<div class="header-left">
-			<a class="header-link" href="https://ardoid.eu/" data-tooltip="Return to ardoid.eu main page">ardoid.eu</a>
+			<a class="header-link header-logo" href=./" data-tooltip="Return to SpectrumStep">
+				<img class="header-logo-img" src="assets/rainbow-colorcircle-with-pipette.webp" alt="SpectrumStep logo" />
+				<span class="header-title-1">Spectrum</span>
+				<span class="header-title-2">Step</span>
+			</a>
 		</div>
 		<nav class="header-nav" aria-label="Site navigation">
 			<a class="header-link active" href="./" aria-current="page" data-tooltip="SpectrumStep – Color Mixer application">SpectrumStep</a>
@@ -134,24 +139,91 @@
 			<div id="tab-cmx"></div>
 			<div id="grd-slider"></div>
 			<div id="grd-cmx" class="linear-gradient"></div>
-			<details>
-				<summary data-tooltip="Expand local browser storage to load or save named palette configurations">User Store to load and save palettes</summary>
-				<fieldset>
-					<legend>Store</legend>
-					<div class="flex">
-						<div class="flex">
-							<select id="load-input" class="narrow"></select>
-							<button id="load-btn" type="button"><img src="assets/icons/folder-open-solid-full.svg" alt="icon for load" class="icon" />Load</button>
-						</div>
-						<div class="flex">
-							<input id="save-input" class="narrow" />
-							<button id="save-btn" type="button"><img src="assets/icons/floppy-disk-solid-full.svg" alt="icon for save" class="icon" />Save</button>
-						</div>
-					</div>
-				</fieldset>
-			</details>
+			<div class="palette-actions-bar flex">
+				<button id="main-load-btn" type="button" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="Load" class="icon" />Load</button>
+				<button id="main-export-btn" type="button" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="Export" class="icon" />Export</button>
+			</div>
 		</div>
 	</main>
+
+	<!-- Export Modal Dialog -->
+	<div id="export-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+		<div class="cmx-modal-dialog">
+			<button type="button" class="popup-close-btn" id="export-modal-close" data-tooltip="Close export dialog (Esc)" aria-label="Close export dialog">
+				<img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" />
+			</button>
+			<h3 id="export-modal-title" class="modal-title">Export Palette</h3>
+
+			<!-- Section: Export to color -->
+			<fieldset class="modal-section">
+				<legend>Export to Color</legend>
+				<div class="modal-option-row">
+					<div class="modal-option-info">
+						<strong>HEX Color List</strong>
+						<p class="modal-option-desc">Every generated swatch included, one color per line.</p>
+					</div>
+					<div class="modal-option-actions">
+						<button type="button" id="btn-copy-hex" class="btn-modal-action" data-tooltip="Copy all swatch HEX colors (one per line) to clipboard">Copy HEX List</button>
+					</div>
+				</div>
+				<div class="modal-option-row">
+					<div class="modal-option-info">
+						<strong>CSS Variables</strong>
+						<p class="modal-option-desc">Export swatches as :root CSS variables (--spectrum-1, ...).</p>
+					</div>
+					<div class="modal-option-actions">
+						<button type="button" id="btn-copy-css" class="btn-modal-action" data-tooltip="Copy palette as :root CSS custom properties to clipboard">Copy CSS Variables</button>
+					</div>
+				</div>
+			</fieldset>
+
+			<!-- Section: Export to file -->
+			<fieldset class="modal-section">
+				<legend>Export to File</legend>
+				<div class="modal-filename-group">
+					<label for="save-input">Filename / Palette Name <span class="text-muted">(without extension)</span>:</label>
+					<input type="text" id="save-input" class="narrow modal-filename-input" value="spectrumstep-palette" placeholder="Enter palette name..." data-tooltip="Enter filename or storage palette name (without file extension)" />
+				</div>
+				<div class="modal-file-grid">
+					<button type="button" id="btn-export-png" class="btn-modal-action" data-tooltip="Download screenshot of the swatch section 1:1 in actual dimension"><img src="assets/icons/download-solid-full.svg" alt="PNG" class="icon" />PNG Palette</button>
+					<button type="button" id="btn-export-svg" class="btn-modal-action" data-tooltip="Download minimal SVG containing rects filled with gradient swatches"><img src="assets/icons/download-solid-full.svg" alt="SVG" class="icon" />SVG Palette</button>
+					<button type="button" id="btn-export-json" class="btn-modal-action" data-tooltip="Download full palette steps, options, and canonical link as JSON file"><img src="assets/icons/download-solid-full.svg" alt="JSON" class="icon" />JSON File</button>
+					<button type="button" id="save-btn" class="btn-modal-action" data-tooltip="Save palette configuration to browser localStorage using the name above"><img src="assets/icons/floppy-disk-solid-full.svg" alt="Save" class="icon" />Save to Storage</button>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+
+	<!-- Load Modal Dialog -->
+	<div id="load-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="load-modal-title">
+		<div class="cmx-modal-dialog">
+			<button type="button" class="popup-close-btn" id="load-modal-close" data-tooltip="Close load dialog (Esc)" aria-label="Close load dialog">
+				<img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" />
+			</button>
+			<h3 id="load-modal-title" class="modal-title">Load Palette</h3>
+
+			<!-- Section: Browser storage -->
+			<fieldset class="modal-section">
+				<legend>Browser Storage</legend>
+				<p class="modal-option-desc">Load a previously stored palette preset from browser localStorage.</p>
+				<div class="modal-storage-row flex">
+					<select id="load-input" class="narrow modal-select" data-tooltip="Select a saved palette preset from browser localStorage (latest saved preselected)"></select>
+					<button type="button" id="load-btn" class="btn-modal-action" data-tooltip="Load selected palette preset (endpoints, color spaces, steps, contrast, and theme)"><img src="assets/icons/folder-open-solid-full.svg" alt="Load" class="icon" />Load Preset</button>
+				</div>
+			</fieldset>
+
+			<!-- Section: JSON File -->
+			<fieldset class="modal-section">
+				<legend>JSON File</legend>
+				<p class="modal-option-desc">Upload a SpectrumStep exported JSON file to restore gradient and all options.</p>
+				<div class="modal-file-upload-row flex">
+					<input type="file" id="load-json-file-input" accept=".json,application/json" style="display:none;" />
+					<button type="button" id="btn-trigger-json-upload" class="btn-modal-action" data-tooltip="Choose and load a SpectrumStep exported JSON file"><img src="assets/icons/folder-open-solid-full.svg" alt="Upload" class="icon" />Upload JSON File</button>
+					<span id="load-json-filename" class="text-muted" style="font-size: 0.85rem;"></span>
+				</div>
+			</fieldset>
+		</div>
+	</div>
 </body>
 
 </html>
