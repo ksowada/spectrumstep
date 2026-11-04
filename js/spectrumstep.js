@@ -1155,8 +1155,8 @@ function exportPaletteToPng(filename) {
 	canvas.height = height;
 	const ctx = canvas.getContext('2d');
 
-	const bg = window.getComputedStyle(paletteEl).backgroundColor;
-	ctx.fillStyle = (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') ? bg : (window.getComputedStyle(document.body).backgroundColor || '#202b38');
+	const defaultBg = document.documentElement.dataset.theme === 'light' ? '#ffffff' : '#000000';
+	ctx.fillStyle = (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') ? bg : (window.getComputedStyle(document.body).backgroundColor || defaultBg);
 	ctx.fillRect(0, 0, width, height);
 
 	const steps = paletteEl.querySelectorAll('.color-step');
