@@ -16,8 +16,8 @@ Available scripts:
 - dedicated indicator line under the gradient swatches with small monochromatic Color 1 & Color 2 markers, indicating the gradient belonging to the corner colors for instant recognition and easy HEX export
 - C2 to C1 copy color and vice versa
 - store in details to hide if unused
-- theme option in store
-- light/dark theme in header
+- header background controls for pure black, pure white, or a custom color; the UI automatically chooses a contrasting light or dark theme
+- custom background color can be selected with the color picker or taken from Color 1 / Color 2, and is retained in the current session, shareable URL, named localStorage presets, and JSON export/import
 - random color button
 - RGB text input
   - expands 3-digit hex colors

@@ -82,7 +82,11 @@
 			<a class="header-link" href="https://ardoid.eu/legal-notice/">Legal Notice</a>
 			<a class="header-link" href="https://ardoid.eu/contact/">Contact</a>
 		</nav>
-		<div class="header-right" id="theme-select"></div>
+		<div class="header-right" id="theme-select">
+			<button id="theme-black" class="status-btn theme-choice" aria-label="Black background" data-tooltip="Black background"><img src="assets/icons/moon-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-white" class="status-btn theme-choice" aria-label="White background" data-tooltip="White background"><img src="assets/icons/sun-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-custom" class="status-btn theme-choice" aria-label="Custom background" data-tooltip="Custom background"><img src="assets/icons/palette-solid-full.svg" class="icon" alt="" /></button>
+		</div>
 	</header>
 	<main>
 		<div class="middle" id="middle">
@@ -161,6 +165,22 @@
 			</div>
 		</div>
 	</main>
+
+	<div id="background-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="background-modal-title">
+		<div class="cmx-modal-dialog background-modal-dialog">
+			<button type="button" class="popup-close-btn" id="background-modal-close" aria-label="Cancel background selection" data-tooltip="Cancel background selection"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="background-modal-title" class="modal-title">Background source</h3>
+			<fieldset class="modal-section"><legend>Background source</legend>
+				<div class="background-source-options">
+				<label class="background-source-option background-picker-option" id="background-picker-option"><span class="background-color-chip" id="background-picker-chip"></span><span><strong>Color picker</strong><small id="background-picker-value">#9c2bee</small></span><input id="background-color-picker" type="color" value="#9c2bee" /></label>
+					<button type="button" class="background-source-option" data-background-source="color1"><span class="background-color-chip" id="background-color1-chip"></span><span><strong>Color 1</strong><small id="background-color1-value"></small></span></button>
+					<button type="button" class="background-source-option" data-background-source="color2"><span class="background-color-chip" id="background-color2-chip"></span><span><strong>Color 2</strong><small id="background-color2-value"></small></span></button>
+				</div>
+				<div class="background-hex-row"><label for="background-color-hex">Selected color</label><input id="background-color-hex" type="text" value="#9c2bee" aria-label="Background color in HEX" /></div>
+				<div class="background-modal-actions"><button type="button" id="background-apply" class="btn-modal-action">OK</button></div>
+			</fieldset>
+		</div>
+	</div>
 
 	<!-- Export Modal Dialog -->
 	<div id="export-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">

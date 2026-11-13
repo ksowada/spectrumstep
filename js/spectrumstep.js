@@ -109,6 +109,7 @@ const inp_cmx_ids = ['form-cmx-0','form-cmx-1']
 var inp_cmx_arr = [];
 var rgb = [[], []]
 var rgbh = ['#3388ee','#ee22aa'];
+const defaultBackgroundColor = '#9c2bee';
 var hslPreArr = [[200, 60, 70],[140, 90, 70]];
 var hsl = [[],[]];
 let steps = undefined;
@@ -170,6 +171,10 @@ var storage = new Storage({ unit: 'color-mixer', storageEn: true,
 });
 const themeModes = ['light','dark']
 var themeSwitch = undefined;
+var backgroundMode = 'white';
+var customBackground = defaultBackgroundColor;
+var customBackgroundSource = 'picker';
+var backgroundDraft = null;
 var textColorSelect = undefined;
 var backColorSelect = undefined;
 var gradientDirectionSwitch = undefined;
@@ -188,17 +193,106 @@ const urlWayToParam = {
 };
 const appBaseUrl = document.currentScript ? new URL('../', document.currentScript.src).href : '';
 function initThemeSwitch() {
-	const themeEl = document.getElementById('theme-select');
-	if (!themeEl || themeSwitch) return;
-	themeSwitch = new ButtonSwitch(
-		themeEl,
-		themeModes, [appBaseUrl + 'assets/icons/sun-solid-full.svg', appBaseUrl + 'assets/icons/moon-solid-full.svg'], undefined, themeCare, {
-			tooltips: {
-				light: 'UI Theme: Light mode active. Click to switch to Dark mode to evaluate colors against a low-luminance surround.',
-				dark: 'UI Theme: Dark mode active. Click to switch to Light mode to evaluate colors against a high-luminance surround.'
-			}
-		});
+	const choices = ['theme-black','theme-white','theme-custom'].map(id => document.getElementById(id));
+	if (!choices.every(Boolean)) return;
+	choices.forEach((button, index) => button.addEventListener('click', () => {
+		if (index === 2) { openBackgroundModal(); return; }
+		backgroundMode = index === 0 ? 'black' : 'white';
+		applyBackground(backgroundMode === 'black' ? '#000000' : '#ffffff');
+		renderBackgroundChoice();
+		calcform_cmx_syncState();
+	}));
+	document.getElementById('background-modal-close')?.addEventListener('click', closeBackgroundModal);
+	document.getElementById('background-apply')?.addEventListener('click', commitBackgroundModal);
+	document.getElementById('background-modal')?.addEventListener('click', e => { if (e.target.id === 'background-modal') commitBackgroundModal(); });
+	const picker = document.getElementById('background-color-picker');
+	const hex = document.getElementById('background-color-hex');
+	const updateDraft = () => {
+		const value = hex.value.trim();
+		if (!/^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return;
+		customBackground = rgbCorrect(value).toLowerCase();
+		hex.value = customBackground;
+		if (/^#[0-9a-f]{6}$/i.test(value)) picker.value = value;
+		backgroundMode = 'custom'; applyBackground(value); renderBackgroundChoice();
+	};
+	picker?.addEventListener('input', () => { customBackgroundSource = 'picker'; hex.value = picker.value; document.getElementById('background-picker-value').textContent = picker.value; updateDraft(); });
+	hex?.addEventListener('input', () => { customBackgroundSource = 'picker'; document.getElementById('background-picker-value').textContent = hex.value; updateDraft(); });
+	document.querySelectorAll('[data-background-source]').forEach(button => button.addEventListener('click', () => {
+		const ix = button.dataset.backgroundSource === 'color1' ? 0 : 1;
+		customBackgroundSource = button.dataset.backgroundSource;
+		hex.value = customBackground = rgbh[ix]; picker.value = customBackground; document.getElementById('background-picker-value').textContent = customBackground; updateDraft();
+	}));
+	renderBackgroundChoice();
 }
+function getThemeForColor(color) {
+	const ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = color;
+	const normalized = ctx.fillStyle;
+	let rgb;
+	if (normalized.startsWith('#')) { const hex = normalized.slice(1); rgb = hex.length === 3 ? hex.split('').map(v => parseInt(v+v,16)) : [0,2,4].map(i => parseInt(hex.slice(i,i+2),16)); }
+	else rgb = normalized.match(/[\d.]+/g)?.slice(0,3).map(Number) || [255,255,255];
+	const luminance = rgb.map(v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }).reduce((sum,v,i) => sum + v * [.2126,.7152,.0722][i],0);
+	return luminance > .45 ? 'light' : 'dark';
+}
+function applyBackground(color) {
+	const uiTheme = getThemeForColor(color);
+	document.documentElement.style.setProperty('--background-body', color);
+	document.documentElement.dataset.theme = uiTheme;
+	localStorage.setItem('theme', uiTheme);
+}
+function renderBackgroundChoice() {
+	[['theme-black','black'],['theme-white','white'],['theme-custom','custom']].forEach(([id, mode]) => {
+		const button = document.getElementById(id);
+		if (!button) return;
+		button.classList.toggle('selected', backgroundMode === mode);
+		const color = mode === 'black' ? '#000000' : mode === 'white' ? '#ffffff' : customBackground;
+		button.style.backgroundColor = color;
+		button.dataset.choiceTheme = getThemeForColor(color);
+	});
+	renderBackgroundSourceSelection();
+	[0,1].forEach(ix => {
+		const color = rgbh[ix] || '#888888';
+		const chip = document.getElementById(`background-color${ix+1}-chip`);
+		const value = document.getElementById(`background-color${ix+1}-value`);
+		if (chip) chip.style.backgroundColor = color;
+		if (value) value.textContent = color;
+		const pickerChip = document.getElementById('background-picker-chip');
+		if (ix === 0 && pickerChip && backgroundMode === 'custom') pickerChip.style.backgroundColor = customBackground;
+	});
+}
+function renderBackgroundSourceSelection() {
+	const selectedId = customBackgroundSource === 'color1' ? 'color1' : customBackgroundSource === 'color2' ? 'color2' : 'picker';
+	document.getElementById('background-picker-option')?.classList.toggle('selected', selectedId === 'picker');
+	document.querySelectorAll('[data-background-source]').forEach(button => button.classList.toggle('selected', button.dataset.backgroundSource === selectedId));
+}
+function openBackgroundModal() {
+	backgroundDraft = { mode: backgroundMode, color: customBackground, source: customBackgroundSource, bg: document.documentElement.style.getPropertyValue('--background-body') };
+	backgroundMode = 'custom';
+	applyBackground(customBackground);
+	const picker = document.getElementById('background-color-picker');
+	const hex = document.getElementById('background-color-hex');
+	hex.value = customBackground;
+	document.getElementById('background-picker-value').textContent = customBackground;
+	if (/^#[0-9a-f]{6}$/i.test(customBackground)) picker.value = customBackground;
+	else { const ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = customBackground; const v = ctx.fillStyle; if (v.startsWith('#')) picker.value = v; }
+	renderBackgroundChoice();
+	renderBackgroundSourceSelection();
+	document.getElementById('background-modal')?.classList.add('open');
+}
+function closeBackgroundModal() {
+	if (backgroundDraft) {
+		backgroundMode = backgroundDraft.mode; customBackground = backgroundDraft.color; customBackgroundSource = backgroundDraft.source;
+		applyBackground(backgroundDraft.bg || (backgroundMode === 'black' ? '#000' : '#fff'));
+		backgroundDraft = null;
+		renderBackgroundChoice(); calcform_cmx_syncState();
+	}
+	document.getElementById('background-modal')?.classList.remove('open');
+}
+function commitBackgroundModal() {
+	backgroundMode = 'custom'; backgroundDraft = null;
+	document.getElementById('background-modal')?.classList.remove('open');
+	renderBackgroundChoice(); calcform_cmx_syncState();
+}
+
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	initThemeSwitch();
@@ -812,7 +906,8 @@ function calcform_cmx_getState() {
 		backColor: _backColor,
 		gradientMode: gradientSwitch.value,
 		colMode: colMode.slice(),
-		theme: themeSwitch.value,
+		theme: themeSwitch ? themeSwitch.value : document.documentElement.dataset.theme,
+		backgroundMode, customBackground, customBackgroundSource,
 		gradientDirection: gradientDirectionSwitch.value,
 		gradientWay: gradientWaySwitch.value,
 		contrastVisibility: contrastVisibilitySwitch.value
@@ -895,7 +990,15 @@ function calcform_cmx_applyState(data) {
 	if (data.gradientDirection) gradientDirectionSwitch.setValue(data.gradientDirection, true);
 	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay, true);
 	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility, true);
-	if (data.theme) themeCare(data.theme);
+	if (data.backgroundMode) backgroundMode = data.backgroundMode;
+	else if (data.theme) backgroundMode = data.theme === 'dark' ? 'black' : 'white';
+	if (data.customBackground) customBackground = data.customBackground;
+	if (['picker','color1','color2'].includes(data.customBackgroundSource)) customBackgroundSource = data.customBackgroundSource;
+	if (backgroundMode === 'custom') applyBackground(customBackground);
+	else if (backgroundMode === 'black') applyBackground('#000000');
+	else applyBackground('#ffffff');
+	renderBackgroundChoice();
+	if (data.theme && !data.backgroundMode) themeCare(data.theme);
 	calcform_cmx_dyna();
 }
 function calcform_cmx_updateUrl(data) {
@@ -926,16 +1029,17 @@ function calcform_cmx_updateUrl(data) {
 	} else if (data.textColor) {
 		params.set('tc', rgbCorrect(data.textColor).slice(1).toLowerCase());
 	}
-	if (data.theme) {
-		params.set('th', data.theme);
-	}
+	if (data.theme) params.set('th', data.theme);
+	params.set('bgm', data.backgroundMode || 'white');
+	if (data.backgroundMode === 'custom' && data.customBackground) params.set('bgc', data.customBackground);
+	params.set('bgs', data.customBackgroundSource || 'picker');
 	const newUrl = window.location.pathname + '?' + params.toString() + window.location.hash;
 	window.history.replaceState(null, '', newUrl);
 }
 function calcform_cmx_getUrlState() {
 	if (!window.location.search || window.location.search.length <= 1) return null;
 	const params = new URLSearchParams(window.location.search);
-	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th'];
+	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th', 'bgm', 'bgc', 'bgs'];
 	if (!knownKeys.some(k => params.has(k))) return null;
 
 	const state = calcform_cmx_getState();
@@ -1026,6 +1130,9 @@ function calcform_cmx_getUrlState() {
 		const th = params.get('th').toLowerCase();
 		if (themeModes.includes(th)) state.theme = th;
 	}
+	if (['white','black','custom'].includes(params.get('bgm'))) state.backgroundMode = params.get('bgm');
+	if (params.has('bgc') && /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(params.get('bgc'))) state.customBackground = rgbCorrect(params.get('bgc')).toLowerCase();
+	if (['picker','color1','color2'].includes(params.get('bgs'))) state.customBackgroundSource = params.get('bgs');
 
 	return state;
 }
@@ -1136,7 +1243,10 @@ function generateExportJson() {
 			contrastVisibility: state.contrastVisibility,
 			textColor: state.textColor || null,
 			backColor: state.backColor || null,
-			theme: state.theme
+			theme: state.theme,
+			backgroundMode: state.backgroundMode,
+			customBackground: state.customBackground,
+			customBackgroundSource: state.customBackgroundSource
 		}
 	};
 	return JSON.stringify(exportObj, null, 2);
@@ -1443,6 +1553,7 @@ function themeCare(text, ix) {
 		: "light";
 	function applyTheme(theme) {
 		document.documentElement.dataset.theme = theme;
+		if (!cmxStateReady) backgroundMode = theme === 'dark' ? 'black' : 'white';
 		localStorage.setItem("theme", theme);
 		if (themeSwitch) themeSwitch.setValue(theme, true);
 		if (!cmxStateReady && storage) {
