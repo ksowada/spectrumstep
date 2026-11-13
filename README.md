@@ -1,5 +1,15 @@
 # SpectrumStep
 
+## Development
+
+Install the project dependencies with `npm install`.
+
+Available scripts:
+
+- `npm run dev` — serve the project locally at `http://localhost:3000`.
+- `npm start` — serve the project locally at `http://localhost:3000`.
+- `npm run build` — create a deployable `dist/` folder containing the app, documentation, styles, scripts, and assets.
+
 ## features
 - besides HSL, use RGB, HSV, Oklab, and Oklch mixing and input spaces
 - gamut mapping via chroma reduction when converting out-of-gamut Oklab/Oklch colors to sRGB HEX

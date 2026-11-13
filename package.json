@@ -4,6 +4,7 @@
   "private": true,
   "description": "SpectrumStep – Multi-Space Gradient & Contrast Generator",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "start": "serve . -l 3000",
     "dev": "serve . -l 3000"
   },
