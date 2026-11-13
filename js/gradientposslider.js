@@ -54,7 +54,7 @@ class GradientPosSlider {
 		// Thin colored bar track
 		this.trackEl = document.createElement('div');
 		this.trackEl.className = 'gradient-slider-track';
-		this.trackEl.dataset.tooltip = 'Click to copy CSS linear-gradient declaration to clipboard';
+		this.trackEl.dataset.tooltip = 'Drag a swatch handle to change its interpolation position. Double-click a handle to reset all positions to the Steps and Overdrive defaults.';
 
 		// Knobs layer
 		this.knobsLayer = document.createElement('div');
@@ -68,13 +68,6 @@ class GradientPosSlider {
 	}
 
 	_bindEvents() {
-		// Click on track to copy CSS declaration
-		this.trackEl.addEventListener('click', (e) => {
-			if (e.target.closest('.gradient-slider-knob')) return;
-			if (typeof this.onCopy === 'function') {
-				this.onCopy(this.gradientCss, this.trackEl);
-			}
-		});
 	}
 
 	/**
@@ -91,6 +84,7 @@ class GradientPosSlider {
 			isC2: Boolean(p.isC2),
 			rel: p.rel !== undefined ? p.rel : 0
 		}));
+		this.points.forEach(point => { point.defaultRel = point.rel; });
 
 		if (options.selectedIndex !== undefined) {
 			this.selectedIndex = options.selectedIndex;
@@ -117,6 +111,7 @@ class GradientPosSlider {
 			knob.setAttribute('aria-valuenow', String(pct));
 			const label = point.isC1 ? 'Color 1 position' : (point.isC2 ? 'Color 2 position' : `Swatch ${i + 1} position`);
 			knob.setAttribute('aria-label', label);
+			knob.dataset.tooltip = `${label}. Drag to adjust its interpolation position. Double-click any handle to reset positions to the Steps and Overdrive defaults.`;
 
 			knob.style.left = `${(point.pos * 100).toFixed(2)}%`;
 
@@ -196,6 +191,31 @@ class GradientPosSlider {
 			knob.addEventListener('pointermove', onPointerMove);
 			knob.addEventListener('pointerup', onPointerUp);
 			knob.addEventListener('pointercancel', onPointerUp);
+		});
+
+		knob.addEventListener('dblclick', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			const start = this.points[0]?.defaultRel;
+			const end = this.points[this.points.length - 1]?.defaultRel;
+			const span = Number.isFinite(start) && Number.isFinite(end) ? end - start : 0;
+			this.points.forEach((point, i) => {
+				const pos = span !== 0 && Number.isFinite(point.defaultRel)
+					? Math.max(0, Math.min(1, (point.defaultRel - start) / span))
+					: (this.points.length > 1 ? i / (this.points.length - 1) : 0);
+				point.pos = pos;
+				const el = this.knobsLayer.children[i];
+				if (el) {
+					el.style.left = `${(pos * 100).toFixed(2)}%`;
+					const pct = Math.round(pos * 100);
+					el.setAttribute('aria-valuenow', String(pct));
+					const badge = el.querySelector('.gradient-knob-tooltip');
+					if (badge) badge.textContent = `${pct}%`;
+				}
+				if (typeof this.onMove === 'function') {
+					this.onMove({ index: i, pos, point, points: this.points });
+				}
+			});
 		});
 
 		// Keyboard navigation for accessibility
