@@ -2,12 +2,12 @@
 
 # Directory slash redirect: Apache's built-in one (mod_dir) builds an http:// URL
 # because TLS ends at the nginx proxy. Do it ourselves and force https.
-<IfModule mod_rewrite.c>
+# mod_alias, not mod_rewrite: per-directory RewriteRules never run for the
+# directory's own URL without trailing slash (/spectrumstep -> 403).
+# Not using mod_rewrite here also keeps WordPress' 404 page for missing files.
+<IfModule mod_alias.c>
 	DirectorySlash Off
-	RewriteEngine On
-	RewriteCond %{REQUEST_FILENAME} -d
-	RewriteCond %{REQUEST_URI} !/$
-	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}/ [R=301,L]
+	RedirectMatch 301 ^(/spectrumstep(?:/docu)?)$ https://ardoid.eu$1/
 </IfModule>
 
 # Compression for text assets
