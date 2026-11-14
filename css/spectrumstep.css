@@ -2042,3 +2042,41 @@ input[type="number"],
 	color: var(--text-muted);
 }
 #export-modal .swx-exports { margin-top: 4px; }
+
+/* ── Vertical gradient position slider (gradientDirection up / down) ──
+   Slider sits left of the swatches / gradient, which take the remaining width.
+   Track runs top → bottom between the midpoints of the first and last swatch
+   (insets set by alignGradientSlider()); knobs slide vertically. */
+#grd-layout.is-vertical {
+	display: flex;
+	align-items: stretch;
+	gap: 0;
+}
+#grd-layout.is-vertical > #tab-cmx,
+#grd-layout.is-vertical > #grd-cmx { flex: 1 1 0; min-width: 0; }
+#grd-layout.is-vertical > #grd-slider { flex: 0 0 44px; margin: 0; }
+#grd-layout.is-vertical > #grd-cmx { margin: 0; }
+#grd-slider.is-vertical { display: flex; }
+#grd-slider.is-vertical .gradient-slider-unit { flex: 1; }
+#grd-slider.is-vertical .gradient-slider-track-wrap { flex: 1; }
+#grd-slider.is-vertical .gradient-slider-track-wrap {
+	padding: var(--grd-inset-t, 10px) 0 var(--grd-inset-b, 10px) 0;
+}
+#grd-slider.is-vertical .gradient-slider-track {
+	width: 8px;
+	height: 100%;
+	margin: 0 auto;
+}
+#grd-slider.is-vertical .gradient-slider-knobs-layer {
+	top: var(--grd-inset-t, 10px);
+	bottom: var(--grd-inset-b, 10px);
+	left: 0;
+	right: 0;
+	height: auto;
+}
+#grd-slider.is-vertical .gradient-slider-knob { top: auto; left: 50%; }
+#grd-slider.is-vertical .gradient-knob-tooltip {
+	top: 50%;
+	left: calc(100% + 6px);
+	transform: translateY(-50%);
+}

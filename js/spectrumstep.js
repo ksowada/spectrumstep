@@ -846,8 +846,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 				rel: rel
 			};
 		});
+		gradientSlider.updateGradient(gradientText, gradientDirection);   // direction first: knobs are placed along its axis
 		gradientSlider.setPoints(points);
-		gradientSlider.updateGradient(gradientText, gradientDirection);
 	}
 	alignGradientSlider();
 
@@ -928,14 +928,25 @@ function alignGradientSlider() {
 	const sliderEl = document.getElementById('grd-slider');
 	const wrapEl = sliderEl && sliderEl.querySelector('.gradient-slider-track-wrap');
 	if (!wrapEl) return;
-	sliderEl.style.removeProperty('--grd-inset-l');
-	sliderEl.style.removeProperty('--grd-inset-r');
-	const swatches = document.querySelectorAll('#tab-cmx .color-palette-right .color-step, #tab-cmx .color-palette-left .color-step');
+	['--grd-inset-l', '--grd-inset-r', '--grd-inset-t', '--grd-inset-b'].forEach(n => sliderEl.style.removeProperty(n));
+	const layoutEl = document.getElementById('grd-layout');
+	const vertical = sliderEl.classList.contains('is-vertical');
+	if (layoutEl) layoutEl.classList.toggle('is-vertical', vertical);
+	const swatches = document.querySelectorAll('#tab-cmx .color-step');
 	if (swatches.length < 2) return;
 	const first = swatches[0].getBoundingClientRect();
 	const last = swatches[swatches.length - 1].getBoundingClientRect();
-	if (first.width === 0 || Math.abs(first.top - last.top) > 1) return;   // hidden or wrapped
 	const wrap = wrapEl.getBoundingClientRect();
+	if (vertical) {
+		// ends at the vertical midpoints of the first / last swatch (overdrive included)
+		if (first.height === 0) return;   // hidden
+		const centerT = first.top + first.height / 2;
+		const centerB = last.top + last.height / 2;
+		sliderEl.style.setProperty('--grd-inset-t', `${Math.max(0, centerT - wrap.top).toFixed(2)}px`);
+		sliderEl.style.setProperty('--grd-inset-b', `${Math.max(0, wrap.bottom - centerB).toFixed(2)}px`);
+		return;
+	}
+	if (first.width === 0 || Math.abs(first.top - last.top) > 1) return;   // hidden or wrapped
 	const centerL = first.left + first.width / 2;
 	const centerR = last.left + last.width / 2;
 	sliderEl.style.setProperty('--grd-inset-l', `${Math.max(0, centerL - wrap.left).toFixed(2)}px`);

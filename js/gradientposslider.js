@@ -76,6 +76,23 @@ class GradientPosSlider {
 	_bindEvents() {
 	}
 
+	/** True when the slider runs top → bottom (gradientDirection up/down). */
+	get vertical() {
+		return this.direction === 'up' || this.direction === 'down';
+	}
+
+	/** Places a knob along the track axis (left for horizontal, top for vertical). */
+	_placeKnob(knob, pos) {
+		const v = `${(pos * 100).toFixed(2)}%`;
+		if (this.vertical) {
+			knob.style.left = '';
+			knob.style.top = v;
+		} else {
+			knob.style.top = '';
+			knob.style.left = v;
+		}
+	}
+
 	/**
 	 * Sets and renders the points.
 	 * @param {Array<{ index: number, pos: number, color: string, isC1?: boolean, isC2?: boolean, rel?: number }>} points
@@ -119,7 +136,7 @@ class GradientPosSlider {
 			knob.setAttribute('aria-label', label);
 			knob.dataset.tooltip = `${label}. Drag to adjust its interpolation position. Double-click any handle to reset positions to the Steps and Overdrive defaults.`;
 
-			knob.style.left = `${(point.pos * 100).toFixed(2)}%`;
+			this._placeKnob(knob, point.pos);
 
 			// Percentage tooltip shown on move / hover / focus
 			const tooltip = document.createElement('span');
@@ -137,12 +154,13 @@ class GradientPosSlider {
 	_bindKnobInteractions(knob, index) {
 		const updateFromPointer = (e) => {
 			const rect = this.trackEl.getBoundingClientRect();
-			if (rect.width <= 0) return;
-			let pos = (e.clientX - rect.left) / rect.width;
+			const size = this.vertical ? rect.height : rect.width;
+			if (size <= 0) return;
+			let pos = this.vertical ? (e.clientY - rect.top) / size : (e.clientX - rect.left) / size;
 			pos = Math.max(0, Math.min(1, pos));
 
 			this.points[index].pos = pos;
-			knob.style.left = `${(pos * 100).toFixed(2)}%`;
+			this._placeKnob(knob, pos);
 
 			const pct = Math.round(pos * 100);
 			knob.setAttribute('aria-valuenow', String(pct));
@@ -227,7 +245,7 @@ class GradientPosSlider {
 			e.preventDefault();
 			const newPos = Math.max(0, Math.min(1, this.points[index].pos + delta));
 			this.points[index].pos = newPos;
-			knob.style.left = `${(newPos * 100).toFixed(2)}%`;
+			this._placeKnob(knob, newPos);
 
 			const pct = Math.round(newPos * 100);
 			knob.setAttribute('aria-valuenow', String(pct));
@@ -276,7 +294,7 @@ class GradientPosSlider {
 			point.pos = pos;
 			const el = this.knobsLayer.children[i];
 			if (el) {
-				el.style.left = `${(pos * 100).toFixed(2)}%`;
+				this._placeKnob(el, pos);
 				const pct = Math.round(pos * 100);
 				el.setAttribute('aria-valuenow', String(pct));
 				const badge = el.querySelector('.gradient-knob-tooltip');
@@ -316,6 +334,7 @@ class GradientPosSlider {
 	updateGradient(gradientCss, direction = 'right') {
 		this.gradientCss = gradientCss;
 		this.direction = direction;
+		this.container.classList.toggle('is-vertical', this.vertical);
 
 		if (this.trackEl) {
 			this.trackEl.style.background = gradientCss;
