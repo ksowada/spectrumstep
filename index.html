@@ -42,7 +42,8 @@
 	<script type="text/javascript" src="js/colorplane.js"></script>
 	<script type="text/javascript" src="js/gradientposslider.js"></script>
 	<script type="text/javascript" src="js/swatchexport.js"></script>
-		<script type="text/javascript" src="js/spectrumstep.js"></script>
+	<script type="text/javascript" src="js/imagepicker.js"></script>
+	<script type="text/javascript" src="js/spectrumstep.js"></script>
 	<!-- Matomo --><script>
 		(function () {
 		function initTracking() {
@@ -79,15 +80,16 @@
 			</a>
 		</div>
 		<nav class="header-nav" aria-label="Site navigation">
-			<a class="header-link active" href="./" aria-current="page" data-tooltip="SpectrumStep – Color Mixer application">SpectrumStep</a>
-			<a class="header-link" href="docu/" data-tooltip="Open technical documentation and usage guide">Documentation</a>
+			<a class="header-link active" href="./" aria-current="page" aria-label="SpectrumStep" data-tooltip="SpectrumStep – Color Mixer application">App</a>
+			<a class="header-link" href="docu/" aria-label="Documentation" data-tooltip="Documentation – open the technical documentation and usage guide">Docs</a>
 			<a class="header-link" href="https://ardoid.eu/legal-notice/">Legal Notice</a>
 			<a class="header-link" href="https://ardoid.eu/contact/">Contact</a>
 		</nav>
 		<div class="header-right" id="theme-select">
-			<button id="theme-black" class="status-btn theme-choice icon-only" aria-label="Black background" data-tooltip="Black background"><img src="assets/icons/moon-solid-full.svg" class="icon" alt="" /></button>
-			<button id="theme-white" class="status-btn theme-choice icon-only" aria-label="White background" data-tooltip="White background"><img src="assets/icons/sun-solid-full.svg" class="icon" alt="" /></button>
-			<button id="theme-custom" class="status-btn theme-choice icon-only" aria-label="Custom background" data-tooltip="Custom background"><img src="assets/icons/palette-solid-full.svg" class="icon" alt="" /></button>
+				<button id="image-picker-btn" class="status-btn icon-only" type="button" aria-label="Pick colors from an image" aria-pressed="false" aria-haspopup="dialog" data-tooltip="Pick colors from an image: drop, paste or upload a picture, then click a pixel to set Color 1, Color 2, text, back or page color"><img src="assets/icons/eye-dropper-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-black" class="status-btn theme-choice icon-only" aria-label="Black back" data-tooltip="Black back"><img src="assets/icons/moon-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-white" class="status-btn theme-choice icon-only" aria-label="White back" data-tooltip="White back"><img src="assets/icons/sun-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-custom" class="status-btn theme-choice icon-only" aria-label="Custom back" data-tooltip="Custom back"><img src="assets/icons/palette-solid-full.svg" class="icon" alt="" /></button>
 		</div>
 	</header>
 	<main>
@@ -150,7 +152,7 @@
 						</label>
 					</fieldset>
 					<fieldset class="contrast-group" id="backContrast">
-						<legend>Background</legend>
+						<legend>Back</legend>
 						<button id="backContrast-black" class="btn-select" data-color="#000000" aria-label="Black"><span>#</span></button>
 						<button id="backContrast-white" class="btn-select" data-color="#ffffff" aria-label="White"><span>#</span></button>
 						<label id="backContrast-label" class="btn-select">
@@ -170,22 +172,22 @@
 
 	<div id="background-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="background-modal-title">
 		<div class="cmx-modal-dialog background-modal-dialog">
-			<button type="button" class="popup-close-btn" id="background-modal-close" aria-label="Cancel background selection" data-tooltip="Cancel background selection"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
-			<h3 id="background-modal-title" class="modal-title">Background source</h3>
-			<fieldset class="modal-section"><legend>Background source</legend>
+			<button type="button" class="popup-close-btn" id="background-modal-close" aria-label="Cancel back selection" data-tooltip="Cancel back selection"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="background-modal-title" class="modal-title">Back source</h3>
+			<fieldset class="modal-section"><legend>Back source</legend>
 				<div class="background-source-options">
 				<label class="background-source-option background-picker-option" id="background-picker-option"><span class="background-color-chip" id="background-picker-chip"></span><span><strong>Color picker</strong><small id="background-picker-value">#9c2bee</small></span><input id="background-color-picker" type="color" value="#9c2bee" /></label>
 					<button type="button" class="background-source-option" data-background-source="color1"><span class="background-color-chip" id="background-color1-chip"></span><span><strong>Color 1</strong><small id="background-color1-value"></small></span></button>
 					<button type="button" class="background-source-option" data-background-source="color2"><span class="background-color-chip" id="background-color2-chip"></span><span><strong>Color 2</strong><small id="background-color2-value"></small></span></button>
 				</div>
-				<div class="background-hex-row"><label for="background-color-hex">Selected color</label><input id="background-color-hex" type="text" value="#9c2bee" aria-label="Background color in HEX" /></div>
+				<div class="background-hex-row"><label for="background-color-hex">Selected color</label><input id="background-color-hex" type="text" value="#9c2bee" aria-label="Back color in HEX" /></div>
 				<div class="background-modal-actions"><button type="button" id="background-apply" class="btn-modal-action">OK</button></div>
 			</fieldset>
 		</div>
 	</div>
 
 	<!-- Gradient Options Modal -->
-	<div id="options-modal" class="cmx-modal-backdrop cmx-modal-live" role="dialog" aria-modal="true" aria-labelledby="options-modal-title">
+	<div id="options-modal" class="cmx-modal-backdrop cmx-modal-live dock-popup" role="dialog" aria-modal="true" aria-labelledby="options-modal-title">
 		<div class="cmx-modal-dialog options-dialog">
 			<button type="button" class="popup-close-btn" id="options-modal-close" data-tooltip="Close gradient options (Esc)" aria-label="Close gradient options"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
 			<h3 id="options-modal-title" class="modal-title">Gradient Options</h3>
@@ -220,6 +222,52 @@
 			<div class="background-modal-actions"><button type="button" id="opt-reset" class="btn-modal-action" data-tooltip="Reset all gradient options to their defaults">Defaults</button></div>
 		</div>
 	</div>
+
+	<!-- Image Color Picker Popup (docked: header and gradient stay visible) -->
+	<div id="image-modal" class="cmx-modal-backdrop dock-popup" role="dialog" aria-labelledby="img-title-main">
+		<div class="cmx-modal-dialog image-dialog">
+			<div class="img-head">
+				<div class="img-head-controls">
+				<span class="img-head-title"><span class="img-title" id="img-title-main">Pick colors from an image</span><small class="img-size" id="img-size"></small></span>
+				<div class="img-tools" id="img-tools" hidden>
+					<div class="img-group" id="img-target" role="group" aria-label="Target: the color a pick sets">
+						<button type="button" class="btn-select img-chip-btn" id="img-target-c1" data-target="c1">Color 1</button>
+						<button type="button" class="btn-select img-chip-btn" id="img-target-c2" data-target="c2">Color 2</button>
+						<button type="button" class="btn-select img-chip-btn" id="img-target-text" data-target="text">Text</button>
+						<button type="button" class="btn-select img-chip-btn" id="img-target-back" data-target="back">Back</button>
+						<button type="button" class="btn-select img-chip-btn" id="img-target-page" data-target="page">Page</button>
+					</div>
+					<span class="img-sep" aria-hidden="true"></span>
+					<div class="img-group" id="img-sample" role="group" aria-label="Sample size"></div>
+					<span class="img-sep" aria-hidden="true"></span>
+					<div class="img-tool-btns">
+						<button type="button" id="img-loupe-btn" class="icon-only selected" aria-pressed="true" aria-label="Loupe" data-tooltip="Loupe: magnified pixels around the pointer and the color a click would pick"><img src="assets/icons/magnifying-glass-solid-full.svg" alt="" class="icon" /></button>
+						<button type="button" id="img-zoom-btn" class="icon-only" aria-label="Fit image" data-tooltip="Fit image (wheel or pinch zooms, keys + − 0)"><img src="assets/icons/up-right-and-down-left-from-center-solid-full.svg" alt="" class="icon" /></button>
+					</div>
+					<span class="img-sep" aria-hidden="true"></span>
+				</div>
+				<!-- the main gradient controls (Gradient, Steps, Overdrive) are moved in here while the popup is open -->
+				<div class="img-grad" id="img-grad"></div>
+				</div>
+				<div class="img-head-right">
+					<button type="button" id="img-remove-btn" class="icon-only" hidden aria-label="Remove image" data-tooltip="Remove the image. The copy stored in this browser is deleted too"><img src="assets/icons/trash-can-solid-full.svg" alt="" class="icon" /></button>
+					<button type="button" class="popup-close-btn" id="image-modal-close" data-tooltip="Close image picker (Esc)" aria-label="Close image picker"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+				</div>
+			</div>
+			<div class="img-drop" id="img-drop" tabindex="0" role="button" aria-label="Choose an image file">
+				<strong>Drop an image here</strong>
+				<span>or click to choose a file, or paste with Ctrl+V</span>
+			</div>
+			<div class="img-stage" id="img-stage" tabindex="0" hidden aria-label="Image. Click a pixel to pick its color">
+				<div class="img-checker" id="img-checker"></div>
+				<canvas id="img-canvas"></canvas>
+				<div class="img-markers" id="img-markers"></div>
+				<div class="img-loupe" id="img-loupe" hidden><canvas id="img-loupe-canvas" width="121" height="121"></canvas><div class="img-loupe-hex"><span class="img-chip" id="img-loupe-chip"></span><span id="img-loupe-hex"></span></div></div>
+			</div>
+			<input type="file" id="img-file" accept="image/*" hidden />
+		</div>
+	</div>
+	<div id="drop-overlay" class="drop-overlay" aria-hidden="true"><div>Drop an image to pick colors<br><small>or a SpectrumStep JSON file to load a palette</small></div></div>
 
 	<!-- Swatch Export Modal -->
 	<div id="swatch-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="swatch-modal-title">
@@ -346,10 +394,10 @@
 					<input type="text" id="save-input" class="narrow modal-filename-input" value="spectrumstep-palette" placeholder="Enter palette name..." data-tooltip="Enter filename or storage palette name (without file extension)" />
 				</div>
 				<div class="modal-file-grid">
-					<button type="button" id="btn-export-png" class="btn-modal-action" data-tooltip="Download screenshot of the swatch section 1:1 in actual dimension"><img src="assets/icons/download-solid-full.svg" alt="PNG" class="icon" />PNG Palette</button>
-					<button type="button" id="btn-export-svg" class="btn-modal-action" data-tooltip="Download minimal SVG containing rects filled with gradient swatches"><img src="assets/icons/download-solid-full.svg" alt="SVG" class="icon" />SVG Palette</button>
-					<button type="button" id="btn-export-json" class="btn-modal-action" data-tooltip="Download full palette steps, options, and canonical link as JSON file"><img src="assets/icons/download-solid-full.svg" alt="JSON" class="icon" />JSON File</button>
-					<button type="button" id="save-btn" class="btn-modal-action" data-tooltip="Save palette configuration to browser localStorage using the name above"><img src="assets/icons/floppy-disk-solid-full.svg" alt="Save" class="icon" />Save to Storage</button>
+					<button type="button" id="btn-export-png" class="btn-modal-action" data-tooltip="Download screenshot of the swatch section 1:1 in actual dimension"><img src="assets/icons/download-solid-full.svg" alt="PNG" class="icon" />PNG</button>
+					<button type="button" id="btn-export-svg" class="btn-modal-action" data-tooltip="Download minimal SVG containing rects filled with gradient swatches"><img src="assets/icons/download-solid-full.svg" alt="SVG" class="icon" />SVG</button>
+					<button type="button" id="btn-export-json" class="btn-modal-action" data-tooltip="Download full palette steps, options, and canonical link as JSON file"><img src="assets/icons/download-solid-full.svg" alt="JSON" class="icon" />JSON</button>
+					<button type="button" id="save-btn" class="btn-modal-action" data-tooltip="Save palette configuration to browser localStorage using the name above"><img src="assets/icons/floppy-disk-solid-full.svg" alt="Save" class="icon" />Storage</button>
 				</div>
 			</fieldset>
 		</div>

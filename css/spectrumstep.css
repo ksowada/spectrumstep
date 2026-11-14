@@ -3,7 +3,8 @@
 	--btn-size: 36px;                          /* height (= width for icon-only buttons → square) */
 	--btn-font-size: 1rem;
 	--btn-border-width: 5px;
-	--btn-border-radius: 15px;
+	--btn-border-radius: 8px;
+	--btn-gap: 5px;                            /* space between neighbouring buttons */
 	--btn-border-color: var(--button-border);  /* default frame colour (follows theme) */
 	--btn-select-color: #555555;               /* frame of active/selected buttons (ButtonSelect, theme, …) – light */
 	--btn-switch-color: #555555;               /* lit frame segment of ButtonSwitch – light */
@@ -916,7 +917,7 @@ table.inputs {
 .flex {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: var(--btn-gap);
   	align-items: center;
 }
 .narrow {
@@ -963,11 +964,10 @@ table.inputs {
 	cursor: pointer;
 }
 .range-setting legend output {
-	display: inline-block;
-	min-width: 2ch;
-	text-align: left;
+	display: inline;
+	font: inherit;
+	color: inherit;
 	font-variant-numeric: tabular-nums;
-	color: var(--text-main);
 }
 .range-setting input[type="range"] {
 	width: 100%;
@@ -1520,7 +1520,7 @@ button:has(> .icon) > .icon {
 	flex: 0 0 auto;
 	display: block;
 }
-.button-container { gap: 7px; margin-top: 6px; }
+.button-container { gap: var(--btn-gap); margin-top: 6px; }
 .button-container button { font-size: calc(var(--btn-font-size) * 0.9); margin: 0; }
 input:not([type="range"]), select {
 	border-radius: var(--input-border-radius);
@@ -2080,3 +2080,316 @@ input[type="number"],
 	left: calc(100% + 6px);
 	transform: translateY(-50%);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Docking (image popup and gradient options popup)
+   header fixed at the top, #grd-layout fixed at the bottom (right / left)
+   or at the right edge (down / up); the popup area is the viewport
+   minus --dock-top / --dock-bottom / --dock-right (set by spectrumstep.js)
+   ════════════════════════════════════════════════════════════════ */
+:root { --dock-top: 0px; --dock-bottom: 0px; --dock-right: 0px; }
+html.is-docked { overflow: hidden; }
+html.is-docked.dock-gutter { scrollbar-gutter: stable; }
+.dock-placeholder { flex: none; }
+html.is-docked .site-header {
+	position: fixed;
+	top: 0; left: 0; right: 0;
+	z-index: 1100;
+}
+html.is-docked #grd-layout {
+	position: fixed;
+	z-index: 1100;
+	box-sizing: border-box;
+	overflow: hidden;
+	background: var(--background-body);
+}
+/* right / left: full width at the bottom, at most 40% of the viewport height */
+html.is-docked #grd-layout:not(.is-vertical) {
+	left: 0; right: 0; bottom: 0;
+	max-height: 40vh;
+	padding: 0;
+	border-top: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+}
+/* swatch rows (also when they wrap) shrink to fit into the 40% */
+html.is-docked #grd-layout:not(.is-vertical) > #grd-slider { flex: none; }
+html.is-docked #grd-layout:not(.is-vertical) > #tab-cmx { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+html.is-docked #grd-layout:not(.is-vertical) .color-palette-right,
+html.is-docked #grd-layout:not(.is-vertical) .color-palette-left {
+	flex: 1 1 auto; min-height: 0;
+	grid-auto-rows: minmax(0, var(--swatch-row-height));
+}
+html.is-docked #grd-layout:not(.is-vertical) .color-step { min-height: 0; height: auto; }
+html.is-docked #grd-layout:not(.is-vertical) > #grd-cmx { flex: 1 1 auto; min-height: 0; }
+/* down / up: column at the right edge that stretches over the whole height below the header;
+   the rows keep a minimum height, and the column scrolls (top never clipped) when they do not fit */
+html.is-docked #grd-layout.is-vertical {
+	top: var(--dock-top); right: 0; bottom: auto;
+	width: clamp(96px, 22vw, 260px);
+	height: auto;
+	min-height: calc(100% - var(--dock-top));
+	max-height: calc(100% - var(--dock-top));
+	padding: 0;
+	border-left: 1px solid var(--border);
+	overflow-x: hidden; overflow-y: auto;
+	scrollbar-width: thin;
+	/* one grid row: slider and rows are exactly as tall as the content (or the column) so the knobs stay over their rows */
+	display: grid;
+	grid-template-columns: 36px minmax(0, 1fr);
+	grid-auto-rows: auto;
+	align-items: stretch;
+}
+html.is-docked #grd-layout.is-vertical > #grd-slider { flex-basis: 36px; }
+html.is-docked #grd-layout.is-vertical > #tab-cmx { display: flex; flex-direction: column; min-height: 0; margin: 0; }
+html.is-docked #grd-layout.is-vertical .color-palette-down,
+html.is-docked #grd-layout.is-vertical .color-palette-up {
+	display: flex; flex-direction: column;
+	flex: 1 1 auto;
+	gap: var(--bar-gap);
+	margin: 0; padding: 0;
+	height: auto; min-height: 0;
+}
+html.is-docked #grd-layout.is-vertical .color-palette-down .color-step,
+html.is-docked #grd-layout.is-vertical .color-palette-up .color-step {
+	flex: 1 0 28px;
+	min-height: 28px; height: auto;
+	font-size: min(var(--sw-font-size), 0.8rem);
+}
+html.is-docked #grd-layout.is-vertical > #grd-cmx { min-height: 0; padding: 0.4rem; word-break: break-all; }
+html.is-docked #grd-layout .color-step:hover { transform: none; box-shadow: none; }
+/* export / load / swatch popups opened from the docked page stay above header and docked gradient */
+html.is-docked .cmx-modal-backdrop:not(.dock-popup) { z-index: 1200; }
+
+/* popups that live in the popup area (the backdrop never covers header or docked gradient) */
+.cmx-modal-backdrop.dock-popup {
+	left: 0;
+	top: var(--dock-top); bottom: var(--dock-bottom); right: var(--dock-right);
+	width: auto; height: auto;
+}
+.dock-popup .cmx-modal-dialog { max-height: 100%; }
+.cmx-modal-backdrop.dock-popup#options-modal { align-items: flex-start; justify-content: center; }
+.cmx-toast {
+	left: calc((100% - var(--dock-right)) / 2);
+	bottom: calc(2rem + var(--dock-bottom));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Image color picker
+   ════════════════════════════════════════════════════════════════ */
+#image-picker-btn { position: relative; margin-right: 14px; }
+#image-picker-btn.selected { border-color: var(--btn-select-color); }
+#image-picker-btn.has-image::after {
+	content: '';
+	position: absolute;
+	top: 3px; right: 3px;
+	width: 8px; height: 8px;
+	border-radius: 50%;
+	background: var(--links);
+	box-shadow: 0 0 0 2px var(--background-body);
+}
+/* the image popup uses the page color (also a custom back color) and the full width of the popup area */
+#image-modal {
+	padding: 0;
+	background: var(--background-body);
+	backdrop-filter: none;
+	box-shadow: inset 0 1px 0 var(--border);
+}
+#options-modal.dock-popup { padding-top: 8px; z-index: 1050; }   /* above the image popup (which comes later in the page) */
+.image-dialog, #image-modal.open .image-dialog {
+	max-width: none;
+	width: 100%;
+	height: 100%;
+	max-height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 6px 8px 8px;
+	overflow: hidden;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	transform: none;
+	transition: none;
+}
+.img-head {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+	gap: 6px 14px;
+	margin-bottom: 6px;
+	--img-pb: 10px;
+}
+/* tools and the adopted gradient controls share one wrapping row */
+.img-head-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px var(--btn-gap); min-width: 0; }
+.img-tools, .img-grad { display: contents; }
+/* flat buttons in one row; thin vertical bars separate the groups (like the fieldset frames in the page) */
+.img-head-controls { align-items: center; }
+.img-group { display: contents; }
+.img-group > .btn-select { padding: 0 10px; flex: 0 0 auto; margin: 0; font-weight: normal; }
+.img-tool-btns { display: contents; }
+.img-tool-btns > button, .img-head-controls button { margin: 0; }
+.img-sep { flex: none; align-self: stretch; width: 0; min-height: var(--btn-size); margin: 0 2px; border-left: var(--btn-border-width) solid var(--border); border-radius: var(--btn-border-radius); }
+/* the Gradient fieldset loses its frame and legend; its buttons join the row */
+.img-head-controls #gradientMode { display: contents; }
+.img-head-controls #gradientMode > legend { display: none; }
+.img-head-controls #gradientMode > div { display: flex; }
+/* Steps and Overdrive: no frame, label on top of the slider; together not taller than a button.
+   (the float turns the rendered legend into a normal box) */
+.img-head-controls fieldset.range-setting {
+	display: block; flex: 0 1 130px; min-width: 90px; max-width: 150px;
+	height: var(--btn-size); margin: 0; padding: 0;
+	border: 0; background: none; box-shadow: none; border-radius: 0;
+}
+.img-head-controls fieldset.range-setting legend {
+	float: left; width: 100%; box-sizing: border-box; margin: 0; padding: 0 2px;
+	font-size: 0.75rem; line-height: 14px; text-align: left; white-space: nowrap;
+}
+.img-head-controls fieldset.range-setting input[type="range"] { display: block; clear: both; width: 100%; height: 20px; margin: 0; }
+/* title + size next to remove and close */
+.img-head-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: var(--btn-size); min-width: 0; }
+.img-head-right .popup-close-btn { position: static; margin: 0; flex: none; }
+.img-head-title { display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%; white-space: nowrap; height: var(--btn-size); margin-right: 4px; }
+.img-title { color: var(--text-bright); font-weight: 700; max-width: min(100%, 26ch); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.img-size {
+	flex: none; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums;
+	font-size: 0.72rem; font-weight: 700; line-height: 1.2; letter-spacing: 0.3px;
+	padding: 1px 5px; border: 1px solid currentColor; border-radius: 3px;   /* monochrome badge */
+}
+.img-size:empty { display: none; }
+.img-head [hidden], .image-dialog > [hidden] { display: none !important; }
+.img-chip {
+	display: inline-block;
+	width: 14px; height: 14px;
+	margin-right: 5px;
+	border-radius: 50%;
+	border: 1px solid var(--border);
+	vertical-align: middle;
+	flex: 0 0 auto;
+}
+#img-loupe-btn.selected { border-color: var(--btn-select-color); }
+#img-remove-btn { margin: 0; flex: none; }
+.img-drop {
+	flex: 1;
+	min-height: 140px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 16px;
+	text-align: center;
+	color: var(--text-muted);
+	border: 2px dashed var(--border);
+	border-radius: 12px;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.img-drop strong { color: var(--text-bright); font-size: 1.15rem; }
+.img-drop:hover, .img-drop:focus-visible, .img-drop.dragover {
+	border-color: var(--btn-select-color);
+	background: rgba(128, 128, 128, 0.12);
+	outline: none;
+}
+.img-drop.dragover { border-style: solid; }
+.img-stage {
+	flex: 1;
+	min-height: 0;
+	position: relative;
+	overflow: hidden;
+	border-radius: 6px;
+	background: rgba(128, 128, 128, 0.14);
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+	cursor: url("../assets/cursor-eye-dropper.svg") 3 29, crosshair;
+}
+.img-stage.is-panning, .img-stage.is-panning * { cursor: grabbing; }
+.img-stage:focus-visible { outline: 2px solid var(--btn-select-color); outline-offset: -2px; }
+#img-canvas { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; display: block; }
+#img-canvas.pixelated { image-rendering: pixelated; }
+.img-checker {
+	position: absolute;
+	background: conic-gradient(#bdbdbd 25%, #e8e8e8 0 50%, #bdbdbd 0 75%, #e8e8e8 0) 0 0 / 16px 16px;
+}
+.img-markers { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.img-marker { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.img-marker-ring {
+	position: absolute;
+	left: -8px; top: -8px;
+	width: 16px; height: 16px;
+	box-sizing: border-box;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000;
+}
+.img-marker-label {
+	position: absolute;
+	left: 10px; top: -22px;
+	font: 700 12px/1 "Ubuntu", system-ui, sans-serif;
+	color: #fff;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 3px #000;
+}
+.img-loupe {
+	position: absolute;
+	left: 0; top: 0;
+	z-index: 5;
+	pointer-events: none;
+	background: #111;
+	border: 2px solid #fff;
+	border-radius: 6px;
+	box-shadow: 0 0 0 1px #000, 0 4px 14px rgba(0, 0, 0, 0.5);
+	overflow: hidden;
+}
+.img-loupe[hidden] { display: none; }
+.img-loupe canvas { display: block; width: 121px; height: 121px; }
+.img-loupe-hex {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	padding: 4px 6px;
+	color: #fff;
+	font: 12px/1.2 var(--font-monospace, monospace);
+}
+.drop-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 9000;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.55);
+	pointer-events: none;
+}
+.drop-overlay.show { display: flex; }
+.drop-overlay > div {
+	margin: 24px;
+	padding: 36px 48px;
+	border: 3px dashed #fff;
+	border-radius: 16px;
+	color: #fff;
+	text-align: center;
+	font-size: 1.3rem;
+	font-weight: 700;
+}
+.drop-overlay small { font-size: 0.9rem; font-weight: 400; }
+/* the docked column is too narrow for the contrast info */
+html.is-docked #grd-layout.is-vertical .contrast-ratio,
+html.is-docked #grd-layout.is-vertical .wcag-badge { display: none; }
+/* image popup on small screens: compact header, the stage keeps a usable height, the dialog scrolls if needed */
+.img-stage { flex: 1 1 120px; min-height: 120px; }
+.image-dialog { overflow-y: auto; }
+@media (max-width: 700px) {
+	.img-head { gap: 4px; margin-bottom: 4px; --img-pb: 6px; }
+	.img-head-controls { gap: 4px 6px; }
+	.img-head-controls fieldset.range-setting { flex: 1 1 110px; max-width: 200px; }
+	.img-group > .btn-select, .img-tools button, .img-tools .status-btn { height: 30px; min-height: 30px; padding: 0 7px; font-size: 0.8rem; }
+	.img-tools button.icon-only { width: 30px; min-width: 30px; padding: 0; }
+	.img-title { font-size: 0.8rem; }
+}
+
+/* inner padding by content: text only, icon (or color chip) + text, icon only (square) */
+.btn-select,
+button:has(> .label):not(:has(> .icon)) { padding-left: 10px; padding-right: 10px; }
+button:has(> .icon):not(.icon-only) { padding-left: 4px; padding-right: 10px; }
+button.icon-only { padding: 0; }

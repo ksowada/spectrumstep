@@ -22,8 +22,8 @@ Available scripts:
 - dedicated indicator line under the gradient swatches with small monochromatic Color 1 & Color 2 markers, indicating the gradient belonging to the corner colors for instant recognition and easy HEX export
 - C2 to C1 copy color and vice versa
 - store in details to hide if unused
-- header background controls for pure black, pure white, or a custom color; the UI automatically chooses a contrasting light or dark theme
-- custom background color can be selected with the color picker or taken from Color 1 / Color 2, and is retained in the current session, shareable URL, named localStorage presets, and JSON export/import
+- header back-color controls for pure black, pure white, or a custom color; the UI automatically chooses a contrasting light or dark theme
+- custom back color can be selected with the color picker or taken from Color 1 / Color 2, and is retained in the current session, shareable URL, named localStorage presets, and JSON export/import
 - random color button
 - RGB text input
   - expands 3-digit hex colors
@@ -52,8 +52,17 @@ Available scripts:
 - use tooltips to clarify exactly what utility does
 - URL search params with color and gradientsetting to make share of colors easy
 - use storage to retain information, when switching to docu and back
+  - the links from the docs back to the app carry the search params of the last app state, so the colors are not reset (a plain `./` link starts from the defaults)
 - documentation in header as link with same header with app and theme switch
 - 2D color plane popup for each fixed color component (H/S/L, R/G/B, H/S/V, l/a/b, l/c/h) to pick the remaining 2 components (X/Y) with real-time gradient updates (opened via channel button or double-clicking the range slider)
+- image color picker (eye dropper button in the header): drop, paste (Ctrl+V) or choose a picture, then click a pixel to set Color 1, Color 2, the text color, the back color (contrast check) or the page color
+  - drop an image anywhere on the app page (a JSON file loads a palette instead); a new image replaces the loaded one
+  - sample size `1 px`, `3×3` or `5×5` (average, transparent pixels skipped); loupe with the magnified pixels and the hex a click would pick
+  - wheel / pinch zoom up to 32×, drag to pan, keys `+` `-` `0`; EXIF rotation is applied; touch: loupe aims above the finger, two fingers pan and zoom
+  - rings with `1` `2` `T` `B` `P` mark the last pick of each target and disappear when the color is changed otherwise
+  - while the popup (or the gradient options popup) is open, the header and the gradient are docked at the top and the bottom / right edge, so every pick is visible live
+  - the Gradient block, Steps and Overdrive move into the popup header while it is open (they wrap on narrow screens); the popup takes the page color, also a custom back color; a click on a free spot of the header closes it
+  - the image is cached in this browser (IndexedDB `spectrumstep-image`) and survives reloads and the way to Docs and back; it is never part of JSON export, presets, session state or URL
 
 ## UI
 - icon: make icons light in dark theme

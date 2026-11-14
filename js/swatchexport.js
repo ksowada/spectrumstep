@@ -121,29 +121,18 @@ function swatchOptsChanged() {
 	if (typeof calcform_cmx_dyna === 'function') calcform_cmx_dyna();
 }
 
-function positionOptionsDialog() {
-	const backdrop = document.getElementById('options-modal');
-	const dlg = backdrop && backdrop.querySelector('.cmx-modal-dialog');
-	if (!dlg) return;
-	// below the gradient, so the swatches and the color bars stay visible while editing
-	const grd = document.getElementById('grd-cmx');
-	const anchor = (grd && !grd.hidden) ? grd : document.getElementById('tab-cmx');
-	const vh = window.innerHeight;
-	let top = anchor ? anchor.getBoundingClientRect().bottom + 12 : vh;
-	top = Math.max(8, Math.min(top, vh - dlg.offsetHeight - 8));
-	dlg.style.marginTop = Math.max(0, top - 16) + 'px';
-}
 function openOptionsModal() {
 	hideTooltip();
 	const modal = document.getElementById('options-modal');
 	if (!modal) return;
 	modal.classList.add('open');
-	positionOptionsDialog();
+	dockEnter('options');
 }
 function closeOptionsModal() {
 	hideTooltip();
 	const modal = document.getElementById('options-modal');
 	if (modal) modal.classList.remove('open');
+	dockLeave('options');
 }
 
 function initSwatchOptions() {
@@ -186,9 +175,6 @@ function initSwatchOptions() {
 	if (close) close.addEventListener('click', closeOptionsModal);
 	const modal = document.getElementById('options-modal');
 	if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeOptionsModal(); });
-	window.addEventListener('resize', () => {
-		if (modal && modal.classList.contains('open')) positionOptionsDialog();
-	}, { passive: true });
 	swatchOptsSync();
 	swatchOptsApply();
 }

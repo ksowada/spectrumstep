@@ -29,6 +29,11 @@ class ButtonSelect {
         });
     }
 
+    /** same accessor as ButtonSwitch.value */
+    get value() {
+        return this._value;
+    }
+
     /** Liefert die id des aktuell selektierten Elements */
     getValue() {
         return this._value;

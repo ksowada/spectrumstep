@@ -137,6 +137,8 @@ class ButtonSwitch {
     }
 
     get value()   { return this.texte[this.index]; }
+    /** same accessor as ButtonSelect.getValue() (there: the id of the selected button) */
+    getValue()    { return this.texte[this.index]; }
     get iconSrc() { return this.hasIcon ? this.icons[this.index] : null; }
 
     set(index) {

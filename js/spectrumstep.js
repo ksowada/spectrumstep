@@ -322,6 +322,179 @@ function commitBackgroundModal() {
 	renderBackgroundChoice(); calcform_cmx_syncState();
 }
 
+/* ───────────────────────── docking: image popup and gradient options popup ─────────────────────────
+ * While one of them is open, the header is fixed at the top and the gradient (#grd-layout) is fixed at the
+ * bottom (right / left) or at the right edge (down / up), so the result stays visible. Placeholders keep
+ * the page from jumping, the page scroll is locked. The popup area is the viewport minus --dock-top,
+ * --dock-bottom and --dock-right. */
+var imagePicker = null;
+var dockOwner = null;           // 'image' | 'options' | null
+var dockScrollY = 0;
+var dockObserver = null;
+var dockPlaceholders = [];
+const dockClosers = {
+	image: () => { if (imagePicker) imagePicker.hide(); },
+	options: () => closeOptionsModal()
+};
+function dockMeasure() {
+	const root = document.documentElement;
+	const header = document.querySelector('.site-header');
+	const layout = document.getElementById('grd-layout');
+	const vertical = !!(layout && layout.classList.contains('is-vertical'));
+	const hh = dockOwner && header ? header.getBoundingClientRect().height : 0;
+	root.style.setProperty('--dock-top', hh + 'px');
+	root.style.setProperty('--dock-bottom', (dockOwner && layout && !vertical ? layout.offsetHeight : 0) + 'px');
+	root.style.setProperty('--dock-right', (dockOwner && layout && vertical ? layout.offsetWidth : 0) + 'px');
+	if (dockPlaceholders[0]) dockPlaceholders[0].style.height = hh + 'px';
+}
+function dockApply() {
+	const root = document.documentElement;
+	const header = document.querySelector('.site-header');
+	const layout = document.getElementById('grd-layout');
+	if (!header || !layout) return;
+	dockScrollY = window.scrollY;
+	const ph = (el, h) => {
+		const d = document.createElement('div');
+		d.className = 'dock-placeholder';
+		d.style.height = h + 'px';
+		el.parentNode.insertBefore(d, el);
+		return d;
+	};
+	dockPlaceholders = [ph(header, header.getBoundingClientRect().height), ph(layout, layout.offsetHeight)];
+	root.classList.add('is-docked');
+	layout.inert = true;   // display only: no swatch popup, no knob dragging
+	if (typeof ResizeObserver === 'function') {
+		dockObserver = new ResizeObserver(() => { dockMeasure(); });
+		dockObserver.observe(header);
+		dockObserver.observe(layout);
+	}
+	window.scrollTo(0, dockScrollY);
+}
+function dockRelease() {
+	const root = document.documentElement;
+	const layout = document.getElementById('grd-layout');
+	if (dockObserver) { dockObserver.disconnect(); dockObserver = null; }
+	root.classList.remove('is-docked', 'dock-gutter');
+	if (layout) layout.inert = false;
+	dockPlaceholders.forEach(d => d.remove());
+	dockPlaceholders = [];
+	['--dock-top', '--dock-bottom', '--dock-right'].forEach(n => root.style.setProperty(n, '0px'));
+	window.scrollTo(0, dockScrollY);
+}
+/** the main gradient controls (Gradient, Steps, Overdrive) move into the image popup header while it is open;
+ *  comment nodes mark their places so they return to the exact spot */
+var dockAdopted = [];
+function dockAdoptControls(on) {
+	if (on === dockAdopted.length > 0) return;
+	if (on) {
+		const slot = document.getElementById('img-grad');
+		const els = [
+			document.getElementById('gradientMode'),
+			document.getElementById('steps') && document.getElementById('steps').closest('fieldset'),
+			document.getElementById('overdrive') && document.getElementById('overdrive').closest('fieldset')
+		].filter(Boolean);
+		if (!slot) return;
+		els.forEach(el => {
+			const mark = document.createComment('dock');
+			el.parentNode.insertBefore(mark, el);
+			dockAdopted.push({ el, mark });
+			slot.appendChild(el);
+		});
+	} else {
+		dockAdopted.forEach(({ el, mark }) => { mark.parentNode.insertBefore(el, mark); mark.remove(); });
+		dockAdopted = [];
+	}
+}
+/** a popup opens: it closes the other one (which keeps its state) and docks the page */
+var dockOptionsOnImage = false;   // the options popup lies over the image popup, which stays open
+function dockEnter(owner) {
+	const prev = dockOwner;
+	if (owner === 'options' && prev === 'image') {
+		dockOptionsOnImage = true;   // layered: the image popup (and its adopted controls) stay as they are
+		return;
+	}
+	dockOwner = owner;
+	if (prev && prev !== owner && dockClosers[prev]) dockClosers[prev]();
+	if (!prev) dockApply();
+	dockAdoptControls(owner === 'image');
+	dockMeasure();
+	alignGradientSlider();
+}
+function dockLeave(owner) {
+	if (owner === 'options' && dockOptionsOnImage) { dockOptionsOnImage = false; return; }
+	if (dockOwner !== owner) return;   // another popup has taken over the dock
+	dockOwner = null;
+	dockAdoptControls(false);
+	dockRelease();
+	alignGradientSlider();
+}
+function dockCloseAll() {
+	if (dockOptionsOnImage) closeOptionsModal();
+	const owner = dockOwner;
+	if (owner && dockClosers[owner]) dockClosers[owner]();
+}
+/** while a popup is open, the App and logo links only close it instead of resetting the app */
+function initDock() {
+	document.querySelectorAll('.header-logo, .header-nav a[aria-current="page"]').forEach(a => {
+		a.addEventListener('click', e => {
+			if (!dockOwner) return;
+			e.preventDefault();
+			dockCloseAll();
+		});
+	});
+	// a click anywhere on the (docked) header outside its controls closes the popup
+	document.querySelector('.site-header')?.addEventListener('click', e => {
+		if (dockOwner && !e.target.closest('a, button, input, label, select')) dockCloseAll();
+	});
+	const root = document.documentElement;
+	['--dock-top', '--dock-bottom', '--dock-right'].forEach(n => root.style.setProperty(n, '0px'));
+}
+
+/** the color a picker target currently has (lowercase #rrggbb) */
+function calcform_cmx_current(target) {
+	const low = c => rgbCorrect(c).toLowerCase();
+	switch (target) {
+		case 'c1': return low(rgbh[0]);
+		case 'c2': return low(rgbh[1]);
+		case 'text': return low(_textColor || document.getElementById('textContrast-color').value);
+		case 'back': return low(_backColor || document.getElementById('backContrast-color').value);
+		case 'page': return low(backgroundMode === 'black' ? '#000000' : backgroundMode === 'custom' ? customBackground : '#ffffff');
+	}
+	return null;
+}
+/** apply a picked color to a target: 'c1' | 'c2' | 'text' | 'back' | 'page' */
+function calcform_cmx_pick(target, hex) {
+	hex = rgbCorrect(hex).toLowerCase();
+	if (target === 'c1' || target === 'c2') {
+		const ix = target === 'c1' ? 0 : 1;
+		inp_cmx_arr[ix].set('c', hex);
+		calcform_cmx_rgb(ix);
+	} else if (target === 'text') {
+		const input = document.getElementById('textContrast-color');
+		const label = document.getElementById('textContrast-label');
+		const preview = document.getElementById('textContrast-color-preview');
+		input.value = hex;
+		textColorSelect._applyColorAccent(label, hex);
+		if (preview) preview.style.color = hex;
+		textColorSelect.setValue('textContrast-label');   // also deselects the Background contrast mode
+	} else if (target === 'back') {
+		const input = document.getElementById('backContrast-color');
+		const label = document.getElementById('backContrast-label');
+		input.value = hex;
+		backColorSelect._applyColorAccent(label, hex);
+		label.style.backgroundColor = hex;
+		backColorSelect.setValue('backContrast-label');
+	} else if (target === 'page') {
+		backgroundMode = 'custom';
+		customBackground = hex;
+		customBackgroundSource = 'picker';
+		applyBackground(hex);
+		renderBackgroundChoice();
+		calcform_cmx_syncState();
+		if (imagePicker) imagePicker.refreshMarkers();
+	}
+}
+
 /** initialisiere Anfangsfarben */
 function calcform_cmx_init() {
 	initThemeSwitch();
@@ -429,9 +602,9 @@ function calcform_cmx_init() {
 			calcform_cmx_dyna(undefined,color); // dein Callback-Ziel
 		},
 		{
-			'backContrast-black': 'Background Contrast Mode: Apply the gradient to text color over a static Black (#000000) background',
-			'backContrast-white': 'Background Contrast Mode: Apply the gradient to text color over a static White (#ffffff) background',
-			'backContrast-label': 'Background Contrast Mode: Pick a custom static background color behind gradient-colored text'
+			'backContrast-black': 'Back Contrast Mode: Apply the gradient to text color over a static Black (#000000) back',
+			'backContrast-white': 'Back Contrast Mode: Apply the gradient to text color over a static White (#ffffff) back',
+			'backContrast-label': 'Back Contrast Mode: Pick a custom static back color behind gradient-colored text'
 		}
 	);
 	_textColor = '#000000';
@@ -858,6 +1031,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 		span.style.backgroundImage = gradientText;
 	});
 	calcform_cmx_syncState();
+	if (imagePicker) imagePicker.refreshMarkers();
 }
 
 function handleGradientSliderMove({ index, pos, point, points }) {
@@ -932,6 +1106,7 @@ function alignGradientSlider() {
 	const layoutEl = document.getElementById('grd-layout');
 	const vertical = sliderEl.classList.contains('is-vertical');
 	if (layoutEl) layoutEl.classList.toggle('is-vertical', vertical);
+	if (dockOwner) dockMeasure();
 	const swatches = document.querySelectorAll('#tab-cmx .color-step');
 	if (swatches.length < 2) return;
 	const first = swatches[0].getBoundingClientRect();
@@ -1174,6 +1349,8 @@ function calcform_cmx_updateUrl(data) {
 	if (sp) params.set('sp', sp);
 	const newUrl = window.location.pathname + '?' + params.toString() + window.location.hash;
 	window.history.replaceState(null, '', newUrl);
+	// the docs page links back with these params, so the colors survive Docs → App
+	try { localStorage.setItem(LAST_SEARCH_KEY, window.location.search); } catch (e) { /* storage unavailable */ }
 }
 function calcform_cmx_getUrlState() {
 	if (!window.location.search || window.location.search.length <= 1) return null;
@@ -1533,23 +1710,7 @@ function initExportAndLoadModals() {
 			}
 		};
 	}
-
-	// Drag & Drop JSON file support onto load modal
-	if (loadModal) {
-		loadModal.addEventListener('dragover', function (e) {
-			e.preventDefault();
-			e.stopPropagation();
-		});
-		loadModal.addEventListener('drop', function (e) {
-			e.preventDefault();
-			e.stopPropagation();
-			const dt = e.dataTransfer;
-			const file = dt && dt.files && dt.files[0];
-			if (file && (file.name.endsWith('.json') || file.type.includes('json'))) {
-				loadJsonFile(file);
-			}
-		});
-	}
+	// dropping files is handled globally by ImagePicker (images, JSON, anything else)
 }
 function calcform_cmx_col_shuffle(ix) {
 	const rgb_per = Array.from({ length: 3 }, () => randomInt(256));
@@ -1598,6 +1759,15 @@ function themeCare(text, ix) {
 	}
 	applyTheme(parameterTheme || savedTheme || systemTheme);
 	calcform_cmx_syncState();
+}
+
+/** Docs → App: the links to the app carry the search params of the last app state, so the colors are not reset */
+const LAST_SEARCH_KEY = 'color-mixer-search';
+function calcform_cmx_docsBackLinks() {
+	let search = '';
+	try { search = localStorage.getItem(LAST_SEARCH_KEY) || ''; } catch (e) { /* storage unavailable */ }
+	if (!/^\?[\w%.,~=&+-]{1,2000}$/.test(search)) return;
+	document.querySelectorAll('a[href="../"]').forEach(a => { a.setAttribute('href', '../' + search); });
 }
 
 var activeTooltipTarget = null;
@@ -1690,10 +1860,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		initThemeSwitch();
 		themeCare();
 		initTooltips();
+		calcform_cmx_docsBackLinks();
 		return;
 	}
 	calcform_cmx_init();
 	calcform_cmx_doml();
+	initDock();
+	imagePicker = new ImagePicker();
+	imagePicker.init();
 	const urlState = calcform_cmx_getUrlState();
 	if (!urlState) {
 		// a clean URL (no known search params) means "start from defaults":

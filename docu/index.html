@@ -55,8 +55,8 @@
 			</a>
 		</div>
 		<nav class="header-nav" aria-label="Site navigation">
-			<a class="header-link header-backlink-app" href="../" data-tooltip="Return to SpectrumStep – Color Mixer application"><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="" />SpectrumStep</a>
-			<a class="header-link active" href="./" aria-current="page" data-tooltip="Technical documentation and usage guide">Documentation</a>
+			<a class="header-link header-backlink-app" href="../" aria-label="SpectrumStep" data-tooltip="SpectrumStep – return to the Color Mixer application"><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="" />App</a>
+			<a class="header-link active" href="./" aria-current="page" aria-label="Documentation" data-tooltip="Documentation – technical documentation and usage guide">Docs</a>
 			<a class="header-link" href="https://ardoid.eu/legal-notice/">Legal Notice</a>
 			<a class="header-link" href="https://ardoid.eu/contact/">Contact</a>
 		</nav>
@@ -216,11 +216,25 @@ Output HEX</pre>
 					<li><strong>Dragged swatch positions:</strong> the colors of swatches whose knobs were dragged are used by all exports. The positions are stored in the share link (<code>sp</code>, compact: 2 base-36 digits per swatch), presets and JSON; they are dropped as soon as the gradient itself (colors, spaces, Steps, Overdrive, direction, hue path) changes.</li>
 				</ul>
 
+				<h3 id="image-picker">Image Color Picker</h3>
+				<p>The <span class="docu-icon-chip"><img class="icon" src="../assets/icons/eye-dropper-solid-full.svg" alt="Image color picker" /></span> button in the header opens a popup in which you click a pixel of a picture to set a color of the app.</p>
+				<ul class="docu-feature-list">
+					<li><strong>Loading:</strong> choose a file in the drop area, paste an image with Ctrl+V, or drop it anywhere on the app page, also while a popup is open. A dropped JSON file is loaded as a palette instead, any other file is reported and ignored. A new image replaces the loaded one without asking. Images from other web addresses cannot be read because of browser security rules, so there is no URL input.</li>
+					<li><strong>Targets:</strong> <em>Color 1</em>, <em>Color 2</em>, <em>Text</em> and <em>Back</em> (the custom colors of the contrast check) or <em>Page</em> (the page color). Every target button shows its current color. The target never switches by itself, so you can pick again and again.</li>
+					<li><strong>Sample:</strong> <em>1 px</em> takes the exact pixel under the pipette tip, <em>3×3</em> and <em>5×5</em> average the pixels around it. Fully transparent pixels are skipped; a click on a fully transparent pixel does nothing. A pick happens when you release the pointer without having moved it more than 4px.</li>
+					<li><strong>Loupe:</strong> shows 11×11 magnified pixels around the pointer with the sample area framed, and the hex value a click would pick. On touch screens one finger aims (the loupe is above the finger, the pick happens on release) and two fingers pan and zoom. With the loupe off, a tap picks, one finger pans and two fingers zoom.</li>
+					<li><strong>Zoom and pan:</strong> the image starts fitted into the popup. Mouse wheel or pinch zooms at the pointer up to 32×, dragging pans, <code>+</code>, <code>-</code> and <code>0</code> (fit) work from the keyboard, and the zoom button fits the image. Images are shown with EXIF rotation; very large images are downscaled for display and sampling (the title shows the original size).</li>
+					<li><strong>Markers:</strong> a ring labeled <code>1</code>, <code>2</code>, <code>T</code>, <code>B</code> or <code>P</code> marks the spot of the last pick of each target. It disappears when that color is changed in any other way, and when the image is replaced or removed.</li>
+					<li><strong>Docked view:</strong> while the image popup or the gradient options popup is open, the header stays at the top and the gradient is docked at the bottom (right / left direction) or stretched over the full height at the right edge (down / up; it scrolls when the swatches do not fit), display only but live, so you see every pick take effect. The popup uses the page color, also a custom back color. The header remains usable: the back buttons change the page color while the image popup stays open (the custom chooser opens above it); the <em>App</em> link, the logo and any free spot of the header close the popups. The gradient options popup (gear button) opens over the image popup, and the image popup remains when it is closed. Steps and Overdrive show their label above the slider, so the header rows are not taller than the buttons.</li>
+					<li><strong>Gradient controls in the popup:</strong> the <em>Gradient</em> block (space, direction, hue path, contrast info, options, load, export), <em>Steps</em> and <em>Overdrive</em> sit in the popup header next to the picker tools and wrap on narrow screens; they move back to the page when the popup closes. Changing the direction rearranges the docked gradient. PNG, SVG and HTML exports started from here use the gradient exactly as it is displayed docked (stretched to the full width or height), so their size can differ from the normal view. The <em>Fit</em> button (arrows icon) fits the whole image.</li>
+					<li><strong>What is stored where:</strong> the image, its title and the markers are kept in this browser only (IndexedDB), so it is still there after a reload and after a visit to the docs. The trash button removes the image and this copy. Target, sample size, loupe, zoom and pan are not stored. The image is never part of the share link, saved presets, session state or JSON export; the picked colors are, like any other color. The links in the docs header lead back to the app with the search params of your last palette, so a visit to the docs does not reset your colors.</li>
+				</ul>
+
 				<h3>Technical Function Description</h3>
 				<ul class="docu-feature-list">
 					<li>
-						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/moon-solid-full.svg" alt="Black background" /><img class="icon" src="../assets/icons/sun-solid-full.svg" alt="White background" /><img class="icon" src="../assets/icons/palette-solid-full.svg" alt="Custom background" /></span>
-						<strong>Background Color &amp; Adaptive Theme:</strong> Choose a pure black or white background, or open the custom background chooser to pick a color directly or use Color 1 / Color 2. The surrounding UI automatically selects a light or dark theme for contrast. Your background color and chooser selection are retained in the session and saved presets, included in shareable URLs and JSON export/import, and can be canceled with the chooser's X button.
+						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/moon-solid-full.svg" alt="Black back" /><img class="icon" src="../assets/icons/sun-solid-full.svg" alt="White back" /><img class="icon" src="../assets/icons/palette-solid-full.svg" alt="Custom back" /></span>
+						<strong>Back Color &amp; Adaptive Theme:</strong> Choose a pure black or white back, or open the custom back chooser to pick a color directly or use Color 1 / Color 2. The surrounding UI automatically selects a light or dark theme for contrast. Your back color and chooser selection are retained in the session and saved presets, included in shareable URLs and JSON export/import, and can be canceled with the chooser's X button.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Color space switch" /></span>
@@ -277,7 +291,7 @@ Output HEX</pre>
 						<strong>Contrast Info Visibility (Show / Hide):</strong> Toggles the display of WCAG contrast ratios and compliance badges on the palette swatches, allowing a distraction-free view showing only the <code>#RRGGBB</code> hex values.
 					</li>
 					<li>
-						<strong>Text Color &amp; Background Color Contrast Modes:</strong> Test either a fixed foreground text color (Black, White, or custom Color) over your generated background swatches, or apply the generated palette to text over a fixed background surface.
+						<strong>Text Color &amp; Back Color Contrast Modes:</strong> Test either a fixed foreground text color (Black, White, or custom Color) over your generated background swatches, or apply the generated palette to text over a fixed back surface.
 					</li>
 					<li>
 						<strong>WCAG 2.1 Contrast Ratio &amp; Badges:</strong> Computes relative luminance and contrast ratio <code>(L1 + 0.05) / (L2 + 0.05)</code> for every step, displaying real-time compliance badges: <strong>AAA</strong> (≥ 7:1), <strong>AA</strong> (≥ 4.5:1), <strong>AA+</strong> (≥ 3:1 for large text), or <strong>Fail</strong> (&lt; 3:1).
