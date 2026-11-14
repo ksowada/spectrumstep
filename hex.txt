@@ -1,9 +1,0 @@
-:root {
-  --spectrum-1: #005fff;
-  --spectrum-2: #2456de;
-  --spectrum-3: #4e4dbd;
-  --spectrum-4: #79449b;
-  --spectrum-5: #a33a7a;
-  --spectrum-6: #cd3158;
-  --spectrum-7: #f72837;
-}

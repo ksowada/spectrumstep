@@ -46,5 +46,5 @@ Available scripts:
 - channel identifier buttons in first column (`H/S/L`, `R/G/B`, `H/S/V`, `l/a/b`, `l/c/h`) and double-clicking channel range sliders open a floating 2D color plane aligned to the range slider width without overlapping gradient swatches
 
 ## infrastructure
-- use npm package for
-  - serve (it is needed for having clean links without index.html between docu and app)
+- no runtime dependencies; local dev server is Python's `http.server` (serves `docu/` as `docu/index.html`, so links stay clean without `index.html`)
+- production: Apache on ardoid.eu; `.htaccess` (copied into `dist/` by the build) handles the https trailing-slash redirect, compression and caching
