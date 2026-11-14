@@ -117,7 +117,7 @@
 					</div>
 				</fieldset>
 			</div>
-			<fieldset class="settings-container">
+			<fieldset class="settings-container steps-group">
 				<legend>Steps</legend>
 				<div class="range-setting">
 					<label for="steps">Steps</label>
@@ -137,6 +137,8 @@
 					<div id="gradientDirection"></div>
 					<div id="gradientWay"></div>
 					<div id="contrastVisibility"></div>
+					<button id="main-load-btn" type="button" aria-label="Load palette" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="" class="icon" /></button>
+					<button id="main-export-btn" type="button" aria-label="Export palette" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" /></button>
 				</fieldset>
 				<fieldset class="flex-scatter-childs" id="textContrast">
 					<legend>Text color</legend>
@@ -160,10 +162,6 @@
 			<div id="grd-slider"></div>
 			<div id="tab-cmx"></div>
 			<div id="grd-cmx" class="linear-gradient"></div>
-			<div class="palette-actions-bar flex">
-				<button id="main-load-btn" type="button" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="Load" class="icon" />Load</button>
-				<button id="main-export-btn" type="button" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="Export" class="icon" />Export</button>
-			</div>
 		</div>
 	</main>
 

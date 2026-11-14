@@ -671,7 +671,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	// Build corner color markers line under the gradient swatches
 	const minCornerIdx = Math.min(finalC1Idx, finalC2Idx);
 	const maxCornerIdx = Math.max(finalC1Idx, finalC2Idx);
-	const pointerSymbol = isVertical ? '◀' : '▲';
+	const pointerSymbol = isVertical ? '◀' : '▼';
 
 	let markersHtml = `<div class="palette-corner-markers palette-corner-markers-${gradientDirection}">`;
 	for (let i = 0; i < colArr.length; i++) {
@@ -682,10 +682,14 @@ function calcform_cmx_dyna(textColor, backColor) {
 		let cellContent = '';
 		if (i === finalC1Idx) {
 			cellClasses += ' is-c1';
-			cellContent = `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 1</span>`;
+			cellContent = isVertical
+				? `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 1</span>`
+				: `<span class="corner-marker-text">Color 1</span><span class="corner-marker-pointer">${pointerSymbol}</span>`;
 		} else if (i === finalC2Idx) {
 			cellClasses += ' is-c2';
-			cellContent = `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 2</span>`;
+			cellContent = isVertical
+				? `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 2</span>`
+				: `<span class="corner-marker-text">Color 2</span><span class="corner-marker-pointer">${pointerSymbol}</span>`;
 		}
 
 		if (i === finalC1Idx || i === finalC2Idx) {
@@ -704,8 +708,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 			+ markersHtml
 			+ `</div>`;
 	} else {
-		html = `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`
-			+ markersHtml;
+		html = markersHtml
+			+ `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`;
 	}
 	document.getElementById('tab-cmx').innerHTML = html;
 

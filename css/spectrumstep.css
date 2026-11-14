@@ -858,6 +858,24 @@ table.inputs {
 .palette-corner-markers-right,
 .palette-corner-markers-left {
 	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+	margin-top: 0;
+	margin-bottom: 4px;
+}
+.palette-corner-markers-right .corner-marker-cell,
+.palette-corner-markers-left .corner-marker-cell {
+	justify-content: flex-end;
+	padding-top: 0;
+	padding-bottom: 3px;
+}
+.palette-corner-markers-right .corner-marker-cell.in-range,
+.palette-corner-markers-left .corner-marker-cell.in-range {
+	border-top: none;
+	border-bottom: 1px solid var(--border);
+}
+.palette-corner-markers-right .corner-marker-pointer,
+.palette-corner-markers-left .corner-marker-pointer {
+	margin-bottom: 0;
+	margin-top: 2px;
 }
 .corner-marker-cell {
 	min-width: 0;
@@ -1352,13 +1370,6 @@ table.inputs {
 	top: 4px;
 }
 
-/** Palette Action Bar (Load / Export buttons) */
-.palette-actions-bar {
-	margin-top: 10px;
-	margin-bottom: 14px;
-	gap: 10px;
-	align-items: center;
-}
 
 /** Centered Modal Popups */
 .cmx-modal-backdrop {
@@ -1592,15 +1603,18 @@ input:not([type="range"]), select {
 	box-shadow: 0 1px 4px rgba(20, 30, 40, 0.3), 0 0 0 1px rgba(20, 30, 40, 0.18);
 }
 #tab-cmx { margin-top: 0; }
+#gradientMode > button { margin: 0; }
 .color-palette-right, .color-palette-left { gap: 6px; }
 .color-step {
 	border-radius: 7px;
 	overflow: hidden;
 }
-.color-palette-right .color-step, .color-palette-left .color-step { min-height: 132px; }
+:root { --swatch-row-height: 132px; }
+.color-palette-right .color-step, .color-palette-left .color-step { min-height: var(--swatch-row-height); }
 .color-step:hover { transform: translateY(-2px); }
 .linear-gradient {
-	min-height: 108px;
+	box-sizing: border-box;
+	min-height: var(--swatch-row-height);
 	margin: 12px 0 14px;
 	padding: 1rem;
 	border-radius: 12px;
@@ -1613,9 +1627,25 @@ input:not([type="range"]), select {
 .settings-container { gap: 0.5rem 0.75rem; }
 .settings-container > fieldset { border-radius: 9px; }
 .range-setting { padding: 2px 0; }
-.palette-actions-bar { margin-top: 8px; }
+/* Steps group without visible frame: keep horizontal insets so the sliders stay in place */
+fieldset.steps-group {
+	border-color: transparent;
+	background: transparent;
+	box-shadow: none;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+fieldset.steps-group > legend {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
 
 @media (max-width: 700px) {
 	.button-container button { flex: 1 1 calc(50% - 7px); }
-	.linear-gradient { min-height: 88px; }
 }
