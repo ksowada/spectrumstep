@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const distDir = resolve(projectRoot, 'dist');
-const deployFiles = ['index.html', 'docu', 'css', 'js', 'assets'];
+const deployFiles = ['index.html', '.htaccess', 'docu', 'css', 'js', 'assets'];
 
 await rm(distDir, { recursive: true, force: true });
 await mkdir(distDir, { recursive: true });

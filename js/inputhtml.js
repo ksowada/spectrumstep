@@ -57,6 +57,8 @@ function InputHtml(args) {
             break;
           case 'color':
             param.value = rgbCorrect(param.value);
+            // empty/invalid initial value would give "#" which <input type="color"> rejects
+            if (!/^#[0-9a-f]{6}$/.test(param.value)) param.value = '#000000';
             html_range = '<td class="form-value color"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '"/></td>';
             html += html_name + html_range + '<td class="form-value color"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" autocomplete="off" spellcheck="false"/></td>' + html_unit;
             break;

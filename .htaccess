@@ -1,0 +1,33 @@
+# SpectrumStep – Apache config for https://ardoid.eu/spectrumstep/
+
+# Directory slash redirect: Apache's built-in one (mod_dir) builds an http:// URL
+# because TLS ends at the nginx proxy. Do it ourselves and force https.
+<IfModule mod_rewrite.c>
+	DirectorySlash Off
+	RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} -d
+	RewriteCond %{REQUEST_URI} !/$
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI}/ [R=301,L]
+</IfModule>
+
+# Compression for text assets
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript text/javascript application/json image/svg+xml
+</IfModule>
+
+# Caching: files have no content hash, so keep JS/CSS short and let ETag revalidate
+<IfModule mod_headers.c>
+	<FilesMatch "\.(html)$">
+		Header set Cache-Control "no-cache"
+	</FilesMatch>
+	<FilesMatch "\.(js|css)$">
+		Header set Cache-Control "public, max-age=86400"
+	</FilesMatch>
+	<FilesMatch "\.(woff2|png|webp|svg)$">
+		Header set Cache-Control "public, max-age=2592000"
+	</FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+	AddCharset utf-8 .html .css .js .json .svg
+</IfModule>

@@ -29,20 +29,21 @@ function Storage(args) {
 				lastSaved = order.length > 0 ? order[order.length - 1] : null;
 			}
 
-			let html = '';
-			if (order.length === 0) {
-				html = '<option value="" disabled selected>No saved palettes</option>';
-			} else {
-				for (var i = 0; i < order.length; i++) {
-					var setting = order[i];
-					var isSelected = (setting === lastSaved) ? ' selected' : '';
-					html += '<option value="' + setting + '"' + isSelected + '>' + setting + '</option>';
-				}
-			}
-
 			this.inputLoadEl = document.getElementById(this.inputLoadId);
 			if (this.inputLoadEl) {
-				this.inputLoadEl.innerHTML = html;
+				// build options via DOM so palette names are never parsed as HTML
+				this.inputLoadEl.replaceChildren();
+				if (order.length === 0) {
+					var emptyOpt = new Option('No saved palettes', '', true, true);
+					emptyOpt.disabled = true;
+					this.inputLoadEl.add(emptyOpt);
+				} else {
+					for (var i = 0; i < order.length; i++) {
+						var setting = order[i];
+						var isSelected = (setting === lastSaved);
+						this.inputLoadEl.add(new Option(setting, setting, isSelected, isSelected));
+					}
+				}
 				if (lastSaved && settings[lastSaved] !== undefined) {
 					this.inputLoadEl.value = lastSaved;
 				}
