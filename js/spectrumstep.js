@@ -1659,17 +1659,18 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 	calcform_cmx_init();
 	calcform_cmx_doml();
-	themeCare(); // need calcform_cmx_init before
 	const urlState = calcform_cmx_getUrlState();
-	const savedState = storage.loadState();
+	if (!urlState) {
+		// a clean URL (no known search params) means "start from defaults":
+		// drop the remembered session state and theme so nothing leaks back in
+		try {
+			localStorage.removeItem(storage.unit + '-state');
+			localStorage.removeItem('theme');
+		} catch (e) { /* storage unavailable: defaults apply anyway */ }
+	}
+	themeCare(); // need calcform_cmx_init before
 	if (urlState) {
 		calcform_cmx_applyState(urlState);
-	} else if (savedState) {
-		const savedTheme = localStorage.getItem("theme");
-		if (savedTheme && themeModes.includes(savedTheme)) {
-			savedState.theme = savedTheme;
-		}
-		calcform_cmx_applyState(savedState);
 	}
 	cmxStateReady = true;
 	calcform_cmx_syncState();
@@ -1678,6 +1679,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		const popState = calcform_cmx_getUrlState();
 		if (popState) {
 			calcform_cmx_applyState(popState);
+		} else {
+			// navigated to a URL without params: reload so defaults are rebuilt cleanly
+			window.location.reload();
 		}
 	});
 });

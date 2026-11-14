@@ -971,7 +971,7 @@ table.inputs {
 }
 .icon {
 	height: 1.3rem;
-	vertical-align: center;
+	vertical-align: middle;
 	padding: 0 0.3rem;
 	filter: var(--icon-filter);
 }
@@ -1555,6 +1555,17 @@ button {
 }
 button:hover {
 	border-color: #c9d2dc;
+}
+/* Center icon + label consistently across browsers (Opera/Chrome/Firefox/Safari). */
+button:has(> .icon) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.2;
+}
+button:has(> .icon) > .icon {
+	flex: 0 0 auto;
+	display: block;
 }
 .button-container { gap: 7px; margin-top: 6px; }
 .button-container button { font-size: 0.9rem; }
