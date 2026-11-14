@@ -1,3 +1,40 @@
+/* ── Unified button look: change these to restyle ALL buttons ── */
+:root {
+	--btn-size: 36px;                          /* height (= width for icon-only buttons → square) */
+	--btn-font-size: 1rem;
+	--btn-border-width: 5px;
+	--btn-border-radius: 15px;
+	--btn-border-color: var(--button-border);  /* default frame colour (follows theme) */
+	--btn-select-color: #555555;               /* frame of active/selected buttons (ButtonSelect, theme, …) – light */
+	--btn-switch-color: #555555;               /* lit frame segment of ButtonSwitch – light */
+	--btn-highlight-duration: 250ms;
+	--btn-hover-color: #777777;                /* hover frame of everything clickable/editable – light */
+	--hover-duration: 200ms;                   /* fade-in/out of the hover frame */
+
+	/* Text inputs & slider knobs (default: same frame as buttons) */
+	--input-border-width: var(--btn-border-width);
+	--input-border-radius: var(--btn-border-radius);
+	--input-border-color: var(--btn-border-color);
+	--knob-size: 22px;                         /* Steps/Overdrive + gradient position knobs */
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--btn-select-color: #aaaaaa;
+		--btn-switch-color: #aaaaaa;
+		--btn-hover-color: #888888;
+	}
+}
+:root[data-theme="light"] {
+	--btn-select-color: #555555;
+	--btn-switch-color: #555555;
+	--btn-hover-color: #777777;
+}
+:root[data-theme="dark"] {
+	--btn-select-color: #aaaaaa;
+	--btn-switch-color: #aaaaaa;
+	--btn-hover-color: #888888;
+}
+
 /* Standard: Systemeinstellung verwenden */
 :root {
 	color-scheme: light dark;
@@ -11,7 +48,7 @@
 	--text-main: #363636;
 	--text-bright: #000000;
 	--text-muted: #70777f;
-	--links: #0076d1;
+	--links: #aaaaaa;
 	--focus: #0096bfab;
 	--border: #dbdbdb;
 	--code: #000000;
@@ -439,8 +476,9 @@ input[type="text"].is-invalid:focus {
 input[type="color"] {
 	padding: 0; /* fill color picking area full with color */
 	height: 43px;
-	border: 1px solid var(--border);
-	border-radius: 5px;
+	border: var(--input-border-width) solid var(--input-border-color);
+	border-radius: var(--input-border-radius);
+	transition: border-color var(--hover-duration) ease;
 }
 input[type="range"] {
 	margin: 0px 0; /* overwrite water margin for less in-between-space */
@@ -456,13 +494,12 @@ button {
 	background-color: var(--button-base);
 	background-image: var(--button-gradient);
 	box-shadow: var(--button-shadow);
-	border: 1px solid var(--button-border);
-	border-radius: 6px;
+	border: var(--btn-border-width) solid var(--btn-border-color);
+	border-radius: var(--btn-border-radius);
 	color: var(--button-text);
 }
 button:hover {
 	background-color: var(--button-hover);
-	border-color: var(--text-muted);
 }
 /* Überschreibe die Standardeinstellungen von Water.css */
 fieldset {
@@ -774,9 +811,6 @@ table.inputs {
 	cursor: pointer;
 	transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
-.gradient-slider-track:hover {
-	box-shadow: var(--slider-track-shadow), 0 0 0 2px var(--focus);
-}
 .gradient-slider-knobs-layer {
 	position: absolute;
 	top: 12px;
@@ -814,8 +848,7 @@ table.inputs {
 	z-index: 10;
 	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.55), 0 0 0 2px var(--focus);
 }
-.gradient-slider-knob:focus-visible,
-.gradient-slider-knob.is-selected {
+.gradient-slider-knob:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 3px var(--focus), 0 2px 6px rgba(0, 0, 0, 0.4);
 	z-index: 6;
@@ -957,9 +990,10 @@ table.inputs {
 	margin-bottom: 0;
 	margin-right: 4px;
 }
+/* swatch belonging to the knob currently being dragged */
 .color-step.is-selected {
-	outline: 2px solid var(--links);
-	outline-offset: -2px;
+	outline: var(--btn-border-width) solid var(--btn-select-color);
+	outline-offset: calc(-1 * var(--btn-border-width));
 	z-index: 3;
 }
 .cmx-toast {
@@ -1089,15 +1123,12 @@ table.inputs {
 }
 #backContrast-white {
 	background: var(--contrast-white);
-	border-color: var(--border);
 }
 #backContrast-black {
 	background: var(--contrast-black);
-	border-color: var(--border);
 }
 #backContrast-label {
 	background: var(--button-base);
-	border-color: var(--border);
 }
 #backContrast .btn-select span {
 	-webkit-background-clip: text;
@@ -1110,46 +1141,46 @@ table.inputs {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 32px;
+	height: var(--btn-size);
 	padding: 0 12px;
-	border-radius: 4px;
-	border: 1px solid var(--border);
+	border-radius: var(--btn-border-radius);
+	border: var(--btn-border-width) solid var(--btn-border-color);
+	font-size: var(--btn-font-size);
 	background: var(--button-base);
 	color: var(--button-text);
 	cursor: pointer;
 	font: inherit;
 	font-weight: bold;
-	transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+	transition: border-color var(--hover-duration) ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
-.btn-select:hover {
-	border-color: var(--text-muted);
-}
+/* Active/selected buttons: monochrome frame, same look as the ButtonSwitch segment */
 .btn-select.selected,
-.theme-choice.selected {
-	border-color: var(--links);
+.theme-choice.selected,
+.channel-plane-btn.selected,
+.btn-select.selected:hover,
+.theme-choice.selected:hover,
+.channel-plane-btn.selected:hover {
+	border-color: var(--btn-select-color);
 	border-style: solid;
-	border-width: 2px;
-	box-shadow: 0 0 0 1px var(--links);
+	border-width: var(--btn-border-width);
+	box-shadow: none;
 }
 .theme-choice {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 36px;
-	min-width: 40px;
-	padding: 6px;
+	width: var(--btn-size);
+	height: var(--btn-size);
+	min-width: var(--btn-size);
+	padding: 0;
 	margin: 0;
 }
 .theme-choice .icon { display: block; flex: 0 0 auto; }
-.theme-choice[data-choice-theme="dark"] { border-color: #454545; }
 .theme-choice[data-choice-theme="dark"] .icon { filter: invert(1) brightness(0.9); }
-.theme-choice[data-choice-theme="light"] { border-color: #c8c8c8; }
 .theme-choice[data-choice-theme="light"] .icon { filter: none; }
-.theme-choice.selected { border-color: var(--links); box-shadow: 0 0 0 1px var(--links); }
 .background-source-options { display: flex; flex-direction: column; gap: 6px; }
 .background-source-option { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; text-align: left; color: var(--text-main); background: var(--background-alt); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; }
-.background-source-option.selected { border: 2px solid var(--links); box-shadow: 0 0 0 1px var(--links); }
+.background-source-option.selected { border: 2px solid var(--btn-select-color); box-shadow: none; }
 .background-source-option + .background-source-option { margin-top: 5px; }
 .background-source-option strong, .background-source-option small { display: block; }
 .background-source-option small { color: var(--text-muted); font-size: .8rem; }
@@ -1301,17 +1332,13 @@ table.inputs {
 }
 /** 2D Color Plane button & popup styling */
 .channel-plane-btn {
-	width: 100%;
-	min-width: 2.2rem;
-	padding: 6px 0;
+	width: var(--btn-size);
+	min-width: var(--btn-size);
+	padding: 0;
 	font-weight: 700;
 	font-family: var(--font-monospace);
 	line-height: 1.2;
 	text-align: center;
-}
-.channel-plane-btn.selected {
-	outline: 2px solid var(--variable, #39a33c);
-	outline-offset: -1px;
 }
 .color-plane-popup {
 	position: absolute;
@@ -1560,12 +1587,24 @@ legend {
 	letter-spacing: 0.01em;
 }
 button {
-	min-height: 36px;
-	border-radius: 7px;
-	transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+	height: var(--btn-size);
+	min-height: var(--btn-size);
+	min-width: var(--btn-size);
+	font-size: var(--btn-font-size);
+	border-radius: var(--btn-border-radius);
+	transition: background-color 120ms ease, border-color var(--hover-duration) ease, color 120ms ease;
 }
-button:hover {
-	border-color: #c9d2dc;
+/* Icon-only buttons (class .icon-only) are square by default */
+button.icon-only {
+	width: var(--btn-size);
+	padding: 0;
+}
+/* Buttons that keep their own geometry (list options, close crosses) */
+.popup-close-btn,
+.background-source-option {
+	height: auto;
+	min-height: 0;
+	min-width: 0;
 }
 /* Center icon + label consistently across browsers (Opera/Chrome/Firefox/Safari). */
 button:has(> .icon) {
@@ -1579,9 +1618,9 @@ button:has(> .icon) > .icon {
 	display: block;
 }
 .button-container { gap: 7px; margin-top: 6px; }
-.button-container button { font-size: 0.9rem; }
+.button-container button { font-size: calc(var(--btn-font-size) * 0.9); margin: 0; }
 input:not([type="range"]), select {
-	border-radius: 7px;
+	border-radius: var(--input-border-radius);
 }
 
 /* Pair the editable continuous gradient and its discrete palette. */
@@ -1648,4 +1687,200 @@ fieldset.steps-group > legend {
 
 @media (max-width: 700px) {
 	.button-container button { flex: 1 1 calc(50% - 7px); }
+}
+
+/* ── ButtonSwitch: rotating frame segment ("Rahmen-Winkel") ──
+   Segment = 360°/n of the frame, centred at top for index 0,
+   rotated by 360°/n per step. ButtonSwitch sets --ring-span
+   and --ring-start as inline style. */
+@property --ring-start {
+	syntax: '<angle>';
+	inherits: true;
+	initial-value: 0deg;
+}
+button.step-ring {
+	position: relative;
+	transition: background-color 120ms ease, border-color var(--hover-duration) ease, color 120ms ease,
+		--ring-start var(--btn-highlight-duration) ease;
+}
+button.step-ring::after {
+	content: '';
+	position: absolute;
+	inset: calc(-1 * var(--btn-border-width));
+	padding: var(--btn-border-width);
+	border-radius: var(--btn-border-radius);
+	background: conic-gradient(from var(--ring-start),
+		var(--btn-switch-color) 0 var(--ring-span, 90deg), transparent 0);
+	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+	pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+	button.step-ring { transition: none; }
+}
+
+/* ── Text inputs: same frame as buttons, .selected colour while editing ── */
+input:not([type]),
+input[type="text"],
+input[type="number"] {
+	border: var(--input-border-width) solid var(--input-border-color);
+	border-radius: var(--input-border-radius);
+	box-sizing: border-box;
+	height: var(--btn-size);                   /* same height as buttons */
+	padding-top: 0;
+	padding-bottom: 0;
+	transition: border-color var(--hover-duration) ease;
+}
+input:not([type]):focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+	border-color: var(--btn-select-color);
+	box-shadow: var(--input-shadow);
+	outline: none;
+}
+
+/* ── Steps / Overdrive slider knob ── */
+:is(.range-setting, .colorrange) input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	width: var(--knob-size);
+	height: var(--knob-size);
+	margin-top: calc((8px - var(--knob-size)) / 2);
+	background: var(--button-base);
+	border: var(--input-border-width) solid var(--input-border-color);
+	border-radius: var(--input-border-radius);
+	box-shadow: var(--slider-knob-shadow);
+	transition: border-color var(--hover-duration) ease;
+}
+:is(.range-setting, .colorrange) input[type="range"]::-moz-range-thumb {
+	box-sizing: border-box;
+	width: var(--knob-size);
+	height: var(--knob-size);
+	background: var(--button-base);
+	border: var(--input-border-width) solid var(--input-border-color);
+	border-radius: var(--input-border-radius);
+	box-shadow: var(--slider-knob-shadow);
+	transition: border-color var(--hover-duration) ease;
+}
+:is(.range-setting, .colorrange) input[type="range"]:active::-webkit-slider-thumb,
+:is(.range-setting, .colorrange) input[type="range"]:focus-visible::-webkit-slider-thumb {
+	border-color: var(--btn-select-color);
+}
+:is(.range-setting, .colorrange) input[type="range"]:active::-moz-range-thumb,
+:is(.range-setting, .colorrange) input[type="range"]:focus-visible::-moz-range-thumb {
+	border-color: var(--btn-select-color);
+}
+:is(.range-setting, .colorrange) input[type="range"]:active {
+	transform: none; /* water.css pushes the whole slider down on :active */
+}
+
+/* ── Gradient position knobs (gradientposslider.js) ── */
+.gradient-slider-knob {
+	box-sizing: border-box;
+	width: var(--knob-size);
+	height: var(--knob-size);
+	background: var(--button-base);
+	border: var(--input-border-width) solid var(--input-border-color);
+	border-radius: var(--input-border-radius);
+	box-shadow: var(--slider-knob-shadow);
+	transition: transform 0.08s ease, box-shadow 0.08s ease, border-color var(--hover-duration) ease;
+}
+.gradient-slider-knob:hover {
+	box-shadow: var(--slider-knob-shadow);
+}
+.gradient-slider-knob:active,
+.gradient-slider-knob.is-dragging,
+.gradient-slider-knob:focus-visible {
+	border-color: var(--btn-select-color);
+	box-shadow: var(--slider-knob-shadow);
+}
+
+/* ── No halo around thick, strongly rounded frames ──
+   Backgrounds paint under the border by default (border-box); at rounded
+   corners the anti-aliased border edge lets that colour shine through as a
+   thin outer ring. Clip backgrounds to the padding box instead.
+   !important because id rules like #backContrast-white use the
+   `background` shorthand, which resets background-clip. */
+button,
+.btn-select,
+input:not([type]),
+input[type="text"],
+input[type="number"],
+.gradient-slider-knob {
+	background-clip: padding-box !important;
+}
+/* Flat knobs: the dark-theme knob shadow contains a 1px light ring */
+.gradient-slider-knob,
+.gradient-slider-knob:hover,
+.gradient-slider-knob:active,
+.gradient-slider-knob.is-dragging,
+.gradient-slider-knob:focus-visible {
+	box-shadow: none;
+}
+:is(.range-setting, .colorrange) input[type="range"]::-webkit-slider-thumb {
+	background-clip: padding-box;
+	box-shadow: none;
+}
+:is(.range-setting, .colorrange) input[type="range"]::-moz-range-thumb {
+	background-clip: padding-box;
+	box-shadow: none;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Common interaction states for everything clickable / editable
+   rest  → --btn-border-color / --input-border-color
+   hover → --btn-hover-color   (fades in/out over --hover-duration)
+   active/focus/selected → --btn-select-color
+   ════════════════════════════════════════════════════════════════ */
+
+/* Framed controls */
+:is(button, .btn-select, input:not([type]), input[type="text"], input[type="number"], input[type="color"]):hover:not(:focus):not(.selected) {
+	border-color: var(--btn-hover-color);
+}
+input[type="color"]:focus {
+	border-color: var(--btn-select-color);
+	box-shadow: none;
+}
+
+/* Slider knobs: Steps / Overdrive / colour channels */
+:is(.range-setting, .colorrange) input[type="range"]:hover:not(:active)::-webkit-slider-thumb {
+	border-color: var(--btn-hover-color);
+}
+:is(.range-setting, .colorrange) input[type="range"]:hover:not(:active)::-moz-range-thumb {
+	border-color: var(--btn-hover-color);
+}
+.colorrange input[type="range"]::-webkit-slider-runnable-track {
+	height: 8px;
+}
+
+/* Gradient position knobs */
+.gradient-slider-knob:hover:not(.is-dragging) {
+	border-color: var(--btn-hover-color);
+}
+
+/* Gradient position bar: frame drawn with outline (bar is too thin for a border) */
+.gradient-slider-track {
+	outline: var(--input-border-width) solid transparent;
+	outline-offset: 0;
+	transition: outline-color var(--hover-duration) ease;
+}
+.gradient-slider-track:hover {
+	outline-color: var(--btn-hover-color);
+}
+
+/* Gradient swatches + CSS linear-gradient box: inner outline frame */
+.color-step,
+.linear-gradient {
+	outline: var(--btn-border-width) solid transparent;
+	outline-offset: calc(-1 * var(--btn-border-width));
+	transition: transform 0.1s ease, box-shadow 0.1s ease, outline-color var(--hover-duration) ease;
+}
+.color-step:hover,
+.linear-gradient:hover {
+	outline-color: var(--btn-hover-color);
+}
+.color-step.is-selected {
+	outline-color: var(--btn-select-color);
 }

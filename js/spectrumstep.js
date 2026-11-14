@@ -417,6 +417,7 @@ function calcform_cmx_init() {
 	gradientSlider = new GradientPosSlider('grd-slider', {
 		onMove: handleGradientSliderMove,
 		onSelect: handleGradientSliderSelect,
+		onRelease: () => handleGradientSliderSelect({ index: -1 }),   // highlight only while dragging
 		onCopy: (css, el) => copyColorStep(css, el)
 	});
 }
@@ -839,10 +840,6 @@ function calcform_cmx_markerClick(index) {
 }
 
 function calcform_cmx_stepClick(index, el) {
-	if (gradientSlider) {
-		gradientSlider.selectPoint(index);
-	}
-	handleGradientSliderSelect({ index });
 	const hexSpan = el.querySelector('.color-hex');
 	const hex = hexSpan ? hexSpan.textContent.trim() : el.style.backgroundColor;
 	copyColorStep(hex, el);
