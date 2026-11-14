@@ -1,5 +1,11 @@
 # SpectrumStep
 
+**SpectrumStep** is a multi-space gradient, color mixer, and palette generator with real-time WCAG 2.1 contrast evaluation. It allows you to create discrete color palettes and continuous CSS gradients across cylindrical (**HSL, HSV, Oklch**), additive (**sRGB**), and perceptual Cartesian (**Oklab**) color spaces.
+
+Key features include interactive multi-position swatch sliders, 2D color plane pickers for any channel component, overdrive extrapolation with automatic duplicate pruning, chroma-reduction gamut mapping for out-of-gamut Oklab/Oklch colors, real-time WCAG AA/AAA contrast auditing, and ready-to-use CSS Color 4 `linear-gradient` export.
+
+![Screenshot of SpectrumStep](Screenshot.png)
+
 ## Development
 
 Available scripts:
