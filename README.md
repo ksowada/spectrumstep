@@ -43,6 +43,11 @@ Available scripts:
   - contrast info and the gradient rating always be visible
   - contrast info can be disabled
 - copy function with visual feedback at gradient swatches & CSS linear gradient
+- gradient options popup (gear button): gap, border-radius, font size / weight / style / family, text decoration, horizontal and vertical text alignment and custom swatch text, all with live update; stored in share links (`so`, `sx`), presets and JSON
+- swatch popup (click a swatch): copy as HEX, HEX+alpha, RGB, RGBA, HSL, HSLA, HSV, HWB, OKLCH, OKLab, Lab, LCH or CSS variable `--spectrum-N`; export as HTML (inline CSS or `<style>`), CSS, SVG or PNG
+- gradient popup (click the continuous gradient): copy `linear-gradient(...)`, SVG, PNG
+- export button: PNG / SVG of exactly what is on screen (swatches or continuous gradient), HTML / CSS of all swatches (`.spectrumstep-container`, `.spectrumstep-swatch-N`; no contrast info)
+- dragged swatch positions are used by all exports and kept in share links (`sp`), presets and JSON
 - hue allows 2 gradients, longer and shorter way (HSL, HSV, Oklch)
 - use tooltips to clarify exactly what utility does
 - URL search params with color and gradientsetting to make share of colors easy

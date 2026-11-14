@@ -41,7 +41,8 @@
 	<script type="text/javascript" src="js/calcs.js"></script>
 	<script type="text/javascript" src="js/colorplane.js"></script>
 	<script type="text/javascript" src="js/gradientposslider.js"></script>
-	<script type="text/javascript" src="js/spectrumstep.js"></script>
+	<script type="text/javascript" src="js/swatchexport.js"></script>
+		<script type="text/javascript" src="js/spectrumstep.js"></script>
 	<!-- Matomo --><script>
 		(function () {
 		function initTracking() {
@@ -125,6 +126,7 @@
 						<div id="gradientDirection"></div>
 						<div id="gradientWay"></div>
 						<div id="contrastVisibility"></div>
+						<button id="main-options-btn" class="icon-only" type="button" aria-label="Gradient options" data-tooltip="Open gradient options (gap, corner radius, swatch text and font, alignment)"><img src="assets/icons/gear-solid-full.svg" alt="" class="icon" /></button>
 						<button id="main-load-btn" class="icon-only" type="button" aria-label="Load palette" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="" class="icon" /></button>
 						<button id="main-export-btn" class="icon-only" type="button" aria-label="Export palette" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" /></button>
 					</fieldset>
@@ -180,6 +182,112 @@
 		</div>
 	</div>
 
+	<!-- Gradient Options Modal -->
+	<div id="options-modal" class="cmx-modal-backdrop cmx-modal-live" role="dialog" aria-modal="true" aria-labelledby="options-modal-title">
+		<div class="cmx-modal-dialog options-dialog">
+			<button type="button" class="popup-close-btn" id="options-modal-close" data-tooltip="Close gradient options (Esc)" aria-label="Close gradient options"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="options-modal-title" class="modal-title">Gradient Options</h3>
+			<fieldset class="modal-section"><legend>Container</legend>
+				<div class="opt-grid">
+					<label for="opt-gap">gap</label>
+					<div class="opt-ctl range-setting"><input type="range" id="opt-gap" min="0" max="24" step="1" value="4"><output for="opt-gap" id="opt-gap-value">4px</output></div>
+				</div>
+			</fieldset>
+			<fieldset class="modal-section"><legend>Swatches</legend>
+				<div class="opt-grid">
+					<label for="opt-radius">border-radius</label>
+					<div class="opt-ctl range-setting"><input type="range" id="opt-radius" min="0" max="96" step="1" value="8"><output for="opt-radius" id="opt-radius-value">8px</output></div>
+					<label for="opt-fontSize">font-size</label>
+					<div class="opt-ctl range-setting"><input type="range" id="opt-fontSize" min="6" max="48" step="1" value="16"><output for="opt-fontSize" id="opt-fontSize-value">16px</output></div>
+					<label>font-weight</label>
+					<div class="opt-ctl" id="opt-fontWeight"></div>
+					<label>font-style</label>
+					<div class="opt-ctl" id="opt-fontStyle"></div>
+					<label>font-family</label>
+					<div class="opt-ctl" id="opt-fontFamily"></div>
+					<label>text-decoration</label>
+					<div class="opt-ctl" id="opt-textDecoration"></div>
+					<label>horizontal align</label>
+					<div class="opt-ctl" id="opt-hAlign"></div>
+					<label>vertical align</label>
+					<div class="opt-ctl" id="opt-vAlign"></div>
+					<label for="opt-text">text</label>
+					<div class="opt-ctl"><input type="text" id="opt-text" placeholder="(HEX value of the swatch)" autocomplete="off" spellcheck="false" /></div>
+				</div>
+			</fieldset>
+			<div class="background-modal-actions"><button type="button" id="opt-reset" class="btn-modal-action" data-tooltip="Reset all gradient options to their defaults">Defaults</button></div>
+		</div>
+	</div>
+
+	<!-- Swatch Export Modal -->
+	<div id="swatch-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="swatch-modal-title">
+		<div class="cmx-modal-dialog swatch-dialog">
+			<button type="button" class="popup-close-btn" id="swatch-modal-close" data-tooltip="Close swatch export (Esc)" aria-label="Close swatch export"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="swatch-modal-title" class="modal-title swx-title"><span class="swx-chip" id="swx-chip"></span>Swatch <span id="swx-hex"></span> <small id="swx-size" class="text-muted"></small></h3>
+			<fieldset class="modal-section"><legend>Copy color</legend>
+				<div class="swx-alpha range-setting"><label for="swx-alpha">Transparency</label><input type="range" id="swx-alpha" min="0" max="100" step="1" value="0" data-tooltip="Transparency used by the formats with alpha channel (0% = opaque)"><output for="swx-alpha" id="swx-alpha-value">0%</output></div>
+				<div class="swx-formats">
+					<button type="button" class="swx-fmt" data-fmt="hex"><span class="fmt-name">HEX</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="hexa"><span class="fmt-name">HEX + alpha</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="rgb"><span class="fmt-name">RGB</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="rgbf"><span class="fmt-name">RGB functional</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="rgba"><span class="fmt-name">RGBA</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="hsl"><span class="fmt-name">HSL</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="hsla"><span class="fmt-name">HSLA</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="hsv"><span class="fmt-name">HSV / HSB</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="hwb"><span class="fmt-name">HWB</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="oklch"><span class="fmt-name">OKLCH</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="oklab"><span class="fmt-name">OKLab</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="lab"><span class="fmt-name">Lab</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="lch"><span class="fmt-name">LCH</span><span class="fmt-val"></span></button>
+					<button type="button" class="swx-fmt" data-fmt="cssvar"><span class="fmt-name">CSS variable</span><span class="fmt-val"></span></button>
+				</div>
+			</fieldset>
+			<fieldset class="modal-section"><legend>Export swatch</legend>
+				<div class="swx-exports">
+					<span class="swx-export-name">HTML + inline CSS</span>
+					<button type="button" class="btn-modal-action" data-export="html-inline" data-action="copy" data-tooltip="Copy: Outer div with the exact swatch size and an inner swatch div, styles inline">Copy</button>
+					<button type="button" class="btn-modal-action" data-export="html-inline" data-action="download" data-tooltip="Download: Outer div with the exact swatch size and an inner swatch div, styles inline"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">HTML + &lt;style&gt;</span>
+					<button type="button" class="btn-modal-action" data-export="html-style" data-action="copy" data-tooltip="Copy: Outer div with the exact swatch size and an inner swatch div, styles in a style element">Copy</button>
+					<button type="button" class="btn-modal-action" data-export="html-style" data-action="download" data-tooltip="Download: Outer div with the exact swatch size and an inner swatch div, styles in a style element"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">CSS only</span>
+					<button type="button" class="btn-modal-action" data-export="css" data-action="copy" data-tooltip="Copy: CSS of container and swatch including the gradient options">Copy</button>
+					<button type="button" class="btn-modal-action" data-export="css" data-action="download" data-tooltip="Download: CSS of container and swatch including the gradient options"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">SVG image</span>
+					<button type="button" class="btn-modal-action" data-export="svg" data-action="copy" data-tooltip="Copy: SVG of this swatch as drawn on screen (with contrast info when shown)">Copy</button>
+					<button type="button" class="btn-modal-action" data-export="svg" data-action="download" data-tooltip="Download: SVG of this swatch as drawn on screen (with contrast info when shown)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">PNG image</span>
+					<span></span>
+					<button type="button" class="btn-modal-action" data-export="png" data-action="download" data-tooltip="Download: PNG of this swatch as drawn on screen (with contrast info when shown)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+
+	<!-- Linear Gradient Export Modal -->
+	<div id="gradient-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="gradient-modal-title">
+		<div class="cmx-modal-dialog swatch-dialog">
+			<button type="button" class="popup-close-btn" id="gradient-modal-close" data-tooltip="Close gradient export (Esc)" aria-label="Close gradient export"><img src="assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="gradient-modal-title" class="modal-title">Linear gradient</h3>
+			<div class="gx-preview" id="gx-chip"></div>
+			<code class="gx-css" id="gx-css"></code>
+			<fieldset class="modal-section"><legend>Export gradient</legend>
+				<div class="swx-exports">
+					<span class="swx-export-name">CSS linear-gradient</span>
+					<button type="button" class="btn-modal-action" data-gexport="css" data-action="copy" data-tooltip="Copy: the CSS linear-gradient definition">Copy</button>
+					
+					<span class="swx-export-name">SVG image</span>
+					<button type="button" class="btn-modal-action" data-gexport="svg" data-action="copy" data-tooltip="Copy: SVG of the gradient as drawn on screen">Copy</button>
+					<button type="button" class="btn-modal-action" data-gexport="svg" data-action="download" data-tooltip="Download: SVG of the gradient as drawn on screen"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">PNG image</span>
+					<span></span>
+					<button type="button" class="btn-modal-action" data-gexport="png" data-action="download" data-tooltip="Download: PNG of the gradient as drawn on screen"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+
 	<!-- Export Modal Dialog -->
 	<div id="export-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
 		<div class="cmx-modal-dialog">
@@ -211,7 +319,24 @@
 				</div>
 			</fieldset>
 
-			<!-- Section: Export to file -->
+			<!-- Section: Export HTML -->
+				<fieldset class="modal-section">
+					<legend>Export HTML</legend>
+					<p class="modal-option-desc">All swatches (or the linear-gradient) with your gradient options; no contrast info.</p>
+					<div class="swx-exports">
+					<span class="swx-export-name">HTML + inline CSS</span>
+					<button type="button" class="btn-modal-action" data-pexport="html-inline" data-action="copy" data-tooltip="Copy: Container with all swatches, styles inline">Copy</button>
+					<button type="button" class="btn-modal-action" data-pexport="html-inline" data-action="download" data-tooltip="Download: Container with all swatches, styles inline"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">HTML + &lt;style&gt;</span>
+					<button type="button" class="btn-modal-action" data-pexport="html-style" data-action="copy" data-tooltip="Copy: Container with all swatches (classes spectrumstep-swatch-1 …), styles in a style element">Copy</button>
+					<button type="button" class="btn-modal-action" data-pexport="html-style" data-action="download" data-tooltip="Download: Container with all swatches (classes spectrumstep-swatch-1 …), styles in a style element"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					<span class="swx-export-name">CSS only</span>
+					<button type="button" class="btn-modal-action" data-pexport="css" data-action="copy" data-tooltip="Copy: CSS of container and swatches">Copy</button>
+					<button type="button" class="btn-modal-action" data-pexport="css" data-action="download" data-tooltip="Download: CSS of container and swatches"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" />File</button>
+					</div>
+				</fieldset>
+
+				<!-- Section: Export to file -->
 			<fieldset class="modal-section">
 				<legend>Export to File</legend>
 				<div class="modal-filename-group">

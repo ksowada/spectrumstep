@@ -65,6 +65,15 @@ var _backColor = undefined;
 let gradientSlider = undefined;
 let currentRelRange = { relStart: 0, relEnd: 1 };
 var currentSwatches = [];
+/** knob positions (0..1, displayed order) dragged by the user; null = default even spacing.
+ *  Valid only for the gradient they were made on (customSig), any other gradient change drops them */
+var customPos = null;
+var customSig = null;
+var pendingSwatchPos = null;   // positions from a loaded state, adopted by the next calcform_cmx_dyna()
+var lastGradSig = null;
+/** what the continuous gradient shows: css text, axis and the interpolation range of its ends */
+var currentGradient = null;
+var stateSyncTimer = null;
 /** Value formats ("color-component-input-mode") per color space.
  *  The engine keeps every color in hsl[ix] in its internal scale (HSL/HSV 0..1,
  *  RGB 0..255, Oklab/Oklch l 0..1, a/b/c raw, h 0..1); a value format only defines
@@ -319,7 +328,8 @@ function calcform_cmx_init() {
 
 	storage.loadInit({ inputId:'load-input', btnId:'load-btn',callback: calcform_cmx_onLoad });
 	storage.saveInit({ inputId:'save-input', btnId:'save-btn',callback: calcform_cmx_onSave });
-	initExportAndLoadModals();
+		initExportAndLoadModals();
+	initSwatchModals();
 
 	inp_cmx_ids.forEach((id,ix) => {
 		inp_cmx_arr[ix] = new InputHtml({ obj: `inp_cmx_arr[${ix}]`, params: params_cmx, el: id, callbackName: 'calcform_cmx_doml', callbackArgs:ix,callAtInit: false, storageEn: true });
@@ -439,7 +449,7 @@ function calcform_cmx_init() {
 	gradientSlider = new GradientPosSlider('grd-slider', {
 		onMove: handleGradientSliderMove,
 		onSelect: handleGradientSliderSelect,
-		onRelease: () => handleGradientSliderSelect({ index: -1 }),   // highlight only while dragging
+		onRelease: () => { handleGradientSliderSelect({ index: -1 }); calcform_cmx_syncState(); },   // highlight only while dragging
 		onCopy: (css, el) => copyColorStep(css, el)
 	});
 }
@@ -726,18 +736,38 @@ function calcform_cmx_dyna(textColor, backColor) {
 	}
 	const finalC1Idx = isReversed ? (colArr.length - 1 - c1Idx) : c1Idx;
 	const finalC2Idx = isReversed ? (colArr.length - 1 - c2Idx) : c2Idx;
-	currentSwatches = colArr.slice();
-
+	
 	// Store rel range for interactive dragging across the gradient bar
 	if (details.length > 0) {
 		currentRelRange.relStart = details[0].rel;
 		currentRelRange.relEnd = details[details.length - 1].rel;
 	} else {
 		currentRelRange.relStart = 0;
-		currentRelRange.relEnd = 1;
+				currentRelRange.relEnd = 1;
 	}
 
-	const isVertical = (gradientDirection === 'down' || gradientDirection === 'up');
+	// knob positions dragged by the user: valid only while the gradient itself is unchanged
+	const gradSig = JSON.stringify([hsl[0], hsl[1], colMode, gradientMode, rowCnt, cha, gradientWay, gradientDirection]);
+	if (pendingSwatchPos) {
+		customPos = pendingSwatchPos;
+		customSig = gradSig;
+		pendingSwatchPos = null;
+	} else if (customSig !== gradSig) {
+		customPos = null;
+	}
+	if (customPos && customPos.length !== colArr.length) customPos = null;
+	lastGradSig = gradSig;
+	const defPos = idx => colArr.length > 1 ? idx / (colArr.length - 1) : 0;
+	const posAt = idx => (customPos && Math.abs(customPos[idx] - defPos(idx)) > 0.0006) ? customPos[idx] : defPos(idx);
+	for (let idx = 0; idx < colArr.length; idx++) {
+		if (posAt(idx) === defPos(idx)) continue;
+		const rel = currentRelRange.relStart + posAt(idx) * (currentRelRange.relEnd - currentRelRange.relStart);
+		colArr[idx] = getColorAtRel(rel, gradientMode, hsl[0], colMode[0], hsl[1], colMode[1], gradientWay, rgbh[0], rgbh[1]);
+		details[idx] = Object.assign({}, details[idx] || {}, { rel });
+	}
+	currentSwatches = colArr.slice();
+
+
 	let swatchesHtml = '';
 	for (var rowIx = 0; rowIx < colArr.length; rowIx++) {
 		let infoBlock = '';
@@ -746,12 +776,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 			const backRgb = _textColor ? hexToRgb(colArr[rowIx]) : hexToRgb(_backColor);
 			const contrastInfo = getContrastInfo(textRgb, backRgb);
 			const badgeHtml = '<span class="wcag-badge ' + contrastInfo.badgeClass + '" data-tooltip="' + contrastInfo.badgeTitle + ' (Contrast ratio ' + contrastInfo.ratioText + ')">' + contrastInfo.badge + '</span>';
-			if (isVertical) {
-				infoBlock = '<span class="contrast-ratio" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '</span>' + badgeHtml;
-			} else {
-				const infoHtml = '<span class="contrast-info" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '<br/>' + badgeHtml + '</span>';
-				infoBlock = '<br/>' + infoHtml;
-			}
+			infoBlock = '<span class="contrast-ratio" style="color:' + contrastInfo.infoColor + '">' + contrastInfo.ratioText + '</span>' + badgeHtml;
 		}
 
 		let stepClasses = 'color-step';
@@ -761,14 +786,12 @@ function calcform_cmx_dyna(textColor, backColor) {
 			stepClasses += ' is-c2';
 		}
 
-		const contentInner = isVertical
-			? '<div class="color-step-content' + (showContrast ? ' has-contrast' : '') + '"><span class="color-hex"' + hexHiddenAttr + '>' + colArr[rowIx] + '</span>' + infoBlock + '</div>'
-			: '<span><span class="color-hex"' + hexHiddenAttr + '>' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
+		const contentInner = '<span class="color-hex"' + hexHiddenAttr + '>' + escapeHtml(swatchText(colArr[rowIx])) + '</span>' + infoBlock;
 		const stepStyle = _backColor === undefined
 			? 'background-color:' + colArr[rowIx] + ';color:' + _textColor
 			: 'background-color:' + _backColor + ';color:' + colArr[rowIx];
 
-		swatchesHtml += '<div class="' + stepClasses + '" data-index="' + rowIx + '" onclick="calcform_cmx_stepClick(' + rowIx + ', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="' + stepStyle + '">' + contentInner + '</div>';
+		swatchesHtml += '<div class="' + stepClasses + '" data-index="' + rowIx + '" data-hex="' + colArr[rowIx] + '" onclick="calcform_cmx_stepClick(' + rowIx + ', this)" data-tooltip="Click for copy and export options of ' + colArr[rowIx] + '" style="' + stepStyle + '">' + contentInner + '</div>';
 	}
 
 	// Color 1 / Color 2 are marked on their gradient slider knobs (works with overdrive too)
@@ -785,7 +808,13 @@ function calcform_cmx_dyna(textColor, backColor) {
 	} else if (gradientMode !== 'RGB') {
 		gradientSpace = ` in hsl ${gradientWay} hue`;
 	}
-	let gradientText = `linear-gradient(${rotation}${gradientSpace},${colArr[0]},${colArr[colArr.length - 1]})`;
+		let gradientText = `linear-gradient(${rotation}${gradientSpace},${colArr[0]},${colArr[colArr.length - 1]})`;
+	currentGradient = {
+		css: gradientText,
+		vertical: gradientDirection === 'down' || gradientDirection === 'up',
+		relA: details.length ? details[0].rel : currentRelRange.relStart,
+		relB: details.length ? details[details.length - 1].rel : currentRelRange.relEnd
+	};
 
 	// restore preview of CSS linear-gradient on grd-cmx as before
 	const div_grd = document.getElementById('grd-cmx');
@@ -795,8 +824,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 		div_grd.style.color = _textColor;
 		// Copy only while the gradient box is the visible view (∞)
 		if (isInfinite) {
-			div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
-			div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+			div_grd.dataset.tooltip = "Click for copy and export options of this CSS linear-gradient";
+			div_grd.onclick = () => openGradientExport(gradientText, div_grd);
 		} else {
 			delete div_grd.dataset.tooltip;
 			div_grd.onclick = null;
@@ -806,8 +835,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 	// update GradientPosSlider unit
 	if (gradientSlider) {
 		const points = colArr.map((col, idx) => {
-			const pos = colArr.length > 1 ? idx / (colArr.length - 1) : 0;
-			const rel = details[idx] ? details[idx].rel : pos;
+					const pos = posAt(idx);
+				const rel = details[idx] ? details[idx].rel : pos;
 			return {
 				index: idx,
 				pos: pos,
@@ -840,7 +869,14 @@ function handleGradientSliderMove({ index, pos, point, points }) {
 	const rel = currentRelRange.relStart + pos * (currentRelRange.relEnd - currentRelRange.relStart);
 	point.rel = rel;
 	const newColor = getColorAtRel(rel, gradientMode, hsl[0], colMode[0], hsl[1], colMode[1], gradientWay, rgbh[0], rgbh[1]);
-	point.color = newColor;
+			point.color = newColor;
+	currentSwatches[index] = newColor;
+	customPos = points.map(p => p.pos);
+	customSig = lastGradSig;
+	if (customPos.every((p, i) => Math.abs(p - (points.length > 1 ? i / (points.length - 1) : 0)) < 0.0006)) customPos = null;
+	clearTimeout(stateSyncTimer);
+	stateSyncTimer = setTimeout(calcform_cmx_syncState, 200);
+
 
 	// Update corresponding swatch in DOM
 	const swatches = document.querySelectorAll('#tab-cmx .color-step');
@@ -854,8 +890,9 @@ function handleGradientSliderMove({ index, pos, point, points }) {
 			swatchEl.style.color = newColor;
 		}
 		const hexSpan = swatchEl.querySelector('.color-hex');
-		if (hexSpan) hexSpan.textContent = newColor;
-		swatchEl.dataset.tooltip = `Click to copy HEX color ${newColor} to clipboard`;
+		if (hexSpan) hexSpan.textContent = swatchText(newColor);
+			swatchEl.dataset.hex = newColor;
+			swatchEl.dataset.tooltip = `Click for copy and export options of ${newColor}`;
 
 		if (showContrast) {
 			const textRgb = _textColor ? hexToRgb(_textColor) : hexToRgb(newColor);
@@ -925,9 +962,7 @@ function handleGradientSliderSelect({ index }) {
 }
 
 function calcform_cmx_stepClick(index, el) {
-	const hexSpan = el.querySelector('.color-hex');
-	const hex = hexSpan ? hexSpan.textContent.trim() : el.style.backgroundColor;
-	copyColorStep(hex, el);
+	openSwatchExport(el.dataset.hex, el);
 }
 
 let toastTimeout = null;
@@ -997,7 +1032,9 @@ function calcform_cmx_getState() {
 		backgroundMode, customBackground, customBackgroundSource,
 		gradientDirection: gradientDirectionSwitch.value,
 		gradientWay: gradientWaySwitch.value,
-		contrastVisibility: contrastVisibilitySwitch.value
+		contrastVisibility: contrastVisibilitySwitch.value,
+		swatchOpts: Object.assign({}, swatchOpts),
+		swatchPos: customPos ? customPos.map(p => Math.round(p * 1000) / 1000) : null
 	};
 }
 function calcform_cmx_applyState(data) {
@@ -1072,6 +1109,7 @@ function calcform_cmx_applyState(data) {
 	if (data.gradientDirection) gradientDirectionSwitch.setValue(data.gradientDirection, true);
 	if (data.gradientWay) gradientWaySwitch.setValue(data.gradientWay, true);
 	if (data.contrastVisibility) contrastVisibilitySwitch.setValue(data.contrastVisibility, true);
+	if (data.swatchOpts) swatchOptsSet(data.swatchOpts);
 	if (data.backgroundMode) backgroundMode = data.backgroundMode;
 	else if (data.theme) backgroundMode = data.theme === 'dark' ? 'black' : 'white';
 	if (data.customBackground) customBackground = data.customBackground;
@@ -1081,6 +1119,9 @@ function calcform_cmx_applyState(data) {
 	else applyBackground('#ffffff');
 	renderBackgroundChoice();
 	if (data.theme && !data.backgroundMode) themeCare(data.theme);
+	customPos = null;
+	customSig = null;
+	pendingSwatchPos = (Array.isArray(data.swatchPos) && data.swatchPos.length > 1 && data.swatchPos.every(n => typeof n === 'number' && n >= 0 && n <= 1)) ? data.swatchPos.slice() : null;
 	calcform_cmx_dyna();
 }
 function calcform_cmx_updateUrl(data) {
@@ -1117,13 +1158,16 @@ function calcform_cmx_updateUrl(data) {
 	params.set('bgm', data.backgroundMode || 'white');
 	if (data.backgroundMode === 'custom' && data.customBackground) params.set('bgc', data.customBackground);
 	params.set('bgs', data.customBackgroundSource || 'picker');
+		swatchOptsToParams(params, data.swatchOpts);
+	const sp = swatchPosEncode(data.swatchPos);
+	if (sp) params.set('sp', sp);
 	const newUrl = window.location.pathname + '?' + params.toString() + window.location.hash;
 	window.history.replaceState(null, '', newUrl);
 }
 function calcform_cmx_getUrlState() {
 	if (!window.location.search || window.location.search.length <= 1) return null;
 	const params = new URLSearchParams(window.location.search);
-	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'im', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th', 'bgm', 'bgc', 'bgs'];
+	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'im', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th', 'bgm', 'bgc', 'bgs', 'so', 'sx', 'sp'];
 	if (!knownKeys.some(k => params.has(k))) return null;
 
 	const state = calcform_cmx_getState();
@@ -1218,6 +1262,10 @@ function calcform_cmx_getUrlState() {
 	if (['white','black','custom'].includes(params.get('bgm'))) state.backgroundMode = params.get('bgm');
 	if (params.has('bgc') && /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(params.get('bgc'))) state.customBackground = rgbCorrect(params.get('bgc')).toLowerCase();
 	if (['picker','color1','color2'].includes(params.get('bgs'))) state.customBackgroundSource = params.get('bgs');
+
+	// gradient options: absent in the link means defaults
+		state.swatchOpts = swatchOptsFromParams(params);
+	state.swatchPos = swatchPosDecode(params.get('sp'));
 
 	return state;
 }
@@ -1332,134 +1380,21 @@ function generateExportJson() {
 			theme: state.theme,
 			backgroundMode: state.backgroundMode,
 			customBackground: state.customBackground,
-			customBackgroundSource: state.customBackgroundSource
-		}
+			customBackgroundSource: state.customBackgroundSource,
+				swatchOpts: state.swatchOpts,
+				swatchPos: state.swatchPos
+
+			}
 	};
 	return JSON.stringify(exportObj, null, 2);
 }
 
 function exportPaletteToPng(filename) {
-	const paletteEl = document.querySelector('#tab-cmx [class*="color-palette-"]') || document.getElementById('tab-cmx');
-	if (!paletteEl) return;
-	const pRect = paletteEl.getBoundingClientRect();
-	const width = Math.round(pRect.width);
-	const height = Math.round(pRect.height);
-	if (width <= 0 || height <= 0) return;
-
-	const canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
-	const ctx = canvas.getContext('2d');
-
-	const defaultBg = document.documentElement.dataset.theme === 'light' ? '#ffffff' : '#000000';
-	ctx.fillStyle = (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') ? bg : (window.getComputedStyle(document.body).backgroundColor || defaultBg);
-	ctx.fillRect(0, 0, width, height);
-
-	const steps = paletteEl.querySelectorAll('.color-step');
-	steps.forEach(step => {
-		const sRect = step.getBoundingClientRect();
-		const sx = Math.round(sRect.left - pRect.left);
-		const sy = Math.round(sRect.top - pRect.top);
-		const sw = Math.round(sRect.width);
-		const sh = Math.round(sRect.height);
-		const stepStyle = window.getComputedStyle(step);
-
-		ctx.fillStyle = stepStyle.backgroundColor;
-		ctx.fillRect(sx, sy, sw, sh);
-
-		const hexEl = step.querySelector('.color-hex');
-		if (hexEl && !hexEl.hidden) {
-			const hRect = hexEl.getBoundingClientRect();
-			const hStyle = window.getComputedStyle(hexEl);
-			ctx.font = `${hStyle.fontWeight} ${hStyle.fontSize} ${hStyle.fontFamily}`;
-			ctx.fillStyle = hStyle.color;
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(hexEl.textContent.trim(), Math.round(hRect.left - pRect.left + hRect.width / 2), Math.round(hRect.top - pRect.top + hRect.height / 2));
-		}
-
-		const contrastEl = step.querySelector('.contrast-info, .contrast-ratio');
-		if (contrastEl) {
-			const cStyle = window.getComputedStyle(contrastEl);
-			const ratioText = contrastEl.childNodes[0]?.textContent?.trim() || contrastEl.textContent.trim();
-			if (ratioText) {
-				const cRect = contrastEl.getBoundingClientRect();
-				ctx.font = `${cStyle.fontWeight} ${cStyle.fontSize} ${cStyle.fontFamily}`;
-				ctx.fillStyle = cStyle.color;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(ratioText, Math.round(cRect.left - pRect.left + cRect.width / 2), Math.round(cRect.top - pRect.top + cRect.height / 2));
-			}
-		}
-
-		const badgeEl = step.querySelector('.wcag-badge');
-		if (badgeEl) {
-			const bRect = badgeEl.getBoundingClientRect();
-			const bStyle = window.getComputedStyle(badgeEl);
-			const bx = Math.round(bRect.left - pRect.left);
-			const by = Math.round(bRect.top - pRect.top);
-			const bw = Math.round(bRect.width);
-			const bh = Math.round(bRect.height);
-
-			ctx.fillStyle = bStyle.backgroundColor;
-			const rad = parseFloat(bStyle.borderRadius) || 3;
-			ctx.beginPath();
-			if (ctx.roundRect) {
-				ctx.roundRect(bx, by, bw, bh, rad);
-			} else {
-				ctx.rect(bx, by, bw, bh);
-			}
-			ctx.fill();
-
-			ctx.strokeStyle = bStyle.borderColor;
-			ctx.lineWidth = parseFloat(bStyle.borderWidth) || 1;
-			ctx.stroke();
-
-			ctx.font = `${bStyle.fontWeight} ${bStyle.fontSize} ${bStyle.fontFamily}`;
-			ctx.fillStyle = bStyle.color;
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText(badgeEl.textContent.trim(), bx + bw / 2, by + bh / 2);
-		}
-	});
-
-	canvas.toBlob(blob => {
-		if (blob) {
-			triggerDownload(blob, filename);
-			showToast(`✓ Downloaded PNG palette: ${filename}`);
-			closeExportModal();
-		}
-	}, 'image/png');
+	exportScreenImage('png', filename.replace(/\.png$/i, ''));
 }
 
 function exportPaletteToSvg(filename) {
-	const paletteEl = document.querySelector('#tab-cmx [class*="color-palette-"]') || document.getElementById('tab-cmx');
-	if (!paletteEl) return;
-	const pRect = paletteEl.getBoundingClientRect();
-	const width = Math.round(pRect.width);
-	const height = Math.round(pRect.height);
-	const steps = paletteEl.querySelectorAll('.color-step');
-
-	let rectsSvg = '';
-	steps.forEach(step => {
-		const sRect = step.getBoundingClientRect();
-		const sx = Math.round(sRect.left - pRect.left);
-		const sy = Math.round(sRect.top - pRect.top);
-		const sw = Math.round(sRect.width);
-		const sh = Math.round(sRect.height);
-		const bg = window.getComputedStyle(step).backgroundColor;
-		rectsSvg += `  <rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" fill="${bg}" />\n`;
-	});
-
-	const svgDoc = `<?xml version="1.0" encoding="UTF-8"?>\n` +
-		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n` +
-		rectsSvg +
-		`</svg>\n`;
-
-	const blob = new Blob([svgDoc], { type: 'image/svg+xml;charset=utf-8' });
-	triggerDownload(blob, filename);
-	showToast(`✓ Downloaded SVG palette: ${filename}`);
-	closeExportModal();
+	exportScreenImage('svg', filename.replace(/\.svg$/i, ''));
 }
 
 function exportPaletteToJson(filename) {
