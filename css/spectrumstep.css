@@ -814,8 +814,8 @@ table.inputs {
 .gradient-slider-knobs-layer {
 	position: absolute;
 	top: 12px;
-	left: 10px;
-	right: 10px;
+	left: var(--grd-inset-l, 10px);
+	right: var(--grd-inset-r, 10px);
 	height: 10px;
 	pointer-events: none;
 }
@@ -879,116 +879,6 @@ table.inputs {
 .gradient-slider-knob:focus-visible .gradient-knob-tooltip {
 	opacity: 1;
 	visibility: visible;
-}
-/* Corner color markers line under the gradient swatches */
-.palette-corner-markers {
-	display: grid;
-	gap: 4px;
-	margin-top: 4px;
-	margin-bottom: 8px;
-	user-select: none;
-}
-.palette-corner-markers-right,
-.palette-corner-markers-left {
-	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-	margin-top: 0;
-	margin-bottom: 4px;
-}
-.palette-corner-markers-right .corner-marker-cell,
-.palette-corner-markers-left .corner-marker-cell {
-	justify-content: flex-end;
-	padding-top: 0;
-	padding-bottom: 3px;
-}
-.palette-corner-markers-right .corner-marker-cell.in-range,
-.palette-corner-markers-left .corner-marker-cell.in-range {
-	border-top: none;
-	border-bottom: 1px solid var(--border);
-}
-.palette-corner-markers-right .corner-marker-pointer,
-.palette-corner-markers-left .corner-marker-pointer {
-	margin-bottom: 0;
-	margin-top: 2px;
-}
-.corner-marker-cell {
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	padding-top: 3px;
-	font-family: var(--font-monospace);
-	font-size: 0.68rem;
-	font-weight: 600;
-	letter-spacing: 0.03em;
-	text-transform: uppercase;
-	color: var(--text-muted);
-	position: relative;
-	min-height: 22px;
-	box-sizing: border-box;
-}
-.corner-marker-cell.in-range {
-	border-top: 1px solid var(--border);
-}
-.corner-marker-cell.is-c1,
-.corner-marker-cell.is-c2 {
-	cursor: pointer;
-	color: var(--text-muted);
-	transition: color 0.15s ease, transform 0.1s ease;
-}
-.corner-marker-cell.is-c1:hover,
-.corner-marker-cell.is-c2:hover,
-.corner-marker-cell.is-selected {
-	color: var(--text-bright);
-}
-.corner-marker-pointer {
-	font-size: 0.5rem;
-	line-height: 1;
-	margin-bottom: 2px;
-	opacity: 0.75;
-}
-.corner-marker-text {
-	white-space: nowrap;
-	line-height: 1.1;
-	text-align: center;
-}
-.palette-vertical-layout {
-	display: flex;
-	flex-direction: row;
-	gap: 8px;
-	align-items: stretch;
-}
-.palette-vertical-layout > [class^="color-palette-"] {
-	flex: 1;
-}
-.palette-corner-markers-down,
-.palette-corner-markers-up {
-	display: grid;
-	grid-template-rows: repeat(auto-fit, 1fr);
-	gap: 4px;
-	width: 90px;
-	margin-top: 0;
-	margin-bottom: 0;
-}
-.palette-corner-markers-down .corner-marker-cell,
-.palette-corner-markers-up .corner-marker-cell {
-	min-height: 34px;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
-	padding-top: 0;
-	padding-left: 6px;
-	border-top: none;
-}
-.palette-corner-markers-down .corner-marker-cell.in-range,
-.palette-corner-markers-up .corner-marker-cell.in-range {
-	border-top: none;
-	border-left: 1px solid var(--border);
-}
-.palette-corner-markers-down .corner-marker-pointer,
-.palette-corner-markers-up .corner-marker-pointer {
-	margin-bottom: 0;
-	margin-right: 4px;
 }
 /* swatch belonging to the knob currently being dragged */
 .color-step.is-selected {
@@ -1646,9 +1536,11 @@ input:not([type="range"]), select {
 /* Pair the editable continuous gradient and its discrete palette. */
 #grd-slider {
 	margin: 2px 0 4px;
-	padding: 0 4px;
+	padding: 0;
 }
-.gradient-slider-track-wrap { padding: 10px 10px 24px; }
+/* Horizontal extent set by alignGradientSlider(): first → last swatch centre */
+.gradient-slider-track-wrap { padding: 10px var(--grd-inset-r, 10px) 24px var(--grd-inset-l, 10px); }
+.gradient-slider-knobs-layer { top: 10px; height: 8px; }
 .gradient-slider-track {
 	height: 8px;
 	border: 0;
@@ -1662,6 +1554,9 @@ input:not([type="range"]), select {
 	box-shadow: 0 1px 4px rgba(20, 30, 40, 0.3), 0 0 0 1px rgba(20, 30, 40, 0.18);
 }
 #tab-cmx { margin-top: 0; }
+#tab-cmx[hidden], #grd-cmx[hidden] { display: none; }
+/* Steps = ∞: continuous gradient, no pos-point knobs */
+#grd-slider.steps-infinite .gradient-slider-knobs-layer { display: none; }
 #gradientMode > button { margin: 0; }
 .color-palette-right, .color-palette-left { gap: 6px; }
 .color-step {
@@ -1865,6 +1760,13 @@ input[type="number"],
 /* Gradient position knobs */
 .gradient-slider-knob:hover:not(.is-dragging) {
 	border-color: var(--btn-hover-color);
+}
+/* Color 1 / Color 2 knobs: same frame colour as .selected in ButtonSwitch / ButtonSelect */
+.gradient-slider-knob.is-c1,
+.gradient-slider-knob.is-c2,
+.gradient-slider-knob.is-c1:hover,
+.gradient-slider-knob.is-c2:hover {
+	border-color: var(--btn-select-color);
 }
 
 /* Gradient position bar: frame drawn with outline (bar is too thin for a border) */

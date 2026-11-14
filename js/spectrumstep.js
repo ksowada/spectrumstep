@@ -113,6 +113,9 @@ const defaultBackgroundColor = '#9c2bee';
 var hslPreArr = [[200, 60, 70],[140, 90, 70]];
 var hsl = [[],[]];
 let steps = undefined;
+/** Last tick of the Steps slider: displayed as ∞ and switches to the continuous CSS gradient view */
+const STEPS_INFINITE = 17;
+const STEPS_MAX_DISCRETE = 16;
 let overdrive = undefined;
 var _textColor = undefined;
 var _backColor = undefined;
@@ -324,7 +327,7 @@ function calcform_cmx_init() {
 	if (typeof initColorPlaneButtons === 'function') {
 		initColorPlaneButtons();
 	}
-	steps = new RangeSetting('steps',calcform_cmx_dyna, 'Discrete interpolation steps (2–16): number of equidistant color stops generated between Color 1 and Color 2');
+	steps = new RangeSetting('steps',calcform_cmx_dyna, 'Discrete interpolation steps (2–16): number of equidistant color stops generated between Color 1 and Color 2. Last tick (∞) switches to the continuous CSS linear-gradient', (v) => v >= STEPS_INFINITE ? '∞' : v);
 	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna, 'Overdrive extrapolation (0–16): linearly extrapolate additional color stops beyond Color 1 and Color 2 on both ends');
 	gradientSwitch = new ButtonSwitch(
 		document.getElementById('gradient-select'),
@@ -585,8 +588,16 @@ function calcform_cmx_hsl(ix,init) {
 }
 /** berechne Farbtabelle */
 function calcform_cmx_dyna(textColor, backColor) {
-	const rowCnt = steps.get();
+	const isInfinite = steps.get() >= STEPS_INFINITE;
+	const rowCnt = Math.min(steps.get(), STEPS_MAX_DISCRETE);
 	const cha = overdrive.get();
+	// ∞ toggles between discrete swatches and the continuous CSS gradient box
+	const tabEl = document.getElementById('tab-cmx');
+	const grdEl = document.getElementById('grd-cmx');
+	if (tabEl) tabEl.hidden = isInfinite;
+	if (grdEl) grdEl.hidden = !isInfinite;
+	const sliderEl = document.getElementById('grd-slider');
+	if (sliderEl) sliderEl.classList.toggle('steps-infinite', isInfinite);
 	const gradientMode = gradientSwitch.value;
 	const gradientDirection = gradientDirectionSwitch.value;
 	const gradientWay = gradientWaySwitch.value;
@@ -671,49 +682,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 		swatchesHtml += '<div class="' + stepClasses + '" data-index="' + rowIx + '" onclick="calcform_cmx_stepClick(' + rowIx + ', this)" data-tooltip="Click to copy HEX color ' + colArr[rowIx] + ' to clipboard" style="' + stepStyle + '">' + contentInner + '</div>';
 	}
 
-	// Build corner color markers line under the gradient swatches
-	const minCornerIdx = Math.min(finalC1Idx, finalC2Idx);
-	const maxCornerIdx = Math.max(finalC1Idx, finalC2Idx);
-	const pointerSymbol = isVertical ? '◀' : '▼';
-
-	let markersHtml = `<div class="palette-corner-markers palette-corner-markers-${gradientDirection}">`;
-	for (let i = 0; i < colArr.length; i++) {
-		const isInRange = (i >= minCornerIdx && i <= maxCornerIdx);
-		let cellClasses = 'corner-marker-cell';
-		if (isInRange) cellClasses += ' in-range';
-
-		let cellContent = '';
-		if (i === finalC1Idx) {
-			cellClasses += ' is-c1';
-			cellContent = isVertical
-				? `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 1</span>`
-				: `<span class="corner-marker-text">Color 1</span><span class="corner-marker-pointer">${pointerSymbol}</span>`;
-		} else if (i === finalC2Idx) {
-			cellClasses += ' is-c2';
-			cellContent = isVertical
-				? `<span class="corner-marker-pointer">${pointerSymbol}</span><span class="corner-marker-text">Color 2</span>`
-				: `<span class="corner-marker-text">Color 2</span><span class="corner-marker-pointer">${pointerSymbol}</span>`;
-		}
-
-		if (i === finalC1Idx || i === finalC2Idx) {
-			const labelName = (i === finalC1Idx) ? 'Color 1' : 'Color 2';
-			markersHtml += `<div class="${cellClasses}" data-index="${i}" onclick="calcform_cmx_markerClick(${i})" data-tooltip="Click to copy ${labelName} HEX ${colArr[i]} to clipboard">${cellContent}</div>`;
-		} else {
-			markersHtml += `<div class="${cellClasses}" data-index="${i}">${cellContent}</div>`;
-		}
-	}
-	markersHtml += '</div>';
-
-	let html = '';
-	if (isVertical) {
-		html = `<div class="palette-vertical-layout">`
-			+ `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`
-			+ markersHtml
-			+ `</div>`;
-	} else {
-		html = markersHtml
-			+ `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`;
-	}
+	// Color 1 / Color 2 are marked on their gradient slider knobs (works with overdrive too)
+	const html = `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`;
 	document.getElementById('tab-cmx').innerHTML = html;
 
 	// build CSS linear gradient using CSS native color space interpolation
@@ -734,8 +704,14 @@ function calcform_cmx_dyna(textColor, backColor) {
 		div_grd.innerHTML = '<span' + hexHiddenAttr + '>' + gradientText + '</span>';
 		div_grd.style.background = gradientText;
 		div_grd.style.color = _textColor;
-		div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
-		div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+		// Copy only while the gradient box is the visible view (∞)
+		if (isInfinite) {
+			div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
+			div_grd.onclick = () => copyColorStep(gradientText, div_grd);
+		} else {
+			delete div_grd.dataset.tooltip;
+			div_grd.onclick = null;
+		}
 	}
 
 	// update GradientPosSlider unit
@@ -755,6 +731,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 		gradientSlider.setPoints(points);
 		gradientSlider.updateGradient(gradientText, gradientDirection);
 	}
+	alignGradientSlider();
 
 	document.querySelectorAll('#textContrast .btn-select').forEach(el => {
 		el.style.background = gradientText;
@@ -815,6 +792,38 @@ function handleGradientSliderMove({ index, pos, point, points }) {
 	}
 }
 
+/**
+ * Let the gradient slider run from the centre of the first swatch to the centre
+ * of the last one, so every knob sits directly over the centre of its swatch.
+ * Falls back to the default inset when swatches are stacked (up/down) or wrap
+ * into several rows, or when the swatches are hidden (Steps = ∞).
+ */
+function alignGradientSlider() {
+	const sliderEl = document.getElementById('grd-slider');
+	const wrapEl = sliderEl && sliderEl.querySelector('.gradient-slider-track-wrap');
+	if (!wrapEl) return;
+	sliderEl.style.removeProperty('--grd-inset-l');
+	sliderEl.style.removeProperty('--grd-inset-r');
+	const swatches = document.querySelectorAll('#tab-cmx .color-palette-right .color-step, #tab-cmx .color-palette-left .color-step');
+	if (swatches.length < 2) return;
+	const first = swatches[0].getBoundingClientRect();
+	const last = swatches[swatches.length - 1].getBoundingClientRect();
+	if (first.width === 0 || Math.abs(first.top - last.top) > 1) return;   // hidden or wrapped
+	const wrap = wrapEl.getBoundingClientRect();
+	const centerL = first.left + first.width / 2;
+	const centerR = last.left + last.width / 2;
+	sliderEl.style.setProperty('--grd-inset-l', `${Math.max(0, centerL - wrap.left).toFixed(2)}px`);
+	sliderEl.style.setProperty('--grd-inset-r', `${Math.max(0, wrap.right - centerR).toFixed(2)}px`);
+}
+if (typeof ResizeObserver === 'function') {
+	document.addEventListener('DOMContentLoaded', () => {
+		const tabEl = document.getElementById('tab-cmx');
+		if (tabEl) new ResizeObserver(() => alignGradientSlider()).observe(tabEl);
+	});
+} else {
+	window.addEventListener('resize', alignGradientSlider, { passive: true });
+}
+
 function handleGradientSliderSelect({ index }) {
 	const swatches = document.querySelectorAll('#tab-cmx .color-step');
 	swatches.forEach((s, i) => {
@@ -824,21 +833,6 @@ function handleGradientSliderSelect({ index }) {
 			s.classList.remove('is-selected');
 		}
 	});
-	const markerCells = document.querySelectorAll('#tab-cmx .corner-marker-cell');
-	markerCells.forEach((m, i) => {
-		if (i === index) {
-			m.classList.add('is-selected');
-		} else {
-			m.classList.remove('is-selected');
-		}
-	});
-}
-
-function calcform_cmx_markerClick(index) {
-	const swatchEl = document.querySelector(`#tab-cmx .color-step[data-index="${index}"]`);
-	if (swatchEl) {
-		calcform_cmx_stepClick(index, swatchEl);
-	}
 }
 
 function calcform_cmx_stepClick(index, el) {
@@ -1093,7 +1087,7 @@ function calcform_cmx_getUrlState() {
 
 	if (params.has('st')) {
 		const st = parseInt(params.get('st'), 10);
-		if (!isNaN(st)) state.steps = bound(st, 2, 16);
+		if (!isNaN(st)) state.steps = bound(st, 2, STEPS_INFINITE);
 	}
 	if (params.has('od')) {
 		const od = parseInt(params.get('od'), 10);

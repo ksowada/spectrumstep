@@ -1,6 +1,8 @@
 
 class RangeSetting {
-    constructor(id, callback, tooltip = undefined) {
+    constructor(id, callback, tooltip = undefined, format = undefined) {
+        // Optional display formatter for the output (e.g. last tick shown as ∞)
+        this.format = typeof format === 'function' ? format : (v) => v;
         this.range = document.getElementById(id);
         this.output = document.getElementById(`${id}-value`);
         // Label may sit inside the fieldset legend; fall back to the legend itself
@@ -18,11 +20,11 @@ class RangeSetting {
         }
 
         this.value = Number(this.range.value);
-        this.output.textContent = this.value;
+        this.output.textContent = this.format(this.value);
 
         this.range.addEventListener('input', () => {
             this.value = Number(this.range.value);
-            this.output.textContent = this.value;
+            this.output.textContent = this.format(this.value);
 
             this.callback();
         });
@@ -31,7 +33,7 @@ class RangeSetting {
     set(value) {
         this.value = value;
         this.range.value = value;
-        this.output.textContent = value;
+        this.output.textContent = this.format(value);
     }
 
     get() {
