@@ -359,11 +359,12 @@ function calcform_cmx_init() {
 		});
 	contrastVisibilitySwitch = new ButtonSwitch(
 		document.getElementById('contrastVisibility'),
-		['show','hide'], ['assets/icons/eye-solid-full.svg','assets/icons/eye-slash-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
+		['show','hide','none'], ['assets/icons/eye-solid-full.svg','assets/icons/eye-slash-solid-full.svg','assets/icons/xmark-solid-full.svg'],undefined, () => calcform_cmx_dyna(), {
 			showText: false,
 			tooltips: {
-				show: 'Hide contrast info',
-				hide: 'Show contrast info'
+				show: 'Showing HEX values and contrast info. Click to hide contrast info',
+				hide: 'Showing HEX values only. Click to hide all text',
+				none: 'All text hidden. Click to show HEX values and contrast info'
 			}
 		});
 	textColorSelect = new ButtonSelect(
@@ -589,7 +590,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const gradientMode = gradientSwitch.value;
 	const gradientDirection = gradientDirectionSwitch.value;
 	const gradientWay = gradientWaySwitch.value;
-	const showContrast = contrastVisibilitySwitch.value !== 'hide';
+	const showContrast = contrastVisibilitySwitch.value === 'show';
+	const hexHiddenAttr = contrastVisibilitySwitch.value === 'none' ? ' hidden' : '';
 	if (textColor) {
 		_textColor = textColor;
 		_backColor = undefined;
@@ -660,8 +662,8 @@ function calcform_cmx_dyna(textColor, backColor) {
 		}
 
 		const contentInner = isVertical
-			? '<div class="color-step-content' + (showContrast ? ' has-contrast' : '') + '"><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</div>'
-			: '<span><span class="color-hex">' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
+			? '<div class="color-step-content' + (showContrast ? ' has-contrast' : '') + '"><span class="color-hex"' + hexHiddenAttr + '>' + colArr[rowIx] + '</span>' + infoBlock + '</div>'
+			: '<span><span class="color-hex"' + hexHiddenAttr + '>' + colArr[rowIx] + '</span>' + infoBlock + '</span>';
 		const stepStyle = _backColor === undefined
 			? 'background-color:' + colArr[rowIx] + ';color:' + _textColor
 			: 'background-color:' + _backColor + ';color:' + colArr[rowIx];
@@ -729,7 +731,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 	// restore preview of CSS linear-gradient on grd-cmx as before
 	const div_grd = document.getElementById('grd-cmx');
 	if (div_grd) {
-		div_grd.innerHTML = gradientText;
+		div_grd.innerHTML = '<span' + hexHiddenAttr + '>' + gradientText + '</span>';
 		div_grd.style.background = gradientText;
 		div_grd.style.color = _textColor;
 		div_grd.dataset.tooltip = "Click to copy CSS linear-gradient declaration to clipboard";
@@ -766,7 +768,7 @@ function calcform_cmx_dyna(textColor, backColor) {
 function handleGradientSliderMove({ index, pos, point, points }) {
 	const gradientMode = gradientSwitch.value;
 	const gradientWay = gradientWaySwitch.value;
-	const showContrast = contrastVisibilitySwitch.value !== 'hide';
+	const showContrast = contrastVisibilitySwitch.value === 'show';
 
 	// Compute interpolation input rel from pos across currentRelRange
 	const rel = currentRelRange.relStart + pos * (currentRelRange.relEnd - currentRelRange.relStart);
@@ -1112,7 +1114,7 @@ function calcform_cmx_getUrlState() {
 	}
 	if (params.has('cv')) {
 		const cv = params.get('cv').toLowerCase();
-		if (['show', 'hide'].includes(cv)) state.contrastVisibility = cv;
+		if (['show', 'hide', 'none'].includes(cv)) state.contrastVisibility = cv;
 	}
 	if (params.has('tc')) {
 		const tc = params.get('tc');
@@ -1283,7 +1285,7 @@ function exportPaletteToPng(filename) {
 		ctx.fillRect(sx, sy, sw, sh);
 
 		const hexEl = step.querySelector('.color-hex');
-		if (hexEl) {
+		if (hexEl && !hexEl.hidden) {
 			const hRect = hexEl.getBoundingClientRect();
 			const hStyle = window.getComputedStyle(hexEl);
 			ctx.font = `${hStyle.fontWeight} ${hStyle.fontSize} ${hStyle.fontFamily}`;

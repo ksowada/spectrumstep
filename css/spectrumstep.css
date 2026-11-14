@@ -1835,12 +1835,20 @@ input[type="number"],
    ════════════════════════════════════════════════════════════════ */
 
 /* Framed controls */
-:is(button, .btn-select, input:not([type]), input[type="text"], input[type="number"], input[type="color"]):hover:not(:focus):not(.selected) {
+:is(button, .btn-select, input[type="color"]):hover:not(.selected),
+:is(input:not([type]), input[type="text"], input[type="number"]):hover:not(:focus) {
 	border-color: var(--btn-hover-color);
 }
-input[type="color"]:focus {
-	border-color: var(--btn-select-color);
+
+/* No focus afterglow: water.css rings every focused control and the ring
+   stays after a mouse click. Only text fields keep a focus state (while
+   typing); other controls show it for keyboard focus only. */
+:is(button, select, .btn-select, input):focus:not(:is(input:not([type]), input[type="text"], input[type="number"])) {
 	box-shadow: none;
+	outline: none;
+}
+:is(button, select, .btn-select, input[type="color"]):focus-visible {
+	border-color: var(--btn-select-color);
 }
 
 /* Slider knobs: Steps / Overdrive / colour channels */
