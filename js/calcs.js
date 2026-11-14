@@ -374,7 +374,7 @@ function hexToRgb(hex) {
 function rgbToColor(args) {
   var hexString = '';
   for (var i in args) {
-    var hex = args[i].toString(16);
+    var hex = Math.round(bound(args[i], 0, 255)).toString(16); // channels may be fractional (0..1 value format)
     if (hex.length < 2) {
       hex = "0" + hex;
     }

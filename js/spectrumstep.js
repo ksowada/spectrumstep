@@ -11,91 +11,34 @@ var params_cmx = {
 	s: { name: 'S', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: -1, step: 'any', rangeStep: '0.1', callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 	l: { name: 'L', type: 'number', unit: '%', value: 0, min: 0, max: 100, round: -1, step: 'any', rangeStep: '0.1', callbackName: 'calcform_cmx_hsl', class:'colorrange'},
 };
-const channelTooltipsForMode = {
+/** Channel descriptions per color space; the value range part of every tooltip
+ *  is generated from the active value format (see cmpModesForMode / channelTooltips) */
+const hueEnds = 'Red at 0, Green at 1/3, Blue at 2/3 and Red again at the full turn';
+const channelInfoForMode = {
 	HSL: [
-		{
-			name: 'Hue (H): angular position on the color wheel (0°–360°)',
-			range: 'Hue angle slider (0° Red, 120° Green, 240° Blue, 360° Red)',
-			input: 'Hue angle in degrees (0–360°, 0.1° resolution)'
-		},
-		{
-			name: 'Saturation (S): chromatic purity in HSL space (0%–100%)',
-			range: 'HSL Saturation slider (0% achromatic gray to 100% pure chroma)',
-			input: 'HSL Saturation percentage (0–100%, 0.1% resolution)'
-		},
-		{
-			name: 'Lightness (L): relative lightness (0% black, 50% pure hue, 100% white)',
-			range: 'HSL Lightness slider (0% black through 50% pure color to 100% white)',
-			input: 'HSL Lightness percentage (0–100%, 0.1% resolution)'
-		}
+		{ name: 'Hue (H)', desc: 'angular position on the color wheel', ends: hueEnds },
+		{ name: 'Saturation (S)', desc: 'chromatic purity in HSL space', ends: 'achromatic gray to pure chroma' },
+		{ name: 'Lightness (L)', desc: 'relative lightness', ends: 'black through the pure hue at the middle to white' }
 	],
 	RGB: [
-		{
-			name: 'Red (R): 8-bit additive sRGB red primary channel (0–255)',
-			range: 'Red channel slider (0–255)',
-			input: 'Red channel 8-bit integer value (0–255)'
-		},
-		{
-			name: 'Green (G): 8-bit additive sRGB green primary channel (0–255)',
-			range: 'Green channel slider (0–255)',
-			input: 'Green channel 8-bit integer value (0–255)'
-		},
-		{
-			name: 'Blue (B): 8-bit additive sRGB blue primary channel (0–255)',
-			range: 'Blue channel slider (0–255)',
-			input: 'Blue channel 8-bit integer value (0–255)'
-		}
+		{ name: 'Red (R)', desc: 'additive sRGB red primary channel', ends: 'no red to full red' },
+		{ name: 'Green (G)', desc: 'additive sRGB green primary channel', ends: 'no green to full green' },
+		{ name: 'Blue (B)', desc: 'additive sRGB blue primary channel', ends: 'no blue to full blue' }
 	],
 	HSV: [
-		{
-			name: 'Hue (H): angular position on the color wheel (0°–360°)',
-			range: 'Hue angle slider (0° Red, 120° Green, 240° Blue, 360° Red)',
-			input: 'Hue angle in degrees (0–360°, 0.1° resolution)'
-		},
-		{
-			name: 'Saturation (S): tint purity in HSV space (0% white/gray to 100% pure hue)',
-			range: 'HSV Saturation slider (0%–100%)',
-			input: 'HSV Saturation percentage (0–100%, 0.1% resolution)'
-		},
-		{
-			name: 'Value (V): illumination brightness (0% black to 100% full brightness)',
-			range: 'HSV Value / Brightness slider (0%–100%)',
-			input: 'HSV Value / Brightness percentage (0–100%, 0.1% resolution)'
-		}
+		{ name: 'Hue (H)', desc: 'angular position on the color wheel', ends: hueEnds },
+		{ name: 'Saturation (S)', desc: 'tint purity in HSV space', ends: 'white/gray to pure hue' },
+		{ name: 'Value (V)', desc: 'illumination brightness', ends: 'black to full brightness' }
 	],
 	Oklab: [
-		{
-			name: 'Perceptual Lightness (l): OKLab perceived lightness (0% black to 100% white)',
-			range: 'OKLab Lightness slider (0% black to 100% white)',
-			input: 'OKLab Lightness percentage (0–100%, 0.1% resolution)'
-		},
-		{
-			name: 'Green–Red opponent axis (a): OKLab Cartesian a-coordinate (−0.4 green to +0.4 red)',
-			range: 'OKLab a-axis slider (−0.4 green through 0 neutral to +0.4 magenta/red)',
-			input: 'OKLab a-axis value (−0.4 to +0.4, 0.001 resolution)'
-		},
-		{
-			name: 'Blue–Yellow opponent axis (b): OKLab Cartesian b-coordinate (−0.4 blue to +0.4 yellow)',
-			range: 'OKLab b-axis slider (−0.4 blue through 0 neutral to +0.4 yellow)',
-			input: 'OKLab b-axis value (−0.4 to +0.4, 0.001 resolution)'
-		}
+		{ name: 'Perceptual Lightness (l)', desc: 'OKLab perceived lightness', ends: 'black to white' },
+		{ name: 'Green–Red opponent axis (a)', desc: 'OKLab Cartesian a-coordinate', ends: 'green through neutral 0 to magenta/red' },
+		{ name: 'Blue–Yellow opponent axis (b)', desc: 'OKLab Cartesian b-coordinate', ends: 'blue through neutral 0 to yellow' }
 	],
 	Oklch: [
-		{
-			name: 'Perceptual Lightness (l): OKLCH perceived lightness (0% black to 100% white)',
-			range: 'OKLCH Lightness slider (0% black to 100% white)',
-			input: 'OKLCH Lightness percentage (0–100%, 0.1% resolution)'
-		},
-		{
-			name: 'Chroma (c): OKLCH perceptual colorfulness (0 neutral gray to 0.4 vivid; gamut-mapped to sRGB via chroma reduction)',
-			range: 'OKLCH Chroma slider (0 achromatic to 0.4 vivid chroma)',
-			input: 'OKLCH Chroma value (0–0.4, 0.001 resolution)'
-		},
-		{
-			name: 'Hue (h): OKLCH perceptual hue angle (0°–360°)',
-			range: 'OKLCH Hue angle slider (0°–360°)',
-			input: 'OKLCH Hue angle in degrees (0–360°, 0.1° resolution)'
-		}
+		{ name: 'Perceptual Lightness (l)', desc: 'OKLCH perceived lightness', ends: 'black to white' },
+		{ name: 'Chroma (c)', desc: 'OKLCH perceptual colorfulness, gamut-mapped to sRGB via chroma reduction', ends: 'neutral gray to vivid' },
+		{ name: 'Hue (h)', desc: 'OKLCH perceptual hue angle', ends: 'one full turn of the perceptual hue circle' }
 	]
 };
 const channelLabelsForMode = {
@@ -122,40 +65,114 @@ var _backColor = undefined;
 let gradientSlider = undefined;
 let currentRelRange = { relStart: 0, relEnd: 1 };
 var currentSwatches = [];
-const rangeMinForMode = {
-	RGB:[0,0,0],
-	HSL:[0,0,0],
-	HSV:[0,0,0],
-	Oklab:[0,-0.4,-0.4],
-	Oklch:[0,0,0],
+/** Value formats ("color-component-input-mode") per color space.
+ *  The engine keeps every color in hsl[ix] in its internal scale (HSL/HSV 0..1,
+ *  RGB 0..255, Oklab/Oklch l 0..1, a/b/c raw, h 0..1); a value format only defines
+ *  how the 3 components are displayed and entered:  display = internal * factor.
+ *  Cycling the format never touches hsl[ix], so no accuracy is lost.
+ *    min/max  slider and input bounds        step   slider step
+ *    round    displayed decimals (negative)  hex    2-digit hexadecimal byte
+ *  Max. 4 formats per color space (2 bits each in the URL param "im"). */
+const cmpFormatsCyl = [
+	{ label: '360° / 100% / 100%', max: [360,100,100], step: ['0.1','0.1','0.1'], round: [-1,-1,-1], factor: [360,100,100], unit: ['°','%','%'] },
+	{ label: '360° / 0–1 / 0–1', max: [360,1,1], step: ['0.1','0.001','0.001'], round: [-1,-3,-3], factor: [360,1,1], unit: ['°','',''] },
+	{ label: '0–1 / 0–1 / 0–1', max: [1,1,1], step: ['0.0001','0.001','0.001'], round: [-4,-3,-3], factor: [1,1,1], unit: ['','',''] }
+];
+const cmpModesForMode = {
+	HSL: cmpFormatsCyl,
+	RGB: [
+		{ label: '0–255', max: [255,255,255], step: ['1','1','1'], round: [0,0,0], factor: [1,1,1], unit: ['','',''], urlRound: [-2,-2,-2] },
+		{ label: '00–ff hex', max: [255,255,255], step: ['1','1','1'], round: [0,0,0], factor: [1,1,1], unit: ['hex','hex','hex'], urlRound: [-2,-2,-2], hex: true },
+		{ label: '0–1', max: [1,1,1], step: ['0.001','0.001','0.001'], round: [-3,-3,-3], factor: [1/255,1/255,1/255], unit: ['','',''] }
+	],
+	HSV: cmpFormatsCyl,
+	Oklab: [
+		{ label: 'l 0–100%', min: [0,-0.4,-0.4], max: [100,0.4,0.4], step: ['0.1','0.001','0.001'], round: [-1,-3,-3], factor: [100,1,1], unit: ['%','',''] },
+		{ label: 'l 0–1', min: [0,-0.4,-0.4], max: [1,0.4,0.4], step: ['0.001','0.001','0.001'], round: [-3,-3,-3], factor: [1,1,1], unit: ['','',''] }
+	],
+	Oklch: [
+		{ label: 'l 0–100%', max: [100,0.4,360], step: ['0.1','0.001','0.1'], round: [-1,-3,-1], factor: [100,1,360], unit: ['%','','°'] },
+		{ label: 'l 0–1', max: [1,0.4,360], step: ['0.001','0.001','0.1'], round: [-3,-3,-1], factor: [1,1,360], unit: ['','','°'] }
+	]
+};
+Object.values(cmpModesForMode).forEach(list => list.forEach(def => {
+	def.min = def.min || [0,0,0];
+	def.urlRound = def.urlRound || def.round;
+	// always show all decimals (trailing zeros) to keep the UI steady
+	def.pad = def.round.map(r => r < 0);
+}));
+/** first value format = canonical units, used for the slider track gradients */
+const factorForMode = {};
+Object.keys(cmpModesForMode).forEach(mode => { factorForMode[mode] = cmpModesForMode[mode][0].factor; });
+const cmpModeDefault = () => ({ HSL: 0, RGB: 0, HSV: 0, Oklab: 0, Oklch: 0 });
+/** selected value format index per color and per color space; kept when the color space is cycled */
+var inputMode = [cmpModeDefault(), cmpModeDefault()];
+var cmpRingTurn = [0, 0];
+/** active value format of color ix (or of another color space of that color) */
+function cmpDef(ix, mode) {
+	mode = mode || colMode[ix];
+	const list = cmpModesForMode[mode] || cmpModesForMode.HSL;
+	return list[inputMode[ix][mode]] || list[0];
 }
-const rangeMaxForMode = {
-	RGB:[255,255,255],
-	HSL:[360,100,100],
-	HSV:[360,100,100],
-	Oklab:[100,0.4,0.4],
-	Oklch:[100,0.4,360],
+/** text of a component value exactly as the input displays it */
+function cmpText(def, i, value) {
+	if (def.hex) return ('0' + Math.round(bound(value, 0, 255)).toString(16)).slice(-2);
+	return def.pad[i] ? Number(value).toFixed(-def.round[i]) : getTextOfRound(value, def.round[i]);
 }
-const rangeStepForMode = {
-	RGB:['1','1','1'],
-	HSL:['0.1','0.1','0.1'],
-	HSV:['0.1','0.1','0.1'],
-	Oklab:['0.1','0.001','0.001'],
-	Oklch:['0.1','0.001','0.1'],
+/** what the engine does with a value entered in this format */
+function cmpEngineText(mode, def, i) {
+	if (mode === 'RGB') {
+		if (def.hex) return 'Two-digit hexadecimal byte, read by the engine as 8-bit sRGB value (ff = 255). Upper- and lowercase are accepted, a single digit gets a leading zero (8 means 08). The display rounds to the nearest byte, the exact value is kept internally';
+		if (def.factor[i] === 1) return 'Used by the engine directly as 8-bit sRGB value. The display rounds to an integer, the exact value is kept internally';
+		return 'Normalised float as in GLSL, Three.js, Unity, Blender or Godot. The engine multiplies it by 255; the HEX color rounds to the nearest of the 256 levels, the entered value is kept internally';
+	}
+	if (def.factor[i] !== 1) return 'The engine divides it by ' + def.factor[i] + ' to its internal 0–1 value';
+	if (factorForMode[mode][i] === 1) return 'Raw ' + mode + ' coordinate, passed to the engine unchanged';
+	return 'Normalised float, passed to the engine unchanged (no scaling)';
 }
-const roundForMode = {
-	RGB:[0,0,0],
-	HSL:[-1,-1,-1],
-	HSV:[-1,-1,-1],
-	Oklab:[-1,-3,-3],
-	Oklch:[-1,-3,-1],
+/** tooltips (name / range / input) of the 3 components of color ix for its active value format */
+function channelTooltips(ix) {
+	const mode = colMode[ix];
+	const def = cmpDef(ix, mode);
+	const list = cmpModesForMode[mode];
+	const next = list[(list.indexOf(def) + 1) % list.length];
+	return channelInfoForMode[mode].map((info, i) => {
+		const unit = def.hex ? '' : def.unit[i];
+		const span = cmpText(def, i, def.min[i]) + '–' + cmpText(def, i, def.max[i]) + unit;
+		const res = def.hex ? '1 byte' : def.step[i] + unit;
+		const engine = cmpEngineText(mode, def, i);
+		return {
+			name: info.name + ': ' + info.desc + ' (' + span + ')',
+			range: info.name + ' slider, ' + span + ' in steps of ' + res + ' (' + info.ends + '). ' + engine,
+			input: info.name + ' ' + (def.hex ? 'as hex byte' : 'value') + ', ' + span + ' with ' + res + ' resolution (arrow keys' + (def.hex ? '' : ' and spin buttons') + ' step by ' + res + '). ' + engine
+				+ '. Value format ' + (list.indexOf(def) + 1) + ' of ' + list.length + ' (' + def.label + '): click the border of this field to switch to "' + next.label + '"; the color itself does not change'
+		};
+	});
 }
-const factorForMode = {
-	RGB:[1,1,1],
-	HSL:[360,100,100],
-	HSV:[360,100,100],
-	Oklab:[100,1,1],
-	Oklch:[100,1,360],
+/** all value formats as one compact base-36 number: 2 bits per color space, Color 1 first */
+function cmpModesEncode(im) {
+	let n = 0;
+	[0, 1].forEach(ix => colModes.forEach((mode, k) => { n += ((im[ix] && im[ix][mode]) || 0) * Math.pow(4, ix * colModes.length + k); }));
+	return n.toString(36);
+}
+function cmpModesDecode(str) {
+	const n = /^[0-9a-z]{1,4}$/i.test(str || '') ? parseInt(str, 36) : 0;
+	return [0, 1].map(ix => {
+		const o = {};
+		colModes.forEach((mode, k) => {
+			const d = Math.floor(n / Math.pow(4, ix * colModes.length + k)) % 4;
+			o[mode] = d < cmpModesForMode[mode].length ? d : 0;
+		});
+		return o;
+	});
+}
+/** take over value formats from a state object, ignoring anything invalid */
+function cmpModesApply(im) {
+	if (!Array.isArray(im)) return;
+	[0, 1].forEach(ix => colModes.forEach(mode => {
+		const v = im[ix] ? Number(im[ix][mode]) : NaN;
+		if (Number.isInteger(v) && v >= 0 && v < cmpModesForMode[mode].length) inputMode[ix][mode] = v;
+	}));
 }
 const hslKeys = ['h','s','l']
 var colMode = ['HSL','HSL']
@@ -324,6 +341,7 @@ function calcform_cmx_init() {
 			}
 		});
 	})
+	inp_cmx_ids.forEach((id,ix) => calcform_cmx_cmpInit(ix));
 	if (typeof initColorPlaneButtons === 'function') {
 		initColorPlaneButtons();
 	}
@@ -515,24 +533,8 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 	// use RGB color as base
 	rgb[ix] = hexToRgb(inp_cmx_arr[ix].get('c'));
 
-	// manipulate range of H,S,L
-	const ids = ['-h-range','-s-range','-l-range']
-	ids.forEach((id,i) => {
-		const newId = inp_cmx_ids[ix]+id;
-		const rangeEl = document.getElementById(newId);
-		if (rangeEl) {
-			rangeEl.min = rangeMinForMode[colMode[ix]][i];
-			rangeEl.max = rangeMaxForMode[colMode[ix]][i];
-			rangeEl.step = rangeStepForMode[colMode[ix]][i];
-		}
-		if (inp_cmx_arr[ix] && inp_cmx_arr[ix].params && inp_cmx_arr[ix].params[hslKeys[i]]) {
-			inp_cmx_arr[ix].params[hslKeys[i]].min = rangeMinForMode[colMode[ix]][i];
-			inp_cmx_arr[ix].params[hslKeys[i]].max = rangeMaxForMode[colMode[ix]][i];
-			inp_cmx_arr[ix].params[hslKeys[i]].rangeStep = rangeStepForMode[colMode[ix]][i];
-			inp_cmx_arr[ix].params[hslKeys[i]].round = roundForMode[colMode[ix]][i];
-		}
-	})
-	// manipulate row heads and channel tooltips
+	calcform_cmx_cmpApply(ix);
+	// manipulate row heads
 	const rowIds = ['-h-row','-s-row','-l-row']
 	rowIds.forEach((id,i) => {
 		const newId = inp_cmx_ids[ix]+id;
@@ -546,12 +548,100 @@ function calcform_cmx_colorspace(mode, index, buttonSwitch, ix, init=false) {
 		} else {
 			firstCell.innerHTML = label;
 		}
-		if (inp_cmx_arr[ix] && channelTooltipsForMode[colMode[ix]]) {
-			inp_cmx_arr[ix].setTooltip(hslKeys[i], channelTooltipsForMode[colMode[ix]][i]);
-		}
 	})
 	if (!init) calcform_cmx_rgb(ix);
 	if (typeof updateColorPlaneButtons === 'function') updateColorPlaneButtons(ix);
+}
+/** apply the active value format of color ix to its 3 sliders and inputs (bounds, step, decimals, tooltips, ring) */
+function calcform_cmx_cmpApply(ix) {
+	const mode = colMode[ix];
+	const def = cmpDef(ix, mode);
+	const inp = inp_cmx_arr[ix];
+	const tips = channelTooltips(ix);
+	const n = cmpModesForMode[mode].length;
+	// ring position always matches the format index, turning forwards when cycled
+	if (((cmpRingTurn[ix] % n) + n) % n !== inputMode[ix][mode]) cmpRingTurn[ix] = inputMode[ix][mode];
+	hslKeys.forEach((key, i) => {
+		const rangeEl = document.getElementById(inp.getId(key, 'range'));
+		const inputEl = document.getElementById(combineToId([inp.el, key]));
+		const row = document.getElementById(inp.getId(key, 'row'));
+		if (rangeEl) {
+			rangeEl.min = def.min[i];
+			rangeEl.max = def.max[i];
+			rangeEl.step = def.step[i];
+		}
+		Object.assign(inp.params[key], {
+			min: def.min[i], max: def.max[i], rangeStep: def.step[i], round: def.round[i],
+			hex: !!def.hex, pad: def.pad[i], unit: def.unit[i]
+		});
+		if (inputEl) {
+			const type = def.hex ? 'text' : 'number';
+			if (inputEl.type !== type) inputEl.type = type;
+			inp.clearInvalid(inputEl);
+			if (def.hex) {
+				['min', 'max', 'step'].forEach(attr => inputEl.removeAttribute(attr));
+				inputEl.setAttribute('autocomplete', 'off');
+				inputEl.setAttribute('spellcheck', 'false');
+			} else {
+				// spin buttons / arrow keys step on the last displayed decimal and stop at the bounds
+				inputEl.min = def.min[i];
+				inputEl.max = def.max[i];
+				inputEl.step = def.step[i];
+			}
+			const ring = inputEl.closest('.cmp-ring');
+			if (ring) {
+				const span = 360 / n;
+				ring.style.setProperty('--ring-span', span + 'deg');
+				ring.style.setProperty('--ring-start', (cmpRingTurn[ix] * span - span / 2) + 'deg');
+			}
+		}
+		if (row && row.cells[3]) row.cells[3].textContent = def.unit[i];
+		inp.setTooltip(key, tips[i]);
+		if (inputEl) updateActiveTooltip(inputEl);
+	});
+}
+/** show the engine values hsl[ix] in the 3 sliders and inputs using the active value format */
+function calcform_cmx_show(ix) {
+	const mode = colMode[ix];
+	const def = cmpDef(ix, mode);
+	const canon = cmpModesForMode[mode][0];
+	const c = hsl[ix].map((v, i) => round(v * canon.factor[i], canon.round[i]));
+	calcform_cmx_range(ix, mode, c[0], c[1], c[2]);
+	hslKeys.forEach((key, i) => inp_cmx_arr[ix].set(key, hsl[ix][i] * def.factor[i]));
+}
+/** next value format for color ix (click on the border of a component input) */
+function calcform_cmx_cmpCycle(ix) {
+	const mode = colMode[ix];
+	inputMode[ix][mode] = (inputMode[ix][mode] + 1) % cmpModesForMode[mode].length;
+	cmpRingTurn[ix]++;
+	calcform_cmx_cmpApply(ix);
+	calcform_cmx_show(ix);
+	if (typeof updateColorPlaneButtons === 'function') updateColorPlaneButtons(ix);
+	calcform_cmx_syncState();
+}
+/** wrap the 3 component inputs into the ring frame and cycle the value format on a click on their border */
+function calcform_cmx_cmpInit(ix) {
+	hslKeys.forEach(key => {
+		const el = document.getElementById(combineToId([inp_cmx_arr[ix].el, key]));
+		if (!el) return;
+		const ring = document.createElement('span');
+		ring.className = 'cmp-ring';
+		el.parentNode.insertBefore(ring, el);
+		ring.appendChild(el);
+		const onBorder = e => {
+			const r = el.getBoundingClientRect();
+			const bw = (parseFloat(getComputedStyle(el).borderTopWidth) || 0) + 1;
+			return e.clientX < r.left + bw || e.clientX > r.right - bw || e.clientY < r.top + bw || e.clientY > r.bottom - bw;
+		};
+		// a click on the border neither focuses the field nor moves the caret
+		el.addEventListener('mousedown', e => { if (onBorder(e)) e.preventDefault(); });
+		el.addEventListener('click', e => {
+			if (!onBorder(e)) return;   // inside: normal caret placement / text selection
+			e.preventDefault();
+			calcform_cmx_cmpCycle(ix);
+		});
+		el.addEventListener('mousemove', e => { el.style.cursor = onBorder(e) ? 'pointer' : ''; });
+	});
 }
 /** calculate HSL from RGB input */
 function calcform_cmx_rgb(ix,init) {
@@ -559,30 +649,29 @@ function calcform_cmx_rgb(ix,init) {
 	rgb[ix] = hexToRgb(rgbh[ix]);
 	const hueIdx = colMode[ix] === 'Oklch' ? 2 : 0;
 	const oldHue = (hsl[ix] && hsl[ix][hueIdx] !== undefined) ? hsl[ix][hueIdx] : undefined;
-	hsl[ix] = colorConvertFromRgb(colMode[ix], rgb[ix], oldHue);
-	const hslLong = []
-	const hslLongRounded = []
-	factorForMode[colMode[ix]].forEach((factor,i) => {
-		hslLong[i] = hsl[ix][i] * factor;
-		const r = roundForMode[colMode[ix]][i];
-		hslLongRounded[i] = round(hslLong[i], r);
-	})
-	calcform_cmx_range(ix, colMode[ix],hslLongRounded[0], hslLongRounded[1], hslLongRounded[2])
-	hslKeys.forEach((key,i) => inp_cmx_arr[ix].set(key, hslLong[i]))
+	hsl[ix] = colorConvertFromRgb(colMode[ix], rgb[ix], oldHue).slice();
+	calcform_cmx_show(ix);
 	if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 	if (init == undefined) calcform_cmx_dyna();
 }
-/** calculate RGB from HSL input */
-function calcform_cmx_hsl(ix,init) {
-	const hslLong = []
-	hslKeys.forEach((key,i) => {
-		hslLong[i] = inp_cmx_arr[ix].get(key)
-		hsl[ix][i] = hslLong[i] / factorForMode[colMode[ix]][i]
-	})
-	calcform_cmx_range(ix, colMode[ix], hslLong[0], hslLong[1], hslLong[2])
-	const rgb_per = colorConvertToRgb(colMode[ix], hsl[ix]);
+/** calculate RGB from HSL input
+ *  only: component indices to read from the inputs. Default: the component being edited;
+ *  the others keep their exact engine value (a displayed value may be rounded, f.e. hex) */
+function calcform_cmx_hsl(ix,init,only) {
+	const inp = inp_cmx_arr[ix];
+	const mode = colMode[ix];
+	const def = cmpDef(ix, mode);
+	if (!only) {
+		const active = hslKeys.indexOf(inp.activeVar);
+		only = (active >= 0 && hsl[ix].length === 3) ? [active] : [0, 1, 2];
+	}
+	only.forEach(i => { hsl[ix][i] = inp.get(hslKeys[i]) / def.factor[i]; });
+	const canon = cmpModesForMode[mode][0];
+	const c = hsl[ix].map((v, i) => round(v * canon.factor[i], canon.round[i]));
+	calcform_cmx_range(ix, mode, c[0], c[1], c[2]);
+	const rgb_per = colorConvertToRgb(mode, hsl[ix]);
 	rgbh[ix] = rgbToColor(rgb_per);
-	inp_cmx_arr[ix].set('c', rgbh[ix]);
+	inp.set('c', rgbh[ix]);
 	if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 	if (init == undefined) calcform_cmx_dyna();
 }
@@ -903,6 +992,7 @@ function calcform_cmx_getState() {
 		backColor: _backColor,
 		gradientMode: gradientSwitch.value,
 		colMode: colMode.slice(),
+		inputMode: inputMode.map(o => Object.assign({}, o)),
 		theme: themeSwitch ? themeSwitch.value : document.documentElement.dataset.theme,
 		backgroundMode, customBackground, customBackgroundSource,
 		gradientDirection: gradientDirectionSwitch.value,
@@ -960,19 +1050,14 @@ function calcform_cmx_applyState(data) {
 	if (Array.isArray(data.colMode) && data.colMode.length === 2) {
 		colMode = data.colMode.map(m => colModes.find(cm => cm.toLowerCase() === String(m).toLowerCase()) || 'HSL');
 	}
+	cmpModesApply(data.inputMode);
 	for (let ix = 0; ix < 2; ix++) {
 		inp_cmx_arr[ix].set('c', rgbh[ix]);
 		colModeSwitch[ix].setValue(colMode[ix], true);
 		calcform_cmx_colorspace(colMode[ix], undefined, undefined, ix, true);
 		if (data.hsl && Array.isArray(data.hsl[ix]) && data.hsl[ix].length === 3) {
 			hsl[ix] = data.hsl[ix].slice();
-			const hslLong = [];
-			factorForMode[colMode[ix]].forEach((factor, i) => {
-				hslLong[i] = hsl[ix][i] * factor;
-			});
-			const r = roundForMode[colMode[ix]];
-			calcform_cmx_range(ix, colMode[ix], round(hslLong[0], r[0]), round(hslLong[1], r[1]), round(hslLong[2], r[2]));
-			hslKeys.forEach((key, i) => inp_cmx_arr[ix].set(key, hslLong[i]));
+			calcform_cmx_show(ix);
 			if (typeof refreshActiveColorPlane === 'function') refreshActiveColorPlane(ix);
 		} else {
 			calcform_cmx_rgb(ix, true);
@@ -1007,14 +1092,16 @@ function calcform_cmx_updateUrl(data) {
 		params.set('c' + num, hex);
 		params.set('m' + num, mode.toLowerCase());
 		if (data.hsl && Array.isArray(data.hsl[ix])) {
-			const factors = factorForMode[mode];
-			const rounds = roundForMode[mode];
+			// channel values in the units of the active value format (hex format: decimal 0–255)
+			const def = cmpModesForMode[mode][(data.inputMode && data.inputMode[ix] && data.inputMode[ix][mode]) || 0];
 			const chStr = data.hsl[ix]
-				.map((v, i) => getTextOfRound(v * factors[i], rounds[i]))
+				.map((v, i) => getTextOfRound(v * def.factor[i], def.urlRound[i]))
 				.join('-');
 			params.set('ch' + num, chStr);
 		}
 	});
+	const im = cmpModesEncode(data.inputMode || []);
+	if (im !== '0') params.set('im', im);   // omitted while every value format is the default
 	params.set('st', String(data.steps));
 	params.set('od', String(data.overdrive));
 	params.set('gm', (data.gradientMode || 'HSL').toLowerCase());
@@ -1036,11 +1123,14 @@ function calcform_cmx_updateUrl(data) {
 function calcform_cmx_getUrlState() {
 	if (!window.location.search || window.location.search.length <= 1) return null;
 	const params = new URLSearchParams(window.location.search);
-	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th', 'bgm', 'bgc', 'bgs'];
+	const knownKeys = ['c1', 'm1', 'ch1', 'c2', 'm2', 'ch2', 'im', 'st', 'od', 'gm', 'gd', 'gw', 'cv', 'tc', 'bc', 'th', 'bgm', 'bgc', 'bgs'];
 	if (!knownKeys.some(k => params.has(k))) return null;
 
 	const state = calcform_cmx_getState();
 	const isHex = v => /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+
+	// value formats define the units of ch1/ch2; links without "im" use the default formats
+	state.inputMode = cmpModesDecode(params.get('im'));
 
 	[0, 1].forEach(ix => {
 		const num = ix + 1;
@@ -1058,10 +1148,8 @@ function calcform_cmx_getUrlState() {
 		if (chParam) {
 			const parts = chParam.split(/(?<=[\d.])-|[_,]/).map(Number);
 			if (parts.length === 3 && parts.every(n => !isNaN(n))) {
-				const mins = rangeMinForMode[mode];
-				const maxes = rangeMaxForMode[mode];
-				const factors = factorForMode[mode];
-				parsedCh = parts.map((val, i) => bound(val, mins[i], maxes[i]) / factors[i]);
+				const def = cmpModesForMode[mode][state.inputMode[ix][mode]];
+				parsedCh = parts.map((val, i) => bound(val, def.min[i], def.max[i]) / def.factor[i]);
 			}
 		}
 
@@ -1230,6 +1318,7 @@ function generateExportJson() {
 			c1: state.rgbh[0],
 			c2: state.rgbh[1],
 			colMode: state.colMode,
+			inputMode: state.inputMode,
 			rgbh: state.rgbh,
 			hsl: state.hsl,
 			steps: state.steps,

@@ -28,6 +28,15 @@ Available scripts:
 - RGB text input
   - expands 3-digit hex colors
   - **onkey event:** At each key, it check for valid color, then update color and gradient. If  value is invalid then don't display color (keep the last), warn with tooltip, "invalid entry". also when user leaves input with a invalid color, f.e.  5 digits instead of 6
+- component value formats for designers and developers: click the border of a component input to cycle its format
+  - HSL / HSV: `360° / 100% / 100%`, `360° / 0–1 / 0–1`, `0–1 / 0–1 / 0–1`; RGB: `0–255`, 2-digit hex `00–ff`, `0–1`; Oklab / Oklch: `l` in `%` or `0–1`
+  - a ring segment on the 3 inputs shows the active format (same design as the switch buttons); it is remembered per color and per color space
+  - cycling formats never changes the color: the exact value is kept, also behind a rounded hex or 0–255 display
+  - hex input accepts upper- and lowercase, a single digit means a leading zero (`8` → `08`)
+  - all values always show all decimals with trailing zeros and are right-aligned, so the decimal points line up
+  - spin buttons and arrow keys step on the last displayed digit of the active format
+  - erroneous entries (invalid hex digits, not a number, too high / too low) stay as typed, get a red border and a tooltip naming the problem; the color keeps its last valid value
+  - stored compactly in the URL search param `im`, in named presets and in JSON export/import
 - gradientDirection in all 4 direction
 - enhanced accuracy for HSV, HSL, Oklab, and Oklch modes, no loss of RGB value
 - each color in gradient holds contrast info including WCAG AA / AAA badges (Pass/Fail)

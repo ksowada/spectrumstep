@@ -69,7 +69,7 @@
 
 			<section class="guide-content">
 				<h2>How to use SpectrumStep</h2>
-				<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, cylindrical <strong>HSV</strong>, perceptual Cartesian <strong>Oklab</strong>, and perceptual cylindrical <strong>Oklch</strong> color models (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Cycle color space" /></span>). Adjust live-rendered channel sliders, enter exact numeric and hexadecimal values, or click any channel button in the first column (<span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">L</span> / <span class="docu-icon-chip">R</span><span class="docu-icon-chip">G</span><span class="docu-icon-chip">B</span> / <span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">V</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">a</span><span class="docu-icon-chip">b</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">c</span><span class="docu-icon-chip">h</span>) or double-click its range slider to fix that component and pick the other two on a 2D color plane (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-left-right-solid-full.svg" alt="X-axis channel" /><img class="icon" src="../assets/icons/arrows-up-down-solid-full.svg" alt="Y-axis channel" /></span>).</p>
+				<p><strong>1. Configure Endpoint Colors:</strong> Switch each endpoint independently between cylindrical <strong>HSL</strong>, additive <strong>RGB</strong>, cylindrical <strong>HSV</strong>, perceptual Cartesian <strong>Oklab</strong>, and perceptual cylindrical <strong>Oklch</strong> color models (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Cycle color space" /></span>). Adjust live-rendered channel sliders, enter exact numeric and hexadecimal values, or click any channel button in the first column (<span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">L</span> / <span class="docu-icon-chip">R</span><span class="docu-icon-chip">G</span><span class="docu-icon-chip">B</span> / <span class="docu-icon-chip">H</span><span class="docu-icon-chip">S</span><span class="docu-icon-chip">V</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">a</span><span class="docu-icon-chip">b</span> / <span class="docu-icon-chip">l</span><span class="docu-icon-chip">c</span><span class="docu-icon-chip">h</span>) or double-click its range slider to fix that component and pick the other two on a 2D color plane (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-left-right-solid-full.svg" alt="X-axis channel" /><img class="icon" src="../assets/icons/arrows-up-down-solid-full.svg" alt="Y-axis channel" /></span>). Click the <em>border</em> of a component input to switch its value format, for example from <code>0–255</code> to hex bytes or <code>0–1</code> floats (see <a href="#value-formats">Component Value Formats</a>).</p>
 				<p><strong>2. Transform &amp; Sync Endpoints:</strong> Generate random 24-bit sRGB colors (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/shuffle-solid-full.svg" alt="Random" />Random</span>), compute the sRGB complement (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/circle-half-stroke-solid-full.svg" alt="RGB-Invert" />RGB-Invert</span>), reflect lightness while preserving hue and saturation (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/circle-half-stroke-solid-full.svg" alt="HSL-Invert" />HSL-Invert</span>), or clone colors across endpoints (<span class="docu-icon-chip"><img class="icon" src="../assets/icons/right-long-solid-full.svg" alt="Copy right" /><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="Copy left" />Copy</span>).</p>
 				<p><strong>3. Set Steps &amp; Overdrive:</strong> Define the number of equidistant interpolation steps (2–16) and optionally extrapolate steps beyond both base colors using <em>Overdrive</em> (0–16). If extreme overdrive produces saturated colors that hit gamut boundaries, duplicate clamped steps are automatically pruned to keep the palette meaningful.</p>
 				<p><strong>4. Interactive Swatch Position Slider:</strong> Fine-tune each swatch's interpolation position using the dedicated slider bar between the palette swatches and continuous CSS preview. Drag a handle across the full 0%–100% range; swatches can overtake one another and the percentage badge updates while dragging. Double-click any handle to reset all positions to the defaults defined by Steps and Overdrive. These handles only adjust swatch interpolation positions; they do not copy colors or CSS. Exact 0% and 100% positions evaluate to Color 1 and Color 2 without conversion drift.</p>
@@ -88,7 +88,7 @@
 					<thead>
 						<tr>
 							<th>Color space</th>
-							<th>Channels (1st col)</th>
+							<th>Channels (1st col, default value format)</th>
 							<th>CSS Gradient Syntax</th>
 							<th>Main advantage</th>
 							<th>Typical limitation</th>
@@ -133,6 +133,57 @@
 					</tbody>
 				</table>
 
+				<h3 id="value-formats">Component Value Formats: Designer and Developer Units</h3>
+				<p>The same color is written differently depending on the tool. Design software and CSS use degrees, percent, and 8-bit values; shaders, engines, and color libraries mostly expect floats from 0 to 1. Each color space therefore offers several <strong>value formats</strong> for its three component inputs and sliders. The first format in each row below is the default.</p>
+				<table class="docu-table">
+					<thead>
+						<tr>
+							<th>Color space</th>
+							<th>Designers (Photoshop, Figma, CSS)</th>
+							<th>Developers (shaders, engines, libraries)</th>
+							<th>Value formats in SpectrumStep</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>RGB</strong></td>
+							<td>0–255, plus hex</td>
+							<td>0–1 floats (GLSL, Three.js, Unity, Blender, Godot)</td>
+							<td><code>0–255</code> → <code>00–ff</code> hex bytes → <code>0.000–1.000</code></td>
+						</tr>
+						<tr>
+							<td><strong>HSL / HSV</strong></td>
+							<td>360° / 100% / 100%</td>
+							<td>all 0–1 (Three.js <code>setHSL</code>, Python <code>colorsys</code>, Apple <code>UIColor</code>, Java <code>HSBtoRGB</code>)</td>
+							<td><code>360° / 100% / 100%</code> → <code>360° / 0–1 / 0–1</code> → <code>0–1 / 0–1 / 0–1</code></td>
+						</tr>
+						<tr>
+							<td><strong>OKLab</strong></td>
+							<td><code>l</code> in % (e.g. oklch.com), <code>a</code>/<code>b</code> raw ±0.4</td>
+							<td><code>l</code> 0–1, <code>a</code>/<code>b</code> raw (Tailwind v4, culori, colorjs.io)</td>
+							<td><code>l</code> 0–100% → <code>l</code> 0–1 (<code>a</code>, <code>b</code> always raw)</td>
+						</tr>
+						<tr>
+							<td><strong>OKLCH</strong></td>
+							<td><code>l</code> in %, <code>c</code> raw 0–0.4, <code>h</code> in degrees</td>
+							<td><code>l</code> 0–1, <code>c</code> raw, <code>h</code> in degrees</td>
+							<td><code>l</code> 0–100% → <code>l</code> 0–1 (<code>c</code> always raw, <code>h</code> always 0–360°)</td>
+						</tr>
+					</tbody>
+				</table>
+				<ul>
+					<li><strong>Switching:</strong> Click the <em>border</em> of any of the three component inputs (the pointer turns into a hand there). All three inputs and sliders of that color change together. Clicks inside the field place the caret and select text as usual.</li>
+					<li><strong>Ring indicator:</strong> The lit segment on the border of the three inputs shows the active format and turns one step per switch, exactly like the switch buttons (a third of the frame per format in RGB/HSL/HSV, half of it in OKLab/OKLCH).</li>
+					<li><strong>Remembered per color and color space:</strong> Color 1 and Color 2 each keep their own format for every color space. Cycling HSL → RGB → … and back returns to the format you chose there.</li>
+					<li><strong>No loss of accuracy:</strong> A format only changes how the value is displayed and entered. The engine keeps the exact value (HSL/HSV and <code>l</code> as 0–1, RGB as 0–255, <code>a</code>/<code>b</code>/<code>c</code> raw), so an RGB value of <code>0.123</code> is still <code>0.123</code> after cycling through the rounded <code>0–255</code> and hex displays. Editing one component leaves the other two untouched.</li>
+					<li><strong>Hex bytes:</strong> Two hexadecimal digits per channel without decimals, rounded to the nearest byte. Upper- and lowercase are accepted, and a single digit means a leading zero (<code>8</code> is read as <code>08</code>). The arrow keys step by one byte.</li>
+					<li><strong>Fixed number of decimals, right-aligned:</strong> Every format always shows all of its decimals including trailing zeros (<code>212.0</code>, <code>0.500</code>; one decimal for degrees and percent, three for 0–1 and raw values, four for a 0–1 hue so it matches the 0.1° resolution). All color inputs, including the <code>#rrggbb</code> field, are right-aligned so decimal points and last digits line up, with room for one extra character such as the minus sign of OKLab <code>a</code>/<code>b</code>. Typed text is normalised when you leave the field or press Enter.</li>
+					<li><strong>Fine-tuning by one digit:</strong> The browser's up/down buttons and the arrow keys change the value by one unit of its last displayed digit: 0.1 for degrees and percent, 0.001 for 0–1 and raw values, 0.0001 for a 0–1 hue, 1 for 0–255 and hex bytes. They stop at the limits of the range.</li>
+					<li><strong>Erroneous entries:</strong> Invalid hex digits, text that is not a number, and values above or below the range are not corrected silently. The text stays exactly as typed, the field gets a red border, and a tooltip names the problem (for example “Value too high: the maximum is 0.400”). The color keeps its last valid value until the entry is fixed.</li>
+					<li><strong>Tooltips:</strong> The tooltips of each slider and input state the active range and resolution and what the engine does with the value (for example “the engine divides it by 100” or “multiplies it by 255”).</li>
+					<li><strong>Sharing and storage:</strong> All ten format choices (2 colors × 5 color spaces) are packed into the single URL search parameter <code>im</code>: two bits per color space in the order HSL, RGB, HSV, Oklab, Oklch, Color 1 first, written as one base-36 number (at most four characters, omitted while everything is on the default). The channel parameters <code>ch1</code> / <code>ch2</code> use the units of the active format (hex bytes are written as decimal 0–255). Named presets and JSON export/import store the same information as <code>inputMode</code>.</li>
+				</ul>
+
 				<h3>What happens when you convert an out-of-gamut color to HEX? (Gamut Mapping)</h3>
 				<p>Unlike HSL and HSV—which are mathematical re-mappings of the sRGB cube—<strong>OKLab</strong> and <strong>OKLCH</strong> can describe colors across the entire human visual gamut, including ultra-vivid colors that cannot be displayed on standard sRGB monitors or encoded as 24-bit <code>#RRGGBB</code> HEX values. Out-of-gamut coordinates can occur both when picking high chroma values manually and when interpolating in OKLCH between two in-gamut colors.</p>
 				<p><strong>Reduce the chroma until the color fits:</strong> Suppose the desired color is too vivid for sRGB. Instead of naively clamping individual R, G, and B channels (which distorts both hue and perceived lightness), SpectrumStep gradually reduces the color's <strong>chroma</strong> via binary search while holding <strong>lightness</strong> and <strong>hue</strong> constant until the color can be represented within the sRGB gamut:</p>
@@ -154,7 +205,7 @@ Output HEX</pre>
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/arrows-rotate-solid-full.svg" alt="Color space switch" /></span>
-						<strong>Color 1 and Color 2 Input Models (HSL, RGB, HSV, Oklab, Oklch):</strong> Each endpoint supports 6-digit or 3-digit shorthand HEX codes (<code>#RGB</code> → <code>#RRGGBB</code>), native color picking, and high-precision sliders (0.1° / 0.1% resolution in HSL/HSV, 8-bit 0–255 in RGB, 0.001 resolution for OKLab <code>a</code>/<code>b</code> and OKLCH <code>c</code>) with dynamic gradient tracks showing the effect of each parameter. The first column displays the active model's component identifiers (<code>H/S/L</code>, <code>R/G/B</code>, <code>H/S/V</code>, lowercase <code>l/a/b</code>, or lowercase <code>l/c/h</code>).
+						<strong>Color 1 and Color 2 Input Models (HSL, RGB, HSV, Oklab, Oklch):</strong> Each endpoint supports 6-digit or 3-digit shorthand HEX codes (<code>#RGB</code> → <code>#RRGGBB</code>), native color picking, and high-precision sliders (0.1° / 0.1% resolution in HSL/HSV, 8-bit 0–255 in RGB, 0.001 resolution for OKLab <code>a</code>/<code>b</code> and OKLCH <code>c</code>) with dynamic gradient tracks showing the effect of each parameter. Clicking the border of a component input cycles its <a href="#value-formats">value format</a> (degrees/percent, 0–255, hex bytes, or 0–1 floats); a ring segment on the input border shows the active format. The first column displays the active model's component identifiers (<code>H/S/L</code>, <code>R/G/B</code>, <code>H/S/V</code>, lowercase <code>l/a/b</code>, or lowercase <code>l/c/h</code>).
 					</li>
 					<li>
 						<span class="docu-icon-chip">H / S / L</span>
@@ -216,7 +267,7 @@ Output HEX</pre>
 						<strong>One-Click Clipboard Export:</strong> Click any swatch to copy its HEX code or click the continuous preview bar to copy the CSS <code>linear-gradient</code> snippet, confirmed with an instant toast notification.
 					</li>
 					<li>
-						<strong>Shareable Palette URLs:</strong> Synchronizes all active colors, channel values, interpolation settings, and contrast options into compact URL search parameters so custom palettes and gradients can be bookmarked or shared via link.
+						<strong>Shareable Palette URLs:</strong> Synchronizes all active colors, channel values, component value formats, interpolation settings, and contrast options into compact URL search parameters so custom palettes and gradients can be bookmarked or shared via link.
 					</li>
 					<li>
 						<span class="docu-icon-chip"><img class="icon" src="../assets/icons/folder-open-solid-full.svg" alt="Load preset" /><img class="icon" src="../assets/icons/floppy-disk-solid-full.svg" alt="Save preset" /></span>

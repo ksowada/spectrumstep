@@ -113,9 +113,10 @@
 
 	function getNormalizedChannels(ix) {
 		var mode = colMode[ix] || 'HSL';
-		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
-		var maxes = rangeMaxForMode[mode];
-		var factors = factorForMode[mode];
+		var def = cmpDef(ix, mode);
+		var mins = def.min;
+		var maxes = def.max;
+		var factors = def.factor;
 		var norm = [0, 0, 0];
 		for (var i = 0; i < 3; i++) {
 			var val;
@@ -185,9 +186,10 @@
 		var xIdx = rem[0];
 		var yIdx = rem[1];
 
-		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
-		var maxes = rangeMaxForMode[mode];
-		var factors = factorForMode[mode];
+		var def = cmpDef(ix, mode);
+		var mins = def.min;
+		var maxes = def.max;
+		var factors = def.factor;
 
 		var norm = getNormalizedChannels(ix);
 		var fixedNorm = norm[fixedIdx];
@@ -279,13 +281,13 @@
 		var xIdx = rem[0];
 		var yIdx = rem[1];
 
-		var mins = (typeof rangeMinForMode !== 'undefined' && rangeMinForMode[mode]) ? rangeMinForMode[mode] : [0, 0, 0];
-		var minX = mins[xIdx];
-		var minY = mins[yIdx];
-		var maxX = rangeMaxForMode[mode][xIdx];
-		var maxY = rangeMaxForMode[mode][yIdx];
-		var roundX = roundForMode[mode][xIdx];
-		var roundY = roundForMode[mode][yIdx];
+		var def = cmpDef(ix, mode);
+		var minX = def.min[xIdx];
+		var minY = def.min[yIdx];
+		var maxX = def.max[xIdx];
+		var maxY = def.max[yIdx];
+		var roundX = def.round[xIdx];
+		var roundY = def.round[yIdx];
 
 		var valX = round(minX + normX * (maxX - minX), roundX);
 		var valY = round(minY + normY * (maxY - minY), roundY);
@@ -293,7 +295,7 @@
 		inp_cmx_arr[ix].set(hslKeys[xIdx], valX);
 		inp_cmx_arr[ix].set(hslKeys[yIdx], valY);
 
-		calcform_cmx_hsl(ix);
+		calcform_cmx_hsl(ix, undefined, [xIdx, yIdx]);
 		updateMarkerAndLabels();
 	}
 
@@ -382,7 +384,7 @@
 
 	function updateColorPlaneButtons(ix) {
 		var mode = colMode[ix] || 'HSL';
-		var tips = channelTooltipsForMode[mode];
+		var tips = channelTooltips(ix);
 		for (var i = 0; i < 3; i++) {
 			var btn = channelBtns[ix] && channelBtns[ix][i];
 			if (!btn) continue;

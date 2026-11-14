@@ -117,13 +117,84 @@ function InputHtml(args) {
     for (var cp in this.params) {
       if (this.params[cp].type === 'color') {
         this.bindColorEvents(cp);
+      } else if (this.params[cp].type === 'number' && this.params[cp].dir !== 'output') {
+        this.bindNumberEvents(cp);
       }
     }
+  }
+  /** text of a number value: hex byte (param.hex), fixed decimals (param.pad) or rounded without trailing zeros */
+  this.format = function (param, value) {
+    if (param.hex) {
+      var hex = Math.round(bound(value, 0, 255)).toString(16);
+      return hex.length < 2 ? '0' + hex : hex;
+    }
+    if (param.round === undefined) return value;
+    if (param.pad) return isNaN(value) ? '' : Number(value).toFixed(Math.max(0, -param.round));
+    return getTextOfRound(value, param.round);
+  }
+  /** flag an erroneous entry: the text stays as typed, red border, tooltip explains the problem */
+  this.setInvalid = function (el, message) {
+    el.classList.add('is-invalid');
+    el.setAttribute('aria-invalid', 'true');
+    el.dataset.tooltip = message;
+    if (typeof positionTooltip === 'function') {
+      positionTooltip(el);
+      window.activeTooltipTarget = el;
+    }
+  }
+  this.clearInvalid = function (el) {
+    if (!el || !el.classList.contains('is-invalid')) return;
+    el.classList.remove('is-invalid');
+    el.setAttribute('aria-invalid', 'false');
+    if (el.dataset.originalTooltip) el.dataset.tooltip = el.dataset.originalTooltip;
+    if (typeof hideTooltip === 'function' && window.activeTooltipTarget === el) hideTooltip();
+  }
+  /** while typing the text is left alone; a valid entry is normalised when the field is left (or on Enter),
+   *  an erroneous one stays as typed and keeps its red border */
+  this.bindNumberEvents = function (varName) {
+    var self = this;
+    var el = document.getElementById(combineToId([this.el, varName]));
+    if (!el) return;
+    el.addEventListener('blur', function () {
+      var param = self.params[varName];
+      if (el.classList.contains('is-invalid')) {
+        // focusout hides every tooltip: show the complaint again for a moment
+        setTimeout(function () {
+          if (el.classList.contains('is-invalid') && typeof positionTooltip === 'function') {
+            positionTooltip(el);
+            window.activeTooltipTarget = el;
+          }
+        }, 20);
+        if (el._invalidTipTimeout) clearTimeout(el._invalidTipTimeout);
+        el._invalidTipTimeout = setTimeout(function () {
+          if (window.activeTooltipTarget === el && document.activeElement !== el && typeof hideTooltip === 'function') hideTooltip();
+        }, 2800);
+        return;
+      }
+      el.value = self.format(param, param.value);
+    });
+    el.addEventListener('keydown', function (e) {
+      var param = self.params[varName];
+      if (e.key === 'Enter') {
+        el.blur();
+      } else if (param.hex && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        // hex bytes are a text field without spin buttons: arrow keys step by one
+        e.preventDefault();
+        var next = bound(Math.round(param.value) + (e.key === 'ArrowUp' ? 1 : -1), param.min, param.max);
+        el.value = self.format(param, next);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
   }
   this.clickEvent = function (callbackName, callbackArgs, varName, paramtype, rangeInput) {
     callbackName = callbackName.name;
     this.rangeInput = rangeInput; // just a bit to remember if it was range Input
+    this.activeVar = varName;     // which input is being edited during the callback
+    // spin buttons / arrow keys fire 'input' without inputType: then the text may be normalised at once
+    this.stepInput = !(window.event && window.event.inputType);
     window[callbackName](callbackArgs);
+    this.activeVar = undefined;
+    this.stepInput = false;
     if (paramtype=='popup') {
       var html_popup = '<div id="'+combineToId([this.el, varName,'modal'])+'" class="modal show-modal"><div class="modal-content"><span class="close-button">&times;</span><h1>Hello, I am a popup!</h1></div></div>';
       document.getElementById(combineToId([this.el])).insertAdjacentHTML('afterend', html_popup);
@@ -219,11 +290,38 @@ function InputHtml(args) {
         return param.value;
       default:
         if (this.rangeInput) return this.getRange(varName);
-        param.value = document.getElementById(combineToId([this.el, varName])).value;
-        param.value = getFloatOfText(param.value);
-        param.value = (param.min !== undefined) ? bound(param.value, param.min, param.max) : param.value;
-        document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
-        document.getElementById(combineToId([this.el, varName, 'range'])).value = param.value;
+        var numEl = document.getElementById(combineToId([this.el, varName]));
+        var numText = numEl.value.trim();
+        var numVal;      // undefined: empty field, keeps the last valid value
+        var numErr = '';
+        if (param.hex) {
+          // 1 or 2 hex digits in any case; "8" means 08
+          if (numText !== '') {
+            if (/^[0-9a-fA-F]{1,2}$/.test(numText)) numVal = parseInt(numText, 16);
+            else numErr = 'Invalid hex byte "' + numText + '": enter 1 or 2 hexadecimal digits (0–9, a–f), 00 to ff';
+          }
+        } else if (numEl.validity && numEl.validity.badInput) {
+          numErr = 'Not a number: enter digits with a decimal point only';
+        } else if (numText !== '') {
+          numVal = Number(numText.replace(',', '.'));
+          if (isNaN(numVal)) numErr = 'Not a number: enter digits with a decimal point only';
+        }
+        if (!numErr && numVal !== undefined && param.min !== undefined) {
+          if (numVal > param.max) numErr = 'Value too high: the maximum is ' + this.format(param, param.max) + (param.hex ? '' : param.unit);
+          else if (numVal < param.min) numErr = 'Value too low: the minimum is ' + this.format(param, param.min) + (param.hex ? '' : param.unit);
+        }
+        if (numErr) {
+          // erroneous entry: leave the text as typed, keep the last valid value
+          this.setInvalid(numEl, numErr);
+          return param.value;
+        }
+        this.clearInvalid(numEl);
+        if (numVal === undefined) return param.value;
+        param.value = numVal;
+        // do not rewrite the text under the caret (normalised on blur), except when stepping
+        if (document.activeElement !== numEl || this.stepInput) numEl.value = this.format(param, param.value);
+        var numRangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
+        if (numRangeEl) numRangeEl.value = param.value;
         return param.value;
     }
   }
@@ -232,7 +330,7 @@ function InputHtml(args) {
     param.value = document.getElementById(combineToId([this.el, varName, 'range'])).value; // change slider
     if (param.type !== 'color') {
       param.value = parseFloat(param.value);
-      document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(param.value, param.round) : param.value;
+      document.getElementById(combineToId([this.el, varName])).value = this.format(param, param.value);
     }
     return param.value;
   }
@@ -275,7 +373,9 @@ function InputHtml(args) {
         break;
       default:
         value = (param.min !== undefined) ? bound(value, param.min, param.max) : value;
-        document.getElementById(combineToId([this.el, varName])).value = (param.round !== undefined) ? getTextOfRound(value, param.round) : value;
+        param.value = value;
+        this.clearInvalid(document.getElementById(combineToId([this.el, varName])));
+        document.getElementById(combineToId([this.el, varName])).value = this.format(param, value);
         if (document.getElementById(combineToId([this.el, varName, 'range'])) !== null) {
           document.getElementById(combineToId([this.el, varName, 'range'])).value = round(value, param.round);
         }

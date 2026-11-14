@@ -343,6 +343,11 @@
 }
 html {
 	background-color: var(--background-body);
+	/* Static UI: every rem in this app (font sizes, gaps, paddings) is based on a
+	   fixed 16px instead of the browser's default-font-size preference. The layout
+	   is sized in px (buttons, inputs), so text must not grow independently of it.
+	   Page zoom still scales everything together. */
+	font-size: 16px;
 }
 body {
 	max-width: 1280px;
@@ -469,7 +474,9 @@ input[type="text"],input[type="number"]{
 	box-shadow: var(--input-shadow);
 }
 input[type="text"].is-invalid,
-input[type="text"].is-invalid:focus {
+input[type="text"].is-invalid:focus,
+input[type="number"].is-invalid,
+input[type="number"].is-invalid:focus {
 	border-color: #e53935 !important;
 	box-shadow: 0 0 0 1px #e53935, inset 0 2px 5px rgb(0 0 0 / 25%) !important;
 }
@@ -542,7 +549,7 @@ table.inputs {
 	border-collapse: collapse;
 	td:nth-child(1) {width: 50px;}
 	td:nth-child(2) {width: auto;}
-	td:nth-child(3) {width: 100px;}
+	td:nth-child(3) {width: var(--value-col);}   /* sized in ch, see "Color value inputs" below */
 	td:nth-child(4) {width:0%;display: none}
 	th,
 	td {
@@ -1612,6 +1619,77 @@ button.step-ring::after {
 }
 @media (prefers-reduced-motion: reduce) {
 	button.step-ring { transition: none; }
+}
+
+/* ── Component inputs: same rotating frame segment as ButtonSwitch ──
+   Shows the active value format (360°/n per format). The segment lies over
+   the border of the text input; a double-click on that border cycles the
+   format (spectrumstep.js sets --ring-span / --ring-start on the wrapper). */
+.cmp-ring {
+	display: block;
+	position: relative;
+	transition: --ring-start var(--btn-highlight-duration) ease;
+}
+.cmp-ring > input {
+	display: block;
+	margin: 0;
+}
+.cmp-ring::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	padding: var(--input-border-width);
+	border-radius: var(--input-border-radius);
+	background: conic-gradient(from var(--ring-start),
+		var(--btn-switch-color) 0 var(--ring-span, 120deg), transparent 0);
+	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+	pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+	.cmp-ring { transition: none; }
+}
+
+/* ── Color value inputs: right-aligned, as narrow as the longest value ──
+   The sliders get all remaining width, so the value column is sized exactly,
+   in px (static UI, the font size is fixed as well):
+     component inputs  6 characters ("-0.400", "0.0000", "360.0") + the
+                       browser's up/down buttons (--spin-space)
+     #rrggbb input     7 characters, no up/down buttons
+   plus --value-reserve so that no digit is ever clipped.
+   Text inputs get the unused part of the spin space as right padding, so
+   all fields share one character grid and the last digit of every component
+   value sits in the same column. */
+table.inputs {
+	--value-char: 9px;       /* width of one character of the 16px monospace font */
+	--spin-space: 15px;      /* up/down buttons of number inputs: Chrome, Edge, Safari */
+	--value-reserve: 4px;
+	--value-pad: 6px;
+	--value-text: calc(max(7 * var(--value-char), 6 * var(--value-char) + var(--spin-space)) + var(--value-reserve));
+	--value-col: calc(var(--value-text) + 2 * var(--value-pad) + 2 * var(--input-border-width) + 8px);
+}
+/* Firefox draws wider up/down buttons */
+@supports (-moz-appearance: none) {
+	table.inputs { --spin-space: 22px; }
+}
+/* touch devices draw no up/down buttons */
+@media (pointer: coarse) {
+	table.inputs { --spin-space: 0px; }
+}
+table.inputs td.form-value input:is([type="text"], [type="number"]) {
+	text-align: right;
+	font-size: 16px;
+	padding-left: var(--value-pad);
+	padding-right: var(--value-pad);
+}
+/* hex bytes: no up/down buttons, keep their digits in the column of the number inputs */
+table.inputs .cmp-ring > input[type="text"] {
+	padding-right: calc(var(--value-pad) + var(--spin-space));
+}
+/* #rrggbb: one character more than the component values */
+table.inputs td.form-value.color input[type="text"] {
+	padding-right: calc(var(--value-pad) + max(0px, var(--spin-space) - var(--value-char)));
 }
 
 /* ── Text inputs: same frame as buttons, .selected colour while editing ── */
