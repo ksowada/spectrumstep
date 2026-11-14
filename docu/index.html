@@ -18,6 +18,7 @@
 	<link rel="stylesheet" type="text/css" href="../css/spectrumstep.css" />
 	<script type="text/javascript" src="../js/buttonswitch.js"></script>
 	<script type="text/javascript" src="../js/storage.js"></script>
+	<script type="text/javascript" src="../js/calcs.js"></script>
 	<script type="text/javascript" src="../js/spectrumstep.js"></script>
 	<!-- Matomo --><script>
 		(function () {
@@ -55,12 +56,17 @@
 			</a>
 		</div>
 		<nav class="header-nav" aria-label="Site navigation">
-			<a class="header-link header-backlink-app" href="../" aria-label="SpectrumStep" data-tooltip="SpectrumStep – return to the Color Mixer application"><img class="icon" src="../assets/icons/left-long-solid-full.svg" alt="" />App</a>
+			<a class="header-link" href="../" aria-label="SpectrumStep" data-tooltip="SpectrumStep – return to the Color Mixer application">App</a>
 			<a class="header-link active" href="./" aria-current="page" aria-label="Documentation" data-tooltip="Documentation – technical documentation and usage guide">Docs</a>
 			<a class="header-link" href="https://ardoid.eu/legal-notice/">Legal Notice</a>
 			<a class="header-link" href="https://ardoid.eu/contact/">Contact</a>
 		</nav>
-		<div class="header-right" id="theme-select"></div>
+		<div class="header-right" id="theme-select">
+				<button id="image-picker-btn" class="status-btn icon-only" type="button" aria-label="Pick colors from an image" data-tooltip="Pick colors from an image: opens the image picker in the app"><img src="../assets/icons/eye-dropper-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-black" class="status-btn theme-choice icon-only" aria-label="Black back" data-tooltip="Black back"><img src="../assets/icons/moon-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-white" class="status-btn theme-choice icon-only" aria-label="White back" data-tooltip="White back"><img src="../assets/icons/sun-solid-full.svg" class="icon" alt="" /></button>
+			<button id="theme-custom" class="status-btn theme-choice icon-only" aria-label="Custom back" data-tooltip="Custom back"><img src="../assets/icons/palette-solid-full.svg" class="icon" alt="" /></button>
+		</div>
 	</header>
 	<main>
 		<article class="middle docu-article" id="middle">
@@ -310,6 +316,23 @@ Output HEX</pre>
 			</section>
 		</article>
 	</main>
+
+	<!-- Back source chooser (same as in the app) -->
+	<div id="background-modal" class="cmx-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="background-modal-title">
+		<div class="cmx-modal-dialog background-modal-dialog">
+			<button type="button" class="popup-close-btn" id="background-modal-close" aria-label="Cancel back selection" data-tooltip="Cancel back selection"><img src="../assets/icons/xmark-solid-full.svg" alt="Close" class="icon" /></button>
+			<h3 id="background-modal-title" class="modal-title">Back source</h3>
+			<fieldset class="modal-section"><legend>Back source</legend>
+				<div class="background-source-options">
+				<label class="background-source-option background-picker-option" id="background-picker-option"><span class="background-color-chip" id="background-picker-chip"></span><span><strong>Color picker</strong><small id="background-picker-value">#9c2bee</small></span><input id="background-color-picker" type="color" value="#9c2bee" /></label>
+					<button type="button" class="background-source-option" data-background-source="color1"><span class="background-color-chip" id="background-color1-chip"></span><span><strong>Color 1</strong><small id="background-color1-value"></small></span></button>
+					<button type="button" class="background-source-option" data-background-source="color2"><span class="background-color-chip" id="background-color2-chip"></span><span><strong>Color 2</strong><small id="background-color2-value"></small></span></button>
+				</div>
+				<div class="background-hex-row"><label for="background-color-hex">Selected color</label><input id="background-color-hex" type="text" value="#9c2bee" aria-label="Back color in HEX" /></div>
+				<div class="background-modal-actions"><button type="button" id="background-apply" class="btn-modal-action">OK</button></div>
+			</fieldset>
+		</div>
+	</div>
 </body>
 
 </html>

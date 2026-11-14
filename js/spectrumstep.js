@@ -260,7 +260,8 @@ function getThemeForColor(color) {
 	if (normalized.startsWith('#')) { const hex = normalized.slice(1); rgb = hex.length === 3 ? hex.split('').map(v => parseInt(v+v,16)) : [0,2,4].map(i => parseInt(hex.slice(i,i+2),16)); }
 	else rgb = normalized.match(/[\d.]+/g)?.slice(0,3).map(Number) || [255,255,255];
 	const luminance = rgb.map(v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }).reduce((sum,v,i) => sum + v * [.2126,.7152,.0722][i],0);
-	return luminance > .45 ? 'light' : 'dark';
+	// Below ~.36 white ink reads better on the page colour, above it black ink (the UI is drawn in ink at an alpha)
+	return luminance > .36 ? 'light' : 'dark';
 }
 function applyBackground(color) {
 	const uiTheme = getThemeForColor(color);
@@ -1458,6 +1459,7 @@ function calcform_cmx_getUrlState() {
 	return state;
 }
 function calcform_cmx_syncState() {
+	if (docsReady) { calcform_cmx_docsSaveBackground(); return; }
 	if (!cmxStateReady) return;
 	const state = calcform_cmx_getState();
 	storage.saveState(state);
@@ -1761,13 +1763,64 @@ function themeCare(text, ix) {
 	calcform_cmx_syncState();
 }
 
-/** Docs → App: the links to the app carry the search params of the last app state, so the colors are not reset */
+/* ───────────────────────── docs page ─────────────────────────
+ * Same header as the app. The page color and Color 1 / Color 2 (for the back chooser) are taken from the
+ * last app state; a back color chosen here is written back, so the app shows it when the user returns. */
 const LAST_SEARCH_KEY = 'color-mixer-search';
-function calcform_cmx_docsBackLinks() {
+var docsReady = false;
+/** search params of the last app state ('' when there is none) */
+function calcform_cmx_lastSearch() {
 	let search = '';
 	try { search = localStorage.getItem(LAST_SEARCH_KEY) || ''; } catch (e) { /* storage unavailable */ }
-	if (!/^\?[\w%.,~=&+-]{1,2000}$/.test(search)) return;
-	document.querySelectorAll('a[href="../"]').forEach(a => { a.setAttribute('href', '../' + search); });
+	return /^\?[\w%.,~=&+-]{1,2000}$/.test(search) ? search : '';
+}
+/** Docs → App: the links to the app carry the search params of the last app state, so the colors are not reset */
+function calcform_cmx_docsBackLinks() {
+	const search = calcform_cmx_lastSearch();
+	if (!search) return;
+	document.querySelectorAll('a[href="../"], a[href^="../?"]').forEach(a => { a.setAttribute('href', '../' + search); });
+}
+function calcform_cmx_docsInit() {
+	const isHex = v => typeof v === 'string' && /^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(v);
+	const params = new URLSearchParams(calcform_cmx_lastSearch());
+	const saved = storage.loadState() || {};
+	const mode = params.get('bgm') || saved.backgroundMode;
+	const custom = params.get('bgc') || saved.customBackground;
+	const source = params.get('bgs') || saved.customBackgroundSource;
+	[params.get('c1') || (saved.rgbh || [])[0], params.get('c2') || (saved.rgbh || [])[1]].forEach((c, ix) => {
+		if (isHex(c)) rgbh[ix] = rgbCorrect(c);
+	});
+	if (isHex(custom)) customBackground = rgbCorrect(custom);
+	if (['picker', 'color1', 'color2'].includes(source)) customBackgroundSource = source;
+	if (['white', 'black', 'custom'].includes(mode)) backgroundMode = mode;
+	else themeCare();   // never been in the app: black or white back by the system theme
+	applyBackground(backgroundMode === 'custom' ? customBackground : backgroundMode === 'black' ? '#000000' : '#ffffff');
+	initThemeSwitch();
+	document.addEventListener('keydown', e => {
+		if (e.key === 'Escape' && document.getElementById('background-modal')?.classList.contains('open')) closeBackgroundModal();
+	});
+	// the image picker works on the gradient, so it lives in the app: go there and open it
+	document.getElementById('image-picker-btn')?.addEventListener('click', () => {
+		window.location.href = '../' + calcform_cmx_lastSearch() + '#image';
+	});
+	calcform_cmx_docsBackLinks();
+	// where the text scrolls inside <main> (see CSS), give it the focus so the keyboard scrolls it
+	const main = document.querySelector('main');
+	if (main && getComputedStyle(main).overflowY === 'auto') { main.tabIndex = -1; main.focus({ preventScroll: true }); }
+	docsReady = true;
+}
+/** writes the back color chosen on the docs page into the last app state (search params and session state) */
+function calcform_cmx_docsSaveBackground() {
+	const theme = document.documentElement.dataset.theme;
+	const params = new URLSearchParams(calcform_cmx_lastSearch());
+	params.set('th', theme);
+	params.set('bgm', backgroundMode);
+	if (backgroundMode === 'custom') params.set('bgc', customBackground); else params.delete('bgc');
+	params.set('bgs', customBackgroundSource);
+	try { localStorage.setItem(LAST_SEARCH_KEY, '?' + params.toString()); } catch (e) { /* storage unavailable */ }
+	const saved = storage.loadState();
+	if (saved && typeof saved === 'object') storage.saveState(Object.assign(saved, { theme, backgroundMode, customBackground, customBackgroundSource }));
+	calcform_cmx_docsBackLinks();
 }
 
 var activeTooltipTarget = null;
@@ -1851,16 +1904,14 @@ function initTooltips() {
 		}
 	});
 	document.addEventListener('focusout', hideTooltip);
-	window.addEventListener('scroll', hideTooltip, { passive: true });
+	window.addEventListener('scroll', hideTooltip, { passive: true, capture: true });   // capture: also scrolling inside a popup or the docs text
 	window.addEventListener('resize', hideTooltip, { passive: true });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
 	if (!document.getElementById('form-cmx-0')) {
-		initThemeSwitch();
-		themeCare();
+		calcform_cmx_docsInit();
 		initTooltips();
-		calcform_cmx_docsBackLinks();
 		return;
 	}
 	calcform_cmx_init();
@@ -1884,6 +1935,11 @@ document.addEventListener('DOMContentLoaded', function () {
 	cmxStateReady = true;
 	calcform_cmx_syncState();
 	initTooltips();
+	// Docs → pipette button: arrive with the image picker open
+	if (window.location.hash === '#image') {
+		window.history.replaceState(null, '', window.location.pathname + window.location.search);
+		imagePicker.open();
+	}
 	window.addEventListener('popstate', function () {
 		const popState = calcform_cmx_getUrlState();
 		if (popState) {

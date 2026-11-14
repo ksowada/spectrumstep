@@ -1,15 +1,80 @@
+/* ════════════════════════════════════════════════════════════════
+   Glass skin: monochrome, transparent UI
+   Every surface is black or white at some alpha, painted over the page
+   colour (--background-body, also a custom one). Nothing here carries
+   a hue, so the UI takes on the tint of whatever lies beneath it.
+
+   light-dark(a, b): a on light pages, b on dark pages. It follows
+   `color-scheme`, which data-theme="light|dark" sets further down
+   (applyBackground() picks the theme from the page colour).
+   ════════════════════════════════════════════════════════════════ */
+:root {
+	/* Ink: text and icons */
+	--ui-text:        light-dark(rgb(0 0 0 / 0.84), rgb(255 255 255 / 0.90));
+	--ui-text-strong: light-dark(#000000, #ffffff);
+	--ui-text-muted:  light-dark(rgb(0 0 0 / 0.56), rgb(255 255 255 / 0.62));
+
+	/* Lines: frames and separators. rest → hover → active (selected, focus, ButtonSwitch segment) */
+	--ui-line:        light-dark(rgb(0 0 0 / 0.13), rgb(255 255 255 / 0.15));
+	--ui-line-hover:  light-dark(rgb(0 0 0 / 0.32), rgb(255 255 255 / 0.38));
+	--ui-line-active: light-dark(rgb(0 0 0 / 0.66), rgb(255 255 255 / 0.82));
+
+	/* Fills */
+	--ui-tint:        light-dark(rgb(0 0 0 / 0.035), rgb(255 255 255 / 0.04));    /* quiet areas: fieldset, header, sections */
+	--ui-fill:        light-dark(rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.045)); /* raised: buttons */
+	--ui-fill-hover:  light-dark(rgb(255 255 255 / 0.36), rgb(255 255 255 / 0.11));
+	--ui-fill-active: light-dark(rgb(0 0 0 / 0.07), rgb(255 255 255 / 0.15));     /* selected / pressed */
+	--ui-well:        light-dark(rgb(255 255 255 / 0.28), rgb(0 0 0 / 0.20));     /* sunken: text inputs, slider grooves */
+
+	/* Gloss: light from above, a little shade below */
+	--ui-gloss-hi:    light-dark(rgb(255 255 255 / 0.32), rgb(255 255 255 / 0.12));
+	--ui-gloss-lo:    light-dark(rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.16));
+	--ui-edge:        light-dark(rgb(255 255 255 / 0.48), rgb(255 255 255 / 0.16)); /* 1px light rim */
+	--ui-drop:        light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.32));
+	--ui-gloss: linear-gradient(180deg, var(--ui-gloss-hi), transparent 52%, var(--ui-gloss-lo));
+	--ui-raise: inset 0 1px 0 var(--ui-edge), 0 1px 2px var(--ui-drop);
+	--ui-sink:  inset 0 1px 2px var(--ui-drop);
+
+	/* Colour directly behind a control. Slider knobs paint it under their glass so the
+	   groove does not show through. Dialogs set it to their own background. */
+	--ui-surface: var(--background-body);
+
+	/* The names water.css and the rules below use */
+	--text-main: var(--ui-text);
+	--text-bright: var(--ui-text-strong);
+	--text-muted: var(--ui-text-muted);
+	--form-text: var(--ui-text-strong);
+	--form-placeholder: var(--ui-text-muted);
+	--links: var(--ui-text-strong);
+	--code: var(--ui-text-strong);
+	--selection: var(--ui-line-hover);
+	--border: var(--ui-line);
+	--focus: var(--ui-line-active);
+	--background: var(--ui-well);
+	--background-alt: var(--ui-tint);
+	--button-base: var(--ui-fill);
+	--button-hover: var(--ui-fill-hover);
+	--button-text: var(--ui-text);
+	--button-border: var(--ui-line);
+	--button-gradient: var(--ui-gloss);
+	--button-shadow: var(--ui-raise);
+	--input-bg: var(--ui-well);
+	--input-shadow: var(--ui-sink);
+	--fieldset-gradient: linear-gradient(180deg, transparent, var(--ui-tint));
+}
+
 /* ── Unified button look: change these to restyle ALL buttons ── */
 :root {
 	--btn-size: 36px;                          /* height (= width for icon-only buttons → square) */
 	--btn-font-size: 1rem;
-	--btn-border-width: 5px;
+	--btn-border-width: 3px;
 	--btn-border-radius: 8px;
 	--btn-gap: 5px;                            /* space between neighbouring buttons */
-	--btn-border-color: var(--button-border);  /* default frame colour (follows theme) */
-	--btn-select-color: #555555;               /* frame of active/selected buttons (ButtonSelect, theme, …) – light */
-	--btn-switch-color: #555555;               /* lit frame segment of ButtonSwitch – light */
+	--btn-border-color: var(--button-border);  /* resting frame */
+	--btn-select-color: var(--ui-line-active); /* frame of active/selected buttons (ButtonSelect, theme, …) */
+	--btn-switch-color: var(--ui-line-active); /* lit frame segment of ButtonSwitch */
 	--btn-highlight-duration: 250ms;
-	--btn-hover-color: #777777;                /* hover frame of everything clickable/editable – light */
+	--btn-hover-color: var(--ui-line-hover);   /* hover frame of everything clickable/editable */
 	--hover-duration: 200ms;                   /* fade-in/out of the hover frame */
 
 	/* Text inputs & slider knobs (default: same frame as buttons) */
@@ -23,22 +88,21 @@
 	--bar-gap: 4px;                            /* gap between stacked bars / gradient swatches / input cells */
 	--bar-radius: 8px;                         /* corners of colour-input bar, gradient swatches, CSS-gradient box */
 }
-@media (prefers-color-scheme: dark) {
-	:root {
-		--btn-select-color: #aaaaaa;
-		--btn-switch-color: #aaaaaa;
-		--btn-hover-color: #888888;
-	}
-}
-:root[data-theme="light"] {
-	--btn-select-color: #555555;
-	--btn-switch-color: #555555;
-	--btn-hover-color: #777777;
-}
-:root[data-theme="dark"] {
-	--btn-select-color: #aaaaaa;
-	--btn-switch-color: #aaaaaa;
-	--btn-hover-color: #888888;
+
+/* ── Colour tools are not part of the glass skin ──
+   Colour-input bar, channel sliders, gradient position slider and the swatches sit
+   on colour, not on the page: they keep their solid 5px frames and opaque knobs. */
+.color-bar,
+.colorrange input[type="range"],
+#grd-slider,
+#tab-cmx,
+.linear-gradient {
+	--btn-border-width: 5px;
+	--input-border-width: 5px;
+	--input-border-color: light-dark(#e4e8ed, #333333);
+	--button-base: light-dark(#ffffff, #1e1e1e);
+	--btn-hover-color: light-dark(#777777, #888888);
+	--btn-select-color: light-dark(#555555, #aaaaaa);
 }
 
 /* Standard: Systemeinstellung verwenden */
@@ -48,39 +112,12 @@
 
 	/* Core background & surface */
 	--background-body: #ffffff;
-	--background: #efefef;
-	--background-alt: #f7f7f7;
-	--selection: #9e9e9e;
-	--text-main: #363636;
-	--text-bright: #000000;
-	--text-muted: #70777f;
-	--links: #aaaaaa;
-	--focus: #0096bfab;
-	--border: #dbdbdb;
-	--code: #000000;
 	--animation-duration: 0.1s;
-
-	/* Button variables */
-	--button-base: #e0e0e0;
-	--button-hover: #c8c8c8;
-	--button-text: #363636;
-	--button-border: #dbdbdb;
-	--button-gradient: none;
-	--button-shadow: none;
-
-	/* Fieldset variables */
-	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
-	--fieldset-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-
-	/* Input variables */
-	--input-bg: var(--background-alt);
-	--input-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
 
 	/* Hover & item shadows */
 	--hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 
 	/* Slider variables */
-	--slider-track-bg: var(--background);
 	--slider-track-border: rgba(0, 0, 0, 0.22);
 	--slider-track-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.8);
 	--slider-knob-bg: #ffffff;
@@ -109,9 +146,7 @@
 
 	/* Form & scrollbar */
 	--scrollbar-thumb: rgb(170, 170, 170);
-	--scrollbar-thumb-hover: var(--button-hover);
-	--form-placeholder: #949494;
-	--form-text: #1d1d1d;
+	--scrollbar-thumb-hover: #c8c8c8;
 	--variable: #39a33c;
 	--highlight: #ff0;
 	--icon-filter: none;
@@ -121,39 +156,12 @@
 	:root {
 		/* Core background & surface */
 		--background-body: #000000;
-		--background: #141414;
-		--background-alt: #1e1e1e;
-		--selection: #1c76c5;
-		--text-main: #d4d4d4;
-		--text-bright: #ffffff;
-		--text-muted: #888888;
-		--links: #41adff;
-		--focus: #0096bfab;
-		--border: #333333;
-		--code: #ffbe85;
 		--animation-duration: 0.1s;
-
-		/* Button variables */
-		--button-base: #1e1e1e;
-		--button-hover: #2e2e2e;
-		--button-text: #ffffff;
-		--button-border: #333333;
-		--button-gradient: none;
-		--button-shadow: none;
-
-		/* Fieldset variables */
-		--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
-		--fieldset-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-		/* Input variables */
-		--input-bg: var(--background);
-		--input-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 
 		/* Hover & item shadows */
 		--hover-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
 
 		/* Slider variables */
-		--slider-track-bg: var(--button-base);
 		--slider-track-border: rgba(255, 255, 255, 0.25);
 		--slider-track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
 		--slider-knob-bg: #ffffff;
@@ -183,8 +191,6 @@
 		/* Form & scrollbar */
 		--scrollbar-thumb: #333333;
 		--scrollbar-thumb-hover: #555555;
-		--form-placeholder: #888888;
-		--form-text: #ffffff;
 		--variable: #d941e2;
 		--highlight: #efdb43;
 		--icon-filter: invert(1) brightness(0.9);
@@ -197,39 +203,12 @@
 
 	/* Core background & surface */
 	--background-body: #ffffff;
-	--background: #efefef;
-	--background-alt: #f7f7f7;
-	--selection: #9e9e9e;
-	--text-main: #363636;
-	--text-bright: #000000;
-	--text-muted: #70777f;
-	--links: #0076d1;
-	--focus: #0096bfab;
-	--border: #dbdbdb;
-	--code: #000000;
 	--animation-duration: 0.1s;
-
-	/* Button variables */
-	--button-base: #e0e0e0;
-	--button-hover: #c8c8c8;
-	--button-text: #363636;
-	--button-border: #dbdbdb;
-	--button-gradient: none;
-	--button-shadow: none;
-
-	/* Fieldset variables */
-	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
-	--fieldset-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-
-	/* Input variables */
-	--input-bg: var(--background-alt);
-	--input-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
 
 	/* Hover & item shadows */
 	--hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 
 	/* Slider variables */
-	--slider-track-bg: var(--background);
 	--slider-track-border: rgba(0, 0, 0, 0.22);
 	--slider-track-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 0 rgba(255, 255, 255, 0.8);
 	--slider-knob-bg: #ffffff;
@@ -258,9 +237,7 @@
 
 	/* Form & scrollbar */
 	--scrollbar-thumb: rgb(170, 170, 170);
-	--scrollbar-thumb-hover: var(--button-hover);
-	--form-placeholder: #949494;
-	--form-text: #1d1d1d;
+	--scrollbar-thumb-hover: #c8c8c8;
 	--variable: #39a33c;
 	--highlight: #ff0;
 	--icon-filter: none;
@@ -272,39 +249,12 @@
 
 	/* Core background & surface */
 	--background-body: #000000;
-	--background: #141414;
-	--background-alt: #1e1e1e;
-	--selection: #1c76c5;
-	--text-main: #d4d4d4;
-	--text-bright: #ffffff;
-	--text-muted: #888888;
-	--links: #41adff;
-	--focus: #0096bfab;
-	--border: #333333;
-	--code: #ffbe85;
 	--animation-duration: 0.1s;
-
-	/* Button variables */
-	--button-base: #1e1e1e;
-	--button-hover: #2e2e2e;
-	--button-text: #ffffff;
-	--button-border: #333333;
-	--button-gradient: none;
-	--button-shadow: none;
-
-	/* Fieldset variables */
-	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
-	--fieldset-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-	/* Input variables */
-	--input-bg: var(--background);
-	--input-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 
 	/* Hover & item shadows */
 	--hover-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
 
 	/* Slider variables */
-	--slider-track-bg: var(--button-base);
 	--slider-track-border: rgba(255, 255, 255, 0.25);
 	--slider-track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
 	--slider-knob-bg: #ffffff;
@@ -334,8 +284,6 @@
 	/* Form & scrollbar */
 	--scrollbar-thumb: #333333;
 	--scrollbar-thumb-hover: #555555;
-	--form-placeholder: #888888;
-	--form-text: #ffffff;
 	--variable: #d941e2;
 	--highlight: #efdb43;
 	--icon-filter: invert(1) brightness(0.9);
@@ -368,8 +316,10 @@ header,
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 8px 18px;
-	background: var(--background-body);
-	border-bottom: 1px solid var(--border);
+	/* glass bar: sheen from above over the page colour, etched hairline below */
+	background: linear-gradient(180deg, var(--ui-fill-hover), var(--ui-tint)), var(--ui-surface);
+	border-bottom: 1px solid var(--ui-line);
+	box-shadow: 0 1px 0 var(--ui-edge);
 	padding: 6px 10px;
 }
 .header-left,
@@ -391,7 +341,7 @@ header,
 	align-content: center;
 }
 .header-title-2 {
-	color: var(--links);
+	color: var(--text-muted);
 	font-size: 20px;
 	font-weight: bold;
 	align-content: center;
@@ -400,52 +350,38 @@ header,
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 6px 18px;
+	gap: 4px 6px;
 }
 .header-link {
 	font-size: 0.875rem;
 	font-weight: 500;
 	color: var(--text-muted);
 	text-decoration: none;
-	padding: 3px 0;
-	border-bottom: 1.5px solid transparent;
-	transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 	white-space: nowrap;
 }
-.header-link:hover,
-.header-link:focus-visible {
+/* Navigation links: glass pills. Hover lifts one faintly, the current page is a lit pill */
+.header-nav .header-link {
+	padding: 4px 12px;
+	border: 1px solid transparent;
+	border-radius: 99px;
+	background-clip: padding-box;
+	transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.header-nav .header-link:hover,
+.header-nav .header-link:focus-visible {
 	color: var(--text-bright);
-	border-bottom-color: var(--text-muted);
+	border-color: var(--ui-line);
+	background-color: var(--ui-fill);
 	text-decoration: none;
+	outline: none;
 }
-.header-link.active,
-.header-link[aria-current="page"] {
-	color: var(--text-bright);
-	font-weight: 600;
-	border-bottom-color: var(--text-bright);
-}
-.header-link.header-backlink-app {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	font-size: 0.92rem;
-	font-weight: 700;
-	color: var(--text-bright);
-	padding: 3px 10px;
-	border: 1px solid var(--border);
-	border-radius: 5px;
-	background: transparent;
-}
-.header-link.header-backlink-app .icon {
-	height: 1.05rem;
-	padding: 0 2px 0 0;
-}
-.header-link.header-backlink-app:hover,
-.header-link.header-backlink-app:focus-visible {
-	color: var(--text-bright);
-	border-color: var(--text-bright);
-	transform: translateX(-1px);
-	text-decoration: none;
+.header-nav .header-link.active,
+.header-nav .header-link[aria-current="page"] {
+	color: var(--text-bright);   /* same font weight as the other links: no link moves when the page changes */
+	border-color: var(--ui-line-hover);
+	background-color: var(--ui-fill-hover);
+	background-image: var(--ui-gloss);
+	box-shadow: var(--ui-raise);
 }
 @media (max-width: 600px) {
 	.site-header {
@@ -541,7 +477,6 @@ fieldset {
 	padding-bottom: 0px;
 	padding-top: 5px;
 	background: var(--fieldset-gradient);
-	box-shadow: var(--fieldset-shadow);
 }
 legend {
 	color: var(--text-muted);
@@ -994,15 +929,19 @@ table.inputs {
 	.settings-half > fieldset.range-setting { flex-basis: 100%; }
 }
 .range-setting input[type="range"]::-webkit-slider-runnable-track {
-	background: var(--slider-track-bg);
-	border: 1px solid var(--border);
-	border-radius: 4px;
+	box-sizing: border-box;
+	background: var(--ui-well);
+	border: 1px solid var(--ui-line);
+	border-radius: 99px;
+	box-shadow: var(--ui-sink);
 	height: 8px;
 }
 .range-setting input[type="range"]::-moz-range-track {
-	background: var(--slider-track-bg);
-	border: 1px solid var(--border);
-	border-radius: 4px;
+	box-sizing: border-box;
+	background: var(--ui-well);
+	border: 1px solid var(--ui-line);
+	border-radius: 99px;
+	box-shadow: var(--ui-sink);
 	height: 8px;
 }
 /** special styles for gradient text and background */
@@ -1043,7 +982,9 @@ table.inputs {
 	border-radius: var(--btn-border-radius);
 	border: var(--btn-border-width) solid var(--btn-border-color);
 	font-size: var(--btn-font-size);
-	background: var(--button-base);
+	background-color: var(--button-base);
+	background-image: var(--button-gradient);
+	box-shadow: var(--button-shadow);
 	color: var(--button-text);
 	cursor: pointer;
 	font: inherit;
@@ -1060,7 +1001,6 @@ table.inputs {
 	border-color: var(--btn-select-color);
 	border-style: solid;
 	border-width: var(--btn-border-width);
-	box-shadow: none;
 }
 .theme-choice {
 	display: inline-flex;
@@ -1153,10 +1093,44 @@ table.inputs {
 	border-top: 1px solid var(--tooltip-border);
 }
 /** documentation page styling */
+/* With a mouse (classic scrollbars) the text scrolls below the header instead of the whole page.
+   The scrollbar then never narrows the header, so its links and buttons sit exactly where they
+   are in the app, and the header stays in view while reading. */
+@media (hover: hover) and (pointer: fine) {
+	#SpectrumStep-Docu {
+		height: 100dvh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+	#SpectrumStep-Docu > .site-header { flex: none; }
+	#SpectrumStep-Docu > main {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		outline: none;
+	}
+}
 .docu-article {
 	max-width: 920px;
 	margin: 0.5rem auto 2rem;
 	line-height: 1.6;
+}
+/* Text markup is ink as well, so it stays readable on any page colour:
+   links are told apart by their underline, code by its tinted chip. */
+.docu-article a {
+	text-decoration: underline;
+	text-decoration-color: var(--ui-line-hover);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	transition: text-decoration-color 0.15s ease;
+}
+.docu-article a:hover,
+.docu-article a:focus-visible {
+	text-decoration-color: currentColor;
+}
+.docu-article code {
+	background: var(--ui-fill-active);
 }
 .docu-article .tool-title {
 	font-size: 1.55rem;
@@ -1320,6 +1294,7 @@ table.inputs {
 	visibility: visible;
 }
 .cmx-modal-dialog {
+	--ui-surface: var(--modal-dialog-bg);
 	position: relative;
 	background: var(--modal-dialog-bg);
 	border: 1px solid var(--modal-dialog-border);
@@ -1344,6 +1319,7 @@ table.inputs {
 	top: 12px;
 	right: 12px;
 	background: transparent;
+	box-shadow: none;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	padding: 5px;
@@ -1455,19 +1431,6 @@ table.inputs {
 /* Calm, lighter workspace treatment */
 :root[data-theme="light"] {
 	--background-body: #fbfcfd;
-	--background: #ffffff;
-	--background-alt: #f6f8fa;
-	--text-main: #29313b;
-	--text-muted: #697586;
-	--border: #e4e8ed;
-	--button-base: #ffffff;
-	--button-hover: #f2f5f7;
-	--button-border: #e4e8ed;
-	--button-gradient: none;
-	--button-shadow: none;
-	--fieldset-gradient: none;
-	--fieldset-shadow: none;
-	--input-shadow: none;
 	--hover-shadow: 0 5px 16px rgba(28, 42, 56, 0.14);
 }
 
@@ -1475,7 +1438,7 @@ fieldset {
 	border-radius: 10px;
 	padding: 8px 10px 10px;
 	margin-bottom: 10px;
-	background: var(--background-body);
+	background: var(--fieldset-gradient);
 	box-shadow: none;
 }
 legend {
@@ -1809,11 +1772,53 @@ input[type="number"],
 	border-color: var(--btn-select-color);
 }
 
-/* Slider knobs: Steps / Overdrive / colour channels */
-:is(.range-setting, .colorrange) input[type="range"]:hover:not(:active)::-webkit-slider-thumb {
+/* Glass buttons: raised at rest (also while focused), pressed-in while held or selected */
+:is(button, .btn-select):focus {
+	box-shadow: var(--button-shadow);
+}
+:is(button, .btn-select):active {
+	background-image: none;
+	box-shadow: var(--ui-sink);
+}
+:is(button, .btn-select).selected,
+:is(button, .btn-select).selected:focus {
+	background-color: var(--ui-fill-active);
+	background-image: none;
+	box-shadow: var(--ui-sink);
+}
+.popup-close-btn,
+.popup-close-btn:focus,
+.popup-close-btn:active {
+	background-image: none;
+	box-shadow: none;
+}
+
+/* Steps / Overdrive / option sliders: glass knob. The page colour lies under the
+   glass (and under the frame), so the groove does not show through the knob. */
+.range-setting input[type="range"]::-webkit-slider-thumb {
+	background: var(--ui-gloss), linear-gradient(var(--ui-fill-hover), var(--ui-fill-hover)), var(--ui-surface);
+	background-clip: border-box;
+	border-color: var(--ui-line-hover);
+	box-shadow: var(--ui-raise);
+}
+.range-setting input[type="range"]::-moz-range-thumb {
+	background: var(--ui-gloss), linear-gradient(var(--ui-fill-hover), var(--ui-fill-hover)), var(--ui-surface);
+	background-clip: border-box;
+	border-color: var(--ui-line-hover);
+	box-shadow: var(--ui-raise);
+}
+.range-setting input[type="range"]:is(:hover, :active, :focus-visible)::-webkit-slider-thumb {
+	border-color: var(--ui-line-active);
+}
+.range-setting input[type="range"]:is(:hover, :active, :focus-visible)::-moz-range-thumb {
+	border-color: var(--ui-line-active);
+}
+
+/* Slider knobs: colour channels (Steps / Overdrive: see the glass knob above) */
+.colorrange input[type="range"]:hover:not(:active)::-webkit-slider-thumb {
 	border-color: var(--btn-hover-color);
 }
-:is(.range-setting, .colorrange) input[type="range"]:hover:not(:active)::-moz-range-thumb {
+.colorrange input[type="range"]:hover:not(:active)::-moz-range-thumb {
 	border-color: var(--btn-hover-color);
 }
 .colorrange input[type="range"]::-webkit-slider-runnable-track {
@@ -2185,8 +2190,8 @@ html.is-docked .cmx-modal-backdrop:not(.dock-popup) { z-index: 1200; }
 	top: 3px; right: 3px;
 	width: 8px; height: 8px;
 	border-radius: 50%;
-	background: var(--links);
-	box-shadow: 0 0 0 2px var(--background-body);
+	background: var(--ui-text-strong);
+	box-shadow: 0 0 0 2px var(--ui-surface);
 }
 /* the image popup uses the page color (also a custom back color) and the full width of the popup area */
 #image-modal {
@@ -2197,6 +2202,7 @@ html.is-docked .cmx-modal-backdrop:not(.dock-popup) { z-index: 1200; }
 }
 #options-modal.dock-popup { padding-top: 8px; z-index: 1050; }   /* above the image popup (which comes later in the page) */
 .image-dialog, #image-modal.open .image-dialog {
+	--ui-surface: var(--background-body);
 	max-width: none;
 	width: 100%;
 	height: 100%;
