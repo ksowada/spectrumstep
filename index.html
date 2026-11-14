@@ -117,47 +117,46 @@
 					</div>
 				</fieldset>
 			</div>
-			<fieldset class="settings-container steps-group">
-				<legend>Steps</legend>
-				<div class="range-setting">
-					<label for="steps">Steps</label>
-					<input type="range" id="steps" name="steps" min="2" max="16" value="7">
-					<output for="steps" id="steps-value">7</output>
+			<div class="settings-row">
+				<div class="settings-half">
+					<fieldset class="flex" id="gradientMode">
+						<legend>Gradient</legend>
+						<div id="gradient-select"></div>
+						<div id="gradientDirection"></div>
+						<div id="gradientWay"></div>
+						<div id="contrastVisibility"></div>
+						<button id="main-load-btn" class="icon-only" type="button" aria-label="Load palette" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="" class="icon" /></button>
+						<button id="main-export-btn" class="icon-only" type="button" aria-label="Export palette" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" /></button>
+					</fieldset>
+					<fieldset class="range-setting">
+						<legend><label for="steps">Steps</label> <output for="steps" id="steps-value">7</output></legend>
+						<input type="range" id="steps" name="steps" min="2" max="16" value="7">
+					</fieldset>
 				</div>
-				<div class="range-setting">
-					<label for="overdrive">Overdrive</label>
-					<input type="range" id="overdrive" name="overdrive" min="0" max="16" value="0">
-					<output for="overdrive" id="overdrive-value">0</output>
+				<div class="settings-half">
+					<fieldset class="range-setting">
+						<legend><label for="overdrive">Overdrive</label> <output for="overdrive" id="overdrive-value">0</output></legend>
+						<input type="range" id="overdrive" name="overdrive" min="0" max="16" value="0">
+					</fieldset>
+					<fieldset class="contrast-group" id="textContrast">
+						<legend>Text</legend>
+						<button id="textContrast-black" class="btn-select" data-color="#000000" aria-label="Black">#</button>
+						<button id="textContrast-white" class="btn-select" data-color="#ffffff" aria-label="White">#</button>
+						<label id="textContrast-label" class="btn-select">
+							<span  id="textContrast-color-preview">#</span>
+							<input type="color" value="#888888" id="textContrast-color">
+						</label>
+					</fieldset>
+					<fieldset class="contrast-group" id="backContrast">
+						<legend>Background</legend>
+						<button id="backContrast-black" class="btn-select" data-color="#000000" aria-label="Black"><span>#</span></button>
+						<button id="backContrast-white" class="btn-select" data-color="#ffffff" aria-label="White"><span>#</span></button>
+						<label id="backContrast-label" class="btn-select">
+							<span  id="backContrast-color-preview">#</span>
+							<input type="color" value="#888888" id="backContrast-color">
+						</label>
+					</fieldset>
 				</div>
-			</fieldset>
-			<div class="settings-container">
-				<fieldset class="flex" id="gradientMode">
-					<legend>Gradient</legend>
-					<div id="gradient-select"></div>
-					<div id="gradientDirection"></div>
-					<div id="gradientWay"></div>
-					<div id="contrastVisibility"></div>
-					<button id="main-load-btn" class="icon-only" type="button" aria-label="Load palette" data-tooltip="Open palette loading dialog (from browser storage or JSON file)"><img src="assets/icons/folder-open-solid-full.svg" alt="" class="icon" /></button>
-					<button id="main-export-btn" class="icon-only" type="button" aria-label="Export palette" data-tooltip="Open palette export dialog (HEX, CSS, PNG, SVG, JSON, or browser storage)"><img src="assets/icons/download-solid-full.svg" alt="" class="icon" /></button>
-				</fieldset>
-				<fieldset class="flex-scatter-childs" id="textContrast">
-					<legend>Text color</legend>
-					<button id="textContrast-black" class="btn-select" data-color="#000000">Black</button>
-					<button id="textContrast-white" class="btn-select" data-color="#ffffff">White</button>
-					<label id="textContrast-label" class="btn-select">
-						<span  id="textContrast-color-preview">Color</span>
-						<input type="color" value="#888888" id="textContrast-color">
-					</label>
-				</fieldset>
-				<fieldset class="flex-scatter-childs" id="backContrast">
-					<legend>Background color</legend>
-					<button id="backContrast-black" class="btn-select" data-color="#000000"><span>Black</span></button>
-					<button id="backContrast-white" class="btn-select" data-color="#ffffff"><span>White</span></button>
-					<label id="backContrast-label" class="btn-select">
-						<span  id="backContrast-color-preview">Color</span>
-						<input type="color" value="#888888" id="backContrast-color">
-					</label>
-				</fieldset>
 			</div>
 			<div id="grd-slider"></div>
 			<div id="tab-cmx"></div>

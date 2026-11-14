@@ -328,7 +328,7 @@ function calcform_cmx_init() {
 	overdrive = new RangeSetting('overdrive',calcform_cmx_dyna, 'Overdrive extrapolation (0–16): linearly extrapolate additional color stops beyond Color 1 and Color 2 on both ends');
 	gradientSwitch = new ButtonSwitch(
 		document.getElementById('gradient-select'),
-		colModes, 'assets/icons/arrows-rotate-solid-full.svg',undefined, () => calcform_cmx_dyna(), {
+		colModes, undefined, undefined, () => calcform_cmx_dyna(), {
 			tooltips: {
 				HSL: 'Interpolation Space: HSL. Linearly interpolates Hue, Saturation, and Lightness. Click to switch to RGB.',
 				RGB: 'Interpolation Space: sRGB. Linearly interpolates Red, Green, and Blue channels. Click to switch to HSV.',
@@ -1588,7 +1588,10 @@ function positionTooltip(target) {
 	tip.textContent = target.dataset.tooltip;
 	tip.classList.add('show');
 
-	const rect = target.getBoundingClientRect();
+	// Range settings: anchor at the whole fieldset (incl. legend) so the
+	// live value in the legend stays visible while sliding
+	const anchor = target.closest('fieldset.range-setting') || target;
+	const rect = anchor.getBoundingClientRect();
 	const tipRect = tip.getBoundingClientRect();
 	const gap = 9;
 	const margin = 8;

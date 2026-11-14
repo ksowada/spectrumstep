@@ -1036,17 +1036,6 @@ table.inputs {
 	gap: 8px;
   	align-items: center;
 }
-.flex-scatter-childs {
-	display: flex;
-	gap: 10px; /* Abstand zwischen den Elementen */
-	width: 100%; /* Nimmt die maximale Breite des Elternelements ein */
-	box-sizing: border-box;
-}
-.flex-scatter-childs > * {
-	flex: 1;
-	min-width: 0; /* Verhindert, dass das Input-Feld die Box sprengt */
-	box-sizing: border-box;
-}
 .narrow {
 	width: 15ch;
 }
@@ -1056,45 +1045,70 @@ table.inputs {
 .status-btn .icon {
 	max-width: none;
 }
-/** settings for steps and overdrive */
-.settings-container {
+/** settings row: two symmetric halves
+    left:  [Gradient (fixed)] [Steps (flexible)]
+    right: [Overdrive (flexible)] [Text (fixed)] [Background (fixed)]
+    fixed blocks sit at the outer edges, sliders meet in the middle */
+.settings-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.5rem 0.75rem;
+	margin-bottom: 10px;
+}
+.settings-half {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 0.75rem 1.5rem;
+	gap: 0.75rem;
+	min-width: 0;
 }
-/* 1. und 4. Fieldset: Minimal breit (nur so breit wie der Inhalt) */
-.settings-container fieldset:nth-child(1),
-.settings-container fieldset:nth-child(4) {
+.settings-half > fieldset {
 	flex: 0 0 auto;
-	min-width: 0; /* Verhindert das Ausbrechen bei sehr langem Inhalt */
+	min-width: 0;
+	margin: 0;
+	border-radius: 9px;
 }
-/* 2. und 3. Fieldset: Teilen sich den restlichen verfügbaren Platz */
-.settings-container fieldset:nth-child(2),
-.settings-container fieldset:nth-child(3) {
-	flex: 1 1 0%;
-}
-.range-setting {
+/* Range fieldsets: label + value live in the legend, slider fills the box */
+.settings-half > fieldset.range-setting {
+	flex: 1 1 120px;
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
-	flex: 1 1 250px;
-	min-width: 0;
 }
-.range-setting label {
-	flex: 0 0 6rem;
+.range-setting legend label {
+	display: inline;
 	margin: 0;
-	white-space: nowrap;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+.range-setting legend output {
+	display: inline-block;
+	min-width: 2ch;
+	text-align: left;
+	font-variant-numeric: tabular-nums;
+	color: var(--text-main);
 }
 .range-setting input[type="range"] {
-	flex: 1 1 auto;
-	width: 0;
+	width: 100%;
 	min-width: 0;
+	height: var(--btn-size);              /* same box height as the button fieldsets */
 	margin: 0;
 }
-.range-setting output {
-	flex: 0 0 2rem;
-	text-align: right;
-	font-variant-numeric: tabular-nums;
+/* Text / Background: three square "#" buttons */
+.contrast-group {
+	display: flex;
+	gap: 8px;
+}
+.contrast-group > .btn-select {
+	flex: 0 0 auto;
+	width: var(--btn-size);
+	padding: 0;
+	box-sizing: border-box;
+}
+@media (max-width: 1000px) {
+	.settings-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+	.settings-half { flex-wrap: wrap; }
+	.settings-half > fieldset.range-setting { flex-basis: 100%; }
 }
 .range-setting input[type="range"]::-webkit-slider-runnable-track {
 	background: var(--slider-track-bg);
@@ -1607,11 +1621,17 @@ button.icon-only {
 	min-width: 0;
 }
 /* Center icon + label consistently across browsers (Opera/Chrome/Firefox/Safari). */
-button:has(> .icon) {
+button:has(> .icon),
+button:has(> .label) {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	line-height: 1.2;
+}
+/* Text-only ButtonSwitch: drop water.css vertical padding inside the fixed height */
+button:has(> .label):not(:has(> .icon)) {
+	padding-top: 0;
+	padding-bottom: 0;
 }
 button:has(> .icon) > .icon {
 	flex: 0 0 auto;
@@ -1663,27 +1683,6 @@ input:not([type="range"]), select {
 	text-shadow: 0 1px 1px rgba(255,255,255,0.22);
 }
 .linear-gradient:hover { transform: translateY(-1px); }
-.settings-container { gap: 0.5rem 0.75rem; }
-.settings-container > fieldset { border-radius: 9px; }
-.range-setting { padding: 2px 0; }
-/* Steps group without visible frame: keep horizontal insets so the sliders stay in place */
-fieldset.steps-group {
-	border-color: transparent;
-	background: transparent;
-	box-shadow: none;
-	padding-top: 0;
-	padding-bottom: 0;
-}
-fieldset.steps-group > legend {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-	white-space: nowrap;
-}
 
 @media (max-width: 700px) {
 	.button-container button { flex: 1 1 calc(50% - 7px); }

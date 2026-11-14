@@ -3,7 +3,9 @@ class RangeSetting {
     constructor(id, callback, tooltip = undefined) {
         this.range = document.getElementById(id);
         this.output = document.getElementById(`${id}-value`);
-        this.label = document.querySelector(`label[for="${id}"]`);
+        // Label may sit inside the fieldset legend; fall back to the legend itself
+        this.label = document.querySelector(`label[for="${id}"]`)
+            ?? this.range.closest('fieldset')?.querySelector('legend');
         this.callback = callback;
 
         if (tooltip) {
