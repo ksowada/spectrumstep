@@ -16,6 +16,11 @@
 	--input-border-radius: var(--btn-border-radius);
 	--input-border-color: var(--btn-border-color);
 	--knob-size: 22px;                         /* Steps/Overdrive + gradient position knobs */
+
+	/* Colour bars: colour-input bar, channel sliders, vertical gradient swatches */
+	--bar-height: 43px;                        /* constant height of every bar */
+	--bar-gap: 4px;                            /* gap between stacked bars / gradient swatches / input cells */
+	--bar-radius: 8px;                         /* corners of colour-input bar, gradient swatches, CSS-gradient box */
 }
 @media (prefers-color-scheme: dark) {
 	:root {
@@ -59,8 +64,8 @@
 	--button-hover: #c8c8c8;
 	--button-text: #363636;
 	--button-border: #dbdbdb;
-	--button-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(0, 0, 0, 0.05));
-	--button-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+	--button-gradient: none;
+	--button-shadow: none;
 
 	/* Fieldset variables */
 	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
@@ -132,8 +137,8 @@
 		--button-hover: #2e2e2e;
 		--button-text: #ffffff;
 		--button-border: #333333;
-		--button-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
-		--button-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+		--button-gradient: none;
+		--button-shadow: none;
 
 		/* Fieldset variables */
 		--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
@@ -208,8 +213,8 @@
 	--button-hover: #c8c8c8;
 	--button-text: #363636;
 	--button-border: #dbdbdb;
-	--button-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(0, 0, 0, 0.05));
-	--button-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+	--button-gradient: none;
+	--button-shadow: none;
 
 	/* Fieldset variables */
 	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
@@ -283,8 +288,8 @@
 	--button-hover: #2e2e2e;
 	--button-text: #ffffff;
 	--button-border: #333333;
-	--button-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
-	--button-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	--button-gradient: none;
+	--button-shadow: none;
 
 	/* Fieldset variables */
 	--fieldset-gradient: linear-gradient(180deg, var(--background-body), var(--background));
@@ -350,9 +355,9 @@ html {
 	font-size: 16px;
 }
 body {
-	max-width: 1280px;
-	margin-top: 0px;
-	padding: 0 0;
+	max-width: none;           /* header + main use the whole viewport width */
+	margin: 0;
+	padding: 0;
 	background-color: var(--background-body);
 }
 header,
@@ -480,16 +485,35 @@ input[type="number"].is-invalid:focus {
 	border-color: #e53935 !important;
 	box-shadow: 0 0 0 1px #e53935, inset 0 2px 5px rgb(0 0 0 / 25%) !important;
 }
-input[type="color"] {
-	padding: 0; /* fill color picking area full with color */
-	height: 43px;
-	border: var(--input-border-width) solid var(--input-border-color);
-	border-radius: var(--input-border-radius);
-	transition: border-color var(--hover-duration) ease;
+/* Colour input bar: Firefox/Chrome draw their own grey frame and anti-aliased rim around the
+   native swatch, so the colour is painted by a plain div (--bar-color, kept in sync by
+   inputhtml.js) and the native input lies invisibly on top to keep the picker. */
+.color-bar {
+	position: relative;
+	height: var(--bar-height);
+	border-radius: var(--bar-radius);
+	background-color: var(--bar-color, #000);
+	/* same inner frame as the gradient swatches: appears on hover = "clickable" */
+	outline: var(--btn-border-width) solid transparent;
+	outline-offset: calc(-1 * var(--btn-border-width));
+	transition: outline-color var(--hover-duration) ease;
+}
+.color-bar:hover { outline-color: var(--btn-hover-color); }
+.color-bar:focus-within { outline-color: var(--btn-select-color); }
+.color-bar > input[type="color"] {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	opacity: 0;
+	cursor: pointer;
 }
 input[type="range"] {
 	margin: 0px 0; /* overwrite water margin for less in-between-space */
-	height: 43px;
+	height: var(--bar-height);
 	border-width: 0px;
 }
 p ,li{
@@ -546,7 +570,9 @@ table.inputs {
 	/* wie grid-template-columns */
 	width: 100%;
 	/* oder fester Wert, z. B. 900px */
-	border-collapse: collapse;
+	border-collapse: separate;
+	border-spacing: 0 var(--bar-gap);   /* vertical gap between the stacked bars */
+	margin: calc(-1 * var(--bar-gap)) 0;
 	td:nth-child(1) {width: 50px;}
 	td:nth-child(2) {width: auto;}
 	td:nth-child(3) {width: var(--value-col);}   /* sized in ch, see "Color value inputs" below */
@@ -562,8 +588,9 @@ table.inputs {
 		/* damit padding die Höhe nicht vergrößert */
 		padding: 0px;
 		margin: 0px;
-		padding-right: 0.5rem; /* a little gap between cells */
+		padding-right: var(--bar-gap); /* gap between cells */
 	}
+	td:nth-child(3) { padding-right: 0; }   /* last visible column: flush with the container edge */
 	td.empty {
 		text-align: left;
 	}
@@ -577,9 +604,6 @@ table.inputs {
 	/* Disables font features that might cause the '#' to glitch */
 	font-variant-ligatures: none;
 	font-feature-settings: "liga" 0, "clig" 0;
-}
-.form-value.color input {
-	background: var(--button-base);
 }
 .form-value.color input[type="text"] {
 	background-color: var(--input-bg);
@@ -659,15 +683,16 @@ table.inputs {
 .color-palette-right, .color-palette-left {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-	gap: 4px;
+	gap: var(--bar-gap);
 }
 .color-palette-down, .color-palette-up {
 	display: grid;
 	grid-template-rows: repeat(auto-fit, 1fr);
-	gap: 4px;
+	gap: var(--bar-gap);
 }
 .color-palette-down .color-step, .color-palette-up .color-step {
-	min-height: 34px;
+	min-height: var(--bar-height);
+	height: var(--bar-height);
 	width: 100%;
 }
 .color-palette-down .color-step-content.has-contrast,
@@ -1565,9 +1590,8 @@ input:not([type="range"]), select {
 /* Steps = ∞: continuous gradient, no pos-point knobs */
 #grd-slider.steps-infinite .gradient-slider-knobs-layer { display: none; }
 #gradientMode > button { margin: 0; }
-.color-palette-right, .color-palette-left { gap: 6px; }
 .color-step {
-	border-radius: 7px;
+	border-radius: var(--bar-radius);
 	overflow: hidden;
 }
 :root { --swatch-row-height: 132px; }
@@ -1576,9 +1600,9 @@ input:not([type="range"]), select {
 .linear-gradient {
 	box-sizing: border-box;
 	min-height: var(--swatch-row-height);
-	margin: 12px 0 14px;
+	margin: var(--bar-gap) 0;
 	padding: 1rem;
-	border-radius: 12px;
+	border-radius: var(--bar-radius);
 	box-shadow: inset 0 0 0 1px rgba(25, 35, 45, 0.08);
 	font-size: 0.95rem;
 	line-height: 1.5;
@@ -1667,7 +1691,7 @@ table.inputs {
 	--value-reserve: 4px;
 	--value-pad: 6px;
 	--value-text: calc(max(7 * var(--value-char), 6 * var(--value-char) + var(--spin-space)) + var(--value-reserve));
-	--value-col: calc(var(--value-text) + 2 * var(--value-pad) + 2 * var(--input-border-width) + 8px);
+	--value-col: calc(var(--value-text) + 2 * var(--value-pad) + 2 * var(--input-border-width));
 }
 /* Firefox draws wider up/down buttons */
 @supports (-moz-appearance: none) {
@@ -1870,4 +1894,10 @@ input[type="number"],
 }
 .color-step.is-selected {
 	outline-color: var(--btn-select-color);
+}
+
+/* Bars share one corner radius (--bar-radius): colour bar, channel sliders, swatches.
+   Must come after the generic `input:not([type="range"])` radius rule. */
+.colorrange input[type="range"] {
+	border-radius: var(--bar-radius);
 }

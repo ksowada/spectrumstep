@@ -59,7 +59,7 @@ function InputHtml(args) {
             param.value = rgbCorrect(param.value);
             // empty/invalid initial value would give "#" which <input type="color"> rejects
             if (!/^#[0-9a-f]{6}$/.test(param.value)) param.value = '#000000';
-            html_range = '<td class="form-value color"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '"/></td>';
+            html_range = '<td class="form-value color"><div class="color-bar" style="--bar-color:' + param.value + '"><input id="' + combineToId([this.el, varName, 'range']) + '" class="form-control" type="color" value="' + param.value + '"/></div></td>';
             html += html_name + html_range + '<td class="form-value color"><input id="' + combineToId([this.el, varName]) + '" type="text" class="form-control" value="' + param.value + '" autocomplete="off" spellcheck="false"/></td>' + html_unit;
             break;
           case 'button':
@@ -428,6 +428,20 @@ function InputHtml(args) {
     var textEl = document.getElementById(combineToId([this.el, varName]));
     var rangeEl = document.getElementById(combineToId([this.el, varName, 'range']));
     if (!textEl || !rangeEl) return;
+
+    // The colour is painted by .color-bar (not by the native swatch, see CSS): keep
+    // --bar-color in sync with picks by the user and with programmatic `.value = …` writes.
+    var bar = rangeEl.parentElement;
+    var valueDesc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    var syncBar = function () { bar.style.setProperty('--bar-color', valueDesc.get.call(rangeEl)); };
+    Object.defineProperty(rangeEl, 'value', {
+      configurable: true,
+      get: function () { return valueDesc.get.call(this); },
+      set: function (v) { valueDesc.set.call(this, v); syncBar(); }
+    });
+    rangeEl.addEventListener('input', syncBar);
+    rangeEl.addEventListener('change', syncBar);
+    syncBar();
 
     var param = this.params[varName];
     var getOrigTooltip = function () {
