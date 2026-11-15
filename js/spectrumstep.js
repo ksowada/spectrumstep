@@ -203,6 +203,11 @@ var themeSwitch = undefined;
 var backgroundMode = 'white';
 var customBackground = defaultBackgroundColor;
 var customBackgroundSource = 'picker';
+/** the color of the "Color picker" row: constant while Color 1 / Color 2 are chosen as back source */
+var customPickerColor = defaultBackgroundColor;
+function syncPickerColor() {
+	if (customBackgroundSource === 'picker' && /^#[0-9a-f]{6}$/i.test(customBackground)) customPickerColor = customBackground.toLowerCase();
+}
 var backgroundDraft = null;
 var textColorSelect = undefined;
 var backColorSelect = undefined;
@@ -235,21 +240,26 @@ function initThemeSwitch() {
 	document.getElementById('background-apply')?.addEventListener('click', commitBackgroundModal);
 	document.getElementById('background-modal')?.addEventListener('click', e => { if (e.target.id === 'background-modal') commitBackgroundModal(); });
 	const picker = document.getElementById('background-color-picker');
-	const hex = document.getElementById('background-color-hex');
-	const updateDraft = () => {
-		const value = hex.value.trim();
+	const valueEl = document.getElementById('background-picker-value');
+	/** take a color as the draft back color (live preview) */
+	const updateDraft = value => {
+		value = String(value).trim();
 		if (!/^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return;
 		customBackground = rgbCorrect(value).toLowerCase();
-		hex.value = customBackground;
-		if (/^#[0-9a-f]{6}$/i.test(value)) picker.value = value;
-		backgroundMode = 'custom'; applyBackground(value); renderBackgroundChoice();
+		syncPickerColor();
+		valueEl.textContent = customPickerColor;
+		picker.value = customPickerColor;
+		backgroundMode = 'custom'; applyBackground(customBackground); renderBackgroundChoice();
 	};
-	picker?.addEventListener('input', () => { customBackgroundSource = 'picker'; hex.value = picker.value; document.getElementById('background-picker-value').textContent = picker.value; updateDraft(); });
-	hex?.addEventListener('input', () => { customBackgroundSource = 'picker'; document.getElementById('background-picker-value').textContent = hex.value; updateDraft(); });
+	// the colored square opens the native chooser (the input lies over it); a click elsewhere on the row only selects the picker
+	picker?.addEventListener('input', () => { customBackgroundSource = 'picker'; updateDraft(picker.value); });
+	const pickerRow = document.getElementById('background-picker-option');
+	pickerRow?.addEventListener('click', () => { customBackgroundSource = 'picker'; updateDraft(customPickerColor); });
+	pickerRow?.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickerRow.click(); } });
 	document.querySelectorAll('[data-background-source]').forEach(button => button.addEventListener('click', () => {
 		const ix = button.dataset.backgroundSource === 'color1' ? 0 : 1;
 		customBackgroundSource = button.dataset.backgroundSource;
-		hex.value = customBackground = rgbh[ix]; picker.value = customBackground; document.getElementById('background-picker-value').textContent = customBackground; updateDraft();
+		updateDraft(rgbh[ix]);
 	}));
 	renderBackgroundChoice();
 }
@@ -286,7 +296,7 @@ function renderBackgroundChoice() {
 		if (chip) chip.style.backgroundColor = color;
 		if (value) value.textContent = color;
 		const pickerChip = document.getElementById('background-picker-chip');
-		if (ix === 0 && pickerChip && backgroundMode === 'custom') pickerChip.style.backgroundColor = customBackground;
+		if (ix === 0 && pickerChip) pickerChip.style.backgroundColor = customPickerColor;
 	});
 }
 function renderBackgroundSourceSelection() {
@@ -295,22 +305,20 @@ function renderBackgroundSourceSelection() {
 	document.querySelectorAll('[data-background-source]').forEach(button => button.classList.toggle('selected', button.dataset.backgroundSource === selectedId));
 }
 function openBackgroundModal() {
-	backgroundDraft = { mode: backgroundMode, color: customBackground, source: customBackgroundSource, bg: document.documentElement.style.getPropertyValue('--background-body') };
+	syncPickerColor();
+	backgroundDraft = { mode: backgroundMode, color: customBackground, source: customBackgroundSource, picker: customPickerColor, bg: document.documentElement.style.getPropertyValue('--background-body') };
 	backgroundMode = 'custom';
 	applyBackground(customBackground);
 	const picker = document.getElementById('background-color-picker');
-	const hex = document.getElementById('background-color-hex');
-	hex.value = customBackground;
-	document.getElementById('background-picker-value').textContent = customBackground;
-	if (/^#[0-9a-f]{6}$/i.test(customBackground)) picker.value = customBackground;
-	else { const ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = customBackground; const v = ctx.fillStyle; if (v.startsWith('#')) picker.value = v; }
+	document.getElementById('background-picker-value').textContent = customPickerColor;
+	picker.value = customPickerColor;
 	renderBackgroundChoice();
 	renderBackgroundSourceSelection();
 	document.getElementById('background-modal')?.classList.add('open');
 }
 function closeBackgroundModal() {
 	if (backgroundDraft) {
-		backgroundMode = backgroundDraft.mode; customBackground = backgroundDraft.color; customBackgroundSource = backgroundDraft.source;
+		backgroundMode = backgroundDraft.mode; customBackground = backgroundDraft.color; customBackgroundSource = backgroundDraft.source; customPickerColor = backgroundDraft.picker;
 		applyBackground(backgroundDraft.bg || (backgroundMode === 'black' ? '#000' : '#fff'));
 		backgroundDraft = null;
 		renderBackgroundChoice(); calcform_cmx_syncState();
@@ -489,6 +497,7 @@ function calcform_cmx_pick(target, hex) {
 		backgroundMode = 'custom';
 		customBackground = hex;
 		customBackgroundSource = 'picker';
+		syncPickerColor();
 		applyBackground(hex);
 		renderBackgroundChoice();
 		calcform_cmx_syncState();
@@ -864,10 +873,11 @@ function calcform_cmx_dyna(textColor, backColor) {
 	const isInfinite = steps.get() >= STEPS_INFINITE;
 	const rowCnt = Math.min(steps.get(), STEPS_MAX_DISCRETE);
 	const cha = overdrive.get();
-	// ∞ toggles between discrete swatches and the continuous CSS gradient box
+	// ∞ shows the continuous CSS gradient box instead of the discrete swatches: the swatches stay
+	// in the layout (invisible) and the box is laid exactly over them, so it has their dimensions
 	const tabEl = document.getElementById('tab-cmx');
 	const grdEl = document.getElementById('grd-cmx');
-	if (tabEl) tabEl.hidden = isInfinite;
+	if (tabEl) tabEl.classList.toggle('is-continuous', isInfinite);
 	if (grdEl) grdEl.hidden = !isInfinite;
 	const sliderEl = document.getElementById('grd-slider');
 	if (sliderEl) sliderEl.classList.toggle('steps-infinite', isInfinite);
@@ -970,7 +980,9 @@ function calcform_cmx_dyna(textColor, backColor) {
 
 	// Color 1 / Color 2 are marked on their gradient slider knobs (works with overdrive too)
 	const html = `<div class="color-palette-${gradientDirection}">${swatchesHtml}</div>`;
-	document.getElementById('tab-cmx').innerHTML = html;
+	tabEl.innerHTML = html;
+	// the gradient box lives inside the palette while it is shown (∞), else (hidden) behind the swatches
+	if (grdEl) (isInfinite ? tabEl.firstElementChild : tabEl.parentNode).appendChild(grdEl);
 
 	// build CSS linear gradient using CSS native color space interpolation
 	const rotation = { right: '90deg', down: '180deg', left: '90deg', up: '180deg' }[gradientDirection];
@@ -991,9 +1003,10 @@ function calcform_cmx_dyna(textColor, backColor) {
 	};
 
 	// restore preview of CSS linear-gradient on grd-cmx as before
-	const div_grd = document.getElementById('grd-cmx');
+	const div_grd = grdEl;
 	if (div_grd) {
-		div_grd.innerHTML = '<span' + hexHiddenAttr + '>' + gradientText + '</span>';
+		// the text option applies here as well; without one, the CSS definition is shown
+		div_grd.innerHTML = '<span' + hexHiddenAttr + '>' + (swatchOpts.text !== '' ? escapeHtml(swatchOpts.text) : gradientText) + '</span>';
 		div_grd.style.background = gradientText;
 		div_grd.style.color = _textColor;
 		// Copy only while the gradient box is the visible view (∞)
@@ -1113,18 +1126,20 @@ function alignGradientSlider() {
 	const first = swatches[0].getBoundingClientRect();
 	const last = swatches[swatches.length - 1].getBoundingClientRect();
 	const wrap = wrapEl.getBoundingClientRect();
+	// continuous gradient (∞): the track spans the whole gradient box, edge to edge
+	const edge = sliderEl.classList.contains('steps-infinite') ? 0 : 0.5;
 	if (vertical) {
 		// ends at the vertical midpoints of the first / last swatch (overdrive included)
 		if (first.height === 0) return;   // hidden
-		const centerT = first.top + first.height / 2;
-		const centerB = last.top + last.height / 2;
+		const centerT = first.top + first.height * edge;
+		const centerB = last.bottom - last.height * edge;
 		sliderEl.style.setProperty('--grd-inset-t', `${Math.max(0, centerT - wrap.top).toFixed(2)}px`);
 		sliderEl.style.setProperty('--grd-inset-b', `${Math.max(0, wrap.bottom - centerB).toFixed(2)}px`);
 		return;
 	}
 	if (first.width === 0 || Math.abs(first.top - last.top) > 1) return;   // hidden or wrapped
-	const centerL = first.left + first.width / 2;
-	const centerR = last.left + last.width / 2;
+	const centerL = first.left + first.width * edge;
+	const centerR = last.right - last.width * edge;
 	sliderEl.style.setProperty('--grd-inset-l', `${Math.max(0, centerL - wrap.left).toFixed(2)}px`);
 	sliderEl.style.setProperty('--grd-inset-r', `${Math.max(0, wrap.right - centerR).toFixed(2)}px`);
 }
@@ -1301,6 +1316,7 @@ function calcform_cmx_applyState(data) {
 	else if (data.theme) backgroundMode = data.theme === 'dark' ? 'black' : 'white';
 	if (data.customBackground) customBackground = data.customBackground;
 	if (['picker','color1','color2'].includes(data.customBackgroundSource)) customBackgroundSource = data.customBackgroundSource;
+	syncPickerColor();
 	if (backgroundMode === 'custom') applyBackground(customBackground);
 	else if (backgroundMode === 'black') applyBackground('#000000');
 	else applyBackground('#ffffff');
@@ -1792,6 +1808,7 @@ function calcform_cmx_docsInit() {
 	});
 	if (isHex(custom)) customBackground = rgbCorrect(custom);
 	if (['picker', 'color1', 'color2'].includes(source)) customBackgroundSource = source;
+	syncPickerColor();
 	if (['white', 'black', 'custom'].includes(mode)) backgroundMode = mode;
 	else themeCare();   // never been in the app: black or white back by the system theme
 	applyBackground(backgroundMode === 'custom' ? customBackground : backgroundMode === 'black' ? '#000000' : '#ffffff');

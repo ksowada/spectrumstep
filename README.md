@@ -16,7 +16,6 @@ Available scripts:
 ## requirements
 - Browser support: the tokens use CSS light-dark(), which needs Chrome 123, Firefox 120 or Safari 17.5 and newer.
 
-
 ## features
 - besides HSL, use RGB, HSV, Oklab, and Oklch mixing and input spaces
 - gamut mapping via chroma reduction when converting out-of-gamut Oklab/Oklch colors to sRGB HEX
